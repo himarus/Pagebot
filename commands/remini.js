@@ -7,7 +7,7 @@ module.exports = {
   author: 'Mark Hitsuraan',
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    // Check if there is no image URL provided and handle it
+    // Check if no image URL is provided and handle it
     if (!imageUrl) {
       if (event.message.reply_to && event.message.reply_to.mid) {
         try {
@@ -32,20 +32,25 @@ module.exports = {
       // Call the Remini API with the retrieved image URL
       const reminiUrl = `https://markdevs69v2-679r.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(reminiUrl);
-      const processedImageURL = response.data.image_data;
+      
+      if (response.data && response.data.image_data) {
+        const processedImageURL = response.data.image_data;
 
-      // Send the enhanced image back to the user
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: {
-            url: processedImageURL
+        // Send the enhanced image back to the user
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: processedImageURL
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } else {
+        throw new Error('No processed image returned from Remini API.');
+      }
 
     } catch (error) {
-      console.error('Error enhancing image:', error);
+      console.error('Error enhancing image:', error.message);
       await sendMessage(senderId, {
         text: 'An error occurred while processing the image. Please try again later.'
       }, pageAccessToken);
@@ -64,8 +69,8 @@ async function getAttachments(mid, pageAccessToken) {
       params: { access_token: pageAccessToken }
     });
 
-    if (data && data.data.length > 0 && data.data[0].image_data) {
-      return data.data[0].image_data.url;
+    if (data && data.data.length > 0 && data.data[0].payload && data.data[0].payload.url) {
+      return data.data[0].payload.url;
     } else {
       throw new Error("No image found in the replied message.");
     }
