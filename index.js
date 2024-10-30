@@ -14,7 +14,7 @@ const PAGE_ACCESS_TOKEN = fs.readFileSync('token.txt', 'utf8').trim();
 const SCRIPT_FILE = "index.js";
 const SCRIPT_PATH = __dirname + "/" + SCRIPT_FILE;
 const RESTART_FILE = './restart.json';
-const GIT_REPO = "https://github.com/churchillitos/Pgiboka.git";
+const GIT_REPO = "https://github.com/churchillitos/kupalka.git";
 
 app.get('/webhook', (req, res) => {
   const mode = req.query['hub.mode'];
