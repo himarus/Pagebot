@@ -1,4 +1,6 @@
 const axios = require('axios');
+const fs = require('fs-extra');
+const path = require('path');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
@@ -29,25 +31,32 @@ module.exports = {
     await sendMessage(senderId, { text: 'Enhancing the image, please wait...' }, pageAccessToken);
 
     try {
-      // Call the Remini API with the retrieved image URL
-      const reminiUrl = `https://markdevs69v2-679r.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imageUrl)}`;
-      const response = await axios.get(reminiUrl);
-      
-      if (response.data && response.data.image_data) {
-        const processedImageURL = response.data.image_data;
+      // Download the image locally
+      const imagePath = path.join(__dirname, 'temp_image.jpg');
+      const response = await axios.get(imageUrl, { responseType: 'stream' });
+      await new Promise((resolve, reject) => {
+        const stream = response.data.pipe(fs.createWriteStream(imagePath));
+        stream.on('finish', resolve);
+        stream.on('error', reject);
+      });
 
-        // Send the enhanced image back to the user
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: processedImageURL
-            }
+      // Call the Remini API with the downloaded image
+      const reminiUrl = `https://markdevs69v2-679r.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imagePath)}`;
+      const reminiResponse = await axios.get(reminiUrl);
+      const processedImageURL = reminiResponse.data.image_data;
+
+      // Send the enhanced image back to the user
+      await sendMessage(senderId, {
+        attachment: {
+          type: 'image',
+          payload: {
+            url: processedImageURL
           }
-        }, pageAccessToken);
-      } else {
-        throw new Error('No processed image returned from Remini API.');
-      }
+        }
+      }, pageAccessToken);
+
+      // Clean up by removing the downloaded image
+      await fs.remove(imagePath);
 
     } catch (error) {
       console.error('Error enhancing image:', error.message);
