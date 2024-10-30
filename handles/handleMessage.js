@@ -16,7 +16,6 @@ for (const file of commandFiles) {
   }
 }
 
-const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
 
 async function handleMessage(event, pageAccessToken) {
   if (!event || !event.sender || !event.sender.id) return;
@@ -37,6 +36,8 @@ async function handleMessage(event, pageAccessToken) {
 
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
+    
+const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
 
     // TikTok URL detection and downloading
     if (tiktokRegex.test(messageText)) {
