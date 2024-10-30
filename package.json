@@ -15,6 +15,7 @@
     "betabotz-tools": "^0.0.7",
     "body-parser": "^1.20.2",
     "express": "^4.19.2",
+    "fs-extra": "^11.1.1",
     "node-fetch": "^3.3.2",
     "request": "^2.88.2",
     "winston": "^3.13.0"
