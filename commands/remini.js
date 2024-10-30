@@ -1,6 +1,14 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
+// Conditionally require 'fs' if needed
+let fs;
+try {
+  fs = require('fs-extra'); // Use 'fs-extra' for extended functionalities if needed
+} catch (err) {
+  console.warn('fs-extra not available, proceeding without it');
+}
+
 module.exports = {
   name: 'remini',
   description: 'Enhance image quality to HD using an upscale API.',
@@ -12,13 +20,14 @@ module.exports = {
         try {
           imageUrl = await getAttachments(event.message.reply_to.mid, pogi);
         } catch (error) {
+          console.error('Error retrieving image from reply:', error);
           return sendMessage(chilli, {
             text: 'Failed to retrieve the image from the reply. Please reply to an image.'
           }, pogi);
         }
       } else {
         return sendMessage(chilli, {
-          text: 'Please reply to an image for HD enhancement.'
+          text: 'Please reply to an image for HD enhancement.send image first bugok'
         }, pogi);
       }
     }
@@ -28,10 +37,7 @@ module.exports = {
     try {
       const upscaleUrl = `https://appjonellccapis.zapto.org/api/upscale?url=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(upscaleUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; remini-bot/1.0)'
-        },
-        timeout: 10000  // 10 seconds timeout
+        timeout: 15000  // 15 seconds timeout
       });
 
       if (response && response.data && response.data.url) {
@@ -44,6 +50,7 @@ module.exports = {
           }
         }, pogi);
       } else {
+        console.warn('Received unexpected response structure:', response.data);
         await sendMessage(chilli, {
           text: 'Failed to retrieve the enhanced image. Please try again later.'
         }, pogi);
