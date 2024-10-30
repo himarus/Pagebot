@@ -27,15 +27,27 @@ module.exports = {
 
     try {
       const upscaleUrl = `https://appjonellccapis.zapto.org/api/upscale?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(upscaleUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; remini-bot/1.0)'
+        },
+        timeout: 10000  // 10 seconds timeout
+      });
 
-      await sendMessage(chilli, {
-        attachment: {
-          type: 'image',
-          payload: {
-            url: upscaleUrl
+      if (response && response.data && response.data.url) {
+        await sendMessage(chilli, {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: response.data.url
+            }
           }
-        }
-      }, pogi);
+        }, pogi);
+      } else {
+        await sendMessage(chilli, {
+          text: 'Failed to retrieve the enhanced image. Please try again later.'
+        }, pogi);
+      }
 
     } catch (error) {
       console.error('Error enhancing image to HD:', error);
