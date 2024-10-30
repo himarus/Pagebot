@@ -2,14 +2,14 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: 'tiktok',
+  name: 'tikdl',
   description: 'Download a TikTok video based on a link.',
-  usage: 'tiktok <url>\nExample: tiktok https://www.tiktok.com/@username/video/1234567890',
+  usage: 'tikdl <url>\nExample: tiktok https://www.tiktok.com/@username/video/1234567890',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: 'Please provide a TikTok video URL.\n\nUsage:\n tiktok <url>\nExample: tiktok https://www.tiktok.com/@username/video/1234567890'
+        text: 'Please provide a TikTok video URL.\n\nUsage:\n tikdl <url>\nExample: tikdl https://www.tiktok.com/@username/video/1234567890'
       }, pageAccessToken);
       return;
     }
