@@ -8,6 +8,7 @@ const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
+
 for (const file of commandFiles) {
   const command = require(`../commands/${file}`);
   if (command.name && typeof command.name === 'string') {
@@ -42,9 +43,10 @@ async function handleMessage(event, pageAccessToken) {
       await sendMessage(senderId, { text: 'Downloading your TikTok video, please wait...' }, pageAccessToken);
       try {
         const response = await axios.post(`https://www.tikwm.com/api/`, { url: messageText });
-        if (response.data && response.data.data && response.data.data.play) {
-          const shotiUrl = response.data.data.play;
+        const data = response.data.data;
+        const shotiUrl = data.play;
 
+        if (shotiUrl) {
           await sendMessage(senderId, {
             attachment: {
               type: 'video',
@@ -55,11 +57,10 @@ async function handleMessage(event, pageAccessToken) {
             }
           }, pageAccessToken);
         } else {
-          console.error("Unexpected response structure:", response.data);
           await sendMessage(senderId, { text: 'Failed to retrieve TikTok video URL. Please check the URL and try again.' }, pageAccessToken);
         }
       } catch (error) {
-        console.error("Error fetching TikTok video:", error.response ? error.response.data : error.message);
+        console.error("Error fetching TikTok video:", error);
         await sendMessage(senderId, { text: 'An error occurred while downloading the TikTok video. Please try again later.' }, pageAccessToken);
       }
       return;
@@ -131,7 +132,19 @@ async function handleMessage(event, pageAccessToken) {
     if (commands.has(commandName)) {
       const command = commands.get(commandName);
       try {
-        await command.execute(senderId, args, pageAccessToken, event);
+        let imageUrl = '';
+        if (event.message.reply_to && event.message.reply_to.mid) {
+          try {
+            imageUrl = await getAttachments(event.message.reply_to.mid, pageAccessToken);
+          } catch (error) {
+            imageUrl = '';
+          }
+        } else if (lastImageByUser.has(senderId)) {
+          imageUrl = lastImageByUser.get(senderId);
+          lastImageByUser.delete(senderId);
+        }
+
+        await command.execute(senderId, args, pageAccessToken, event, imageUrl);
       } catch (error) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
       }
@@ -147,6 +160,24 @@ async function handleMessage(event, pageAccessToken) {
         ]
       }, pageAccessToken);
     }
+  }
+}
+
+async function getAttachments(mid, pageAccessToken) {
+  if (!mid) throw new Error("No message ID provided.");
+
+  try {
+    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+      params: { access_token: pageAccessToken }
+    });
+
+    if (data && data.data.length > 0 && data.data[0].image_data) {
+      return data.data[0].image_data.url;
+    } else {
+      throw new Error("No image found in the replied message.");
+    }
+  } catch (error) {
+    throw new Error("Failed to fetch attachments.");
   }
 }
 
