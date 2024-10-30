@@ -16,7 +16,6 @@ for (const file of commandFiles) {
   }
 }
 
-
 async function handleMessage(event, pageAccessToken) {
   if (!event || !event.sender || !event.sender.id) return;
 
@@ -36,16 +35,19 @@ async function handleMessage(event, pageAccessToken) {
 
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
-    
-const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
+    const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
 
-    // TikTok URL detection and downloading
     if (tiktokRegex.test(messageText)) {
       await sendMessage(senderId, { text: 'Downloading your TikTok video, please wait...' }, pageAccessToken);
       try {
-        const response = await axios.post(`https://www.tikwm.com/api/`, { url: messageText });
+        const response = await axios.post(
+          'https://www.tikwm.com/api/', 
+          { url: messageText }, 
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
         const data = response.data.data;
-        const shotiUrl = data.play;
+        const shotiUrl = data && data.play;
 
         if (shotiUrl) {
           await sendMessage(senderId, {
@@ -67,7 +69,6 @@ const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\
       return;
     }
 
-    // Command handling
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
 
@@ -79,9 +80,7 @@ const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\
           await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
         }
       } else {
-        await sendMessage(senderId, {
-          text: 'Please send an image first, then type "removebg" to remove its background.'
-        }, pageAccessToken);
+        await sendMessage(senderId, { text: 'Please send an image first, then type "removebg" to remove its background.' }, pageAccessToken);
       }
       return;
     }
@@ -118,7 +117,6 @@ const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\
       return;
     }
 
-    // General command handling
     let commandName, args;
     if (messageText.startsWith('-')) {
       const argsArray = messageText.slice(1).trim().split(/\s+/);
