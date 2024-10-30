@@ -7,9 +7,11 @@ module.exports = {
   usage: 'tiktokdl <TikTok video URL>\nExample: tiktokdl https://vt.tiktok.com/ZSjFnGp42/',
   author: 'Churchill',
   async execute(senderId, args, pageAccessToken) {
-    if (!args || args.length === 0) {
+    const urlPattern = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
+
+    if (!args || args.length === 0 || !urlPattern.test(args[0])) {
       await sendMessage(senderId, {
-        text: 'Please provide a TikTok video URL to download.\n\nUsage:\n tiktokdl <TikTok video URL>\nExample: tiktokdl https://vt.tiktok.com/ZSjFnGp42/'
+        text: 'Please provide a valid TikTok video URL.\n\nUsage:\n tiktokdl <TikTok video URL>\nExample: tiktokdl https://vt.tiktok.com/ZSjFnGp42/'
       }, pageAccessToken);
       return;
     }
