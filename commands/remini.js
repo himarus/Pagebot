@@ -3,91 +3,74 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'remini',
-  description: 'Enhance image quality to HD using an upscale API.',
-  author: 'chilli',
+  description: 'Enhance an image using the Remini API.',
+  author: 'Mark Hitsuraan',
 
-  async execute(chilli, kupal, pogi, event, imageUrl) {
-    // Check for an image URL or retrieve from reply
+  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    // Check if there is no image URL provided and handle it
     if (!imageUrl) {
       if (event.message.reply_to && event.message.reply_to.mid) {
         try {
-          imageUrl = await getAttachments(event.message.reply_to.mid, pogi);
+          // Retrieve the image URL from the replied message's attachment
+          imageUrl = await getAttachments(event.message.reply_to.mid, pageAccessToken);
         } catch (error) {
-          console.error('Error retrieving image from reply:', error.message);
-          return sendMessage(chilli, {
-            text: 'Failed to retrieve the image from the reply. Please reply to an image.'
-          }, pogi);
+          return sendMessage(senderId, {
+            text: 'Failed to retrieve the image from the reply. Please try again.'
+          }, pageAccessToken);
         }
       } else {
-        return sendMessage(chilli, {
-          text: 'Please reply to an image for HD enhancement.'
-        }, pogi);
+        return sendMessage(senderId, {
+          text: 'Please reply to an image to enhance it.'
+        }, pageAccessToken);
       }
     }
 
-    // Notify user of the enhancement delay
-    await sendMessage(chilli, { text: 'Enhancing the image to HD, this may take a moment... 🖼️' }, pogi);
+    // Notify the user that the bot is processing the image
+    await sendMessage(senderId, { text: 'Enhancing the image, please wait...' }, pageAccessToken);
 
-    // Retry logic and extended timeout
-    const upscaleUrl = `https://appjonellccapis.zapto.org/api/upscale?url=${encodeURIComponent(imageUrl)}`;
-    let attempts = 3;
-    let response;
+    try {
+      // Call the Remini API with the retrieved image URL
+      const reminiUrl = `https://markdevs69v2-679r.onrender.com/new/api/remini?inputImage=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(reminiUrl);
+      const processedImageURL = response.data.image_data;
 
-    while (attempts > 0) {
-      try {
-        response = await axios.get(upscaleUrl, { timeout: 30000 });  // Set a 30-second timeout
-        if (response?.data?.url) break;  // Exit loop on success
-
-      } catch (error) {
-        console.error('Error on image enhancement attempt:', error.message);
-        if (attempts === 1) {
-          return sendMessage(chilli, {
-            text: 'An error occurred while enhancing the image. Please try again later.'
-          }, pogi);
-        }
-        // Send periodic update and retry after delay
-        await sendMessage(chilli, { text: 'Still working on it, please hold on... ⏳' }, pogi);
-        await new Promise(res => setTimeout(res, 5000));  // Wait 5 seconds before retrying
-      }
-      attempts--;
-    }
-
-    // Send enhanced image if successful
-    if (response?.data?.url) {
-      await sendMessage(chilli, {
+      // Send the enhanced image back to the user
+      await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: response.data.url
+            url: processedImageURL
           }
         }
-      }, pogi);
-    } else {
-      await sendMessage(chilli, {
-        text: 'Failed to retrieve the enhanced image. Please try again later.'
-      }, pogi);
+      }, pageAccessToken);
+
+    } catch (error) {
+      console.error('Error enhancing image:', error);
+      await sendMessage(senderId, {
+        text: 'An error occurred while processing the image. Please try again later.'
+      }, pageAccessToken);
     }
   }
 };
 
-// Helper function to get the image URL from a message ID
-async function getAttachments(mid, pogi) {
+// Function to retrieve the attachment URL from a replied message using the Facebook Graph API
+async function getAttachments(mid, pageAccessToken) {
   if (!mid) {
     throw new Error("No message ID provided.");
   }
 
   try {
     const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-      params: { access_token: pogi }
+      params: { access_token: pageAccessToken }
     });
 
-    if (data?.data?.length > 0 && data.data[0]?.image_data?.url) {
+    if (data && data.data.length > 0 && data.data[0].image_data) {
       return data.data[0].image_data.url;
     } else {
       throw new Error("No image found in the replied message.");
     }
   } catch (error) {
-    console.error('Failed to fetch attachments:', error.message);
+    console.error('Failed to fetch attachments:', error);
     throw new Error("Failed to retrieve the image.");
   }
 }
