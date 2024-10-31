@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "nglspam",
@@ -24,7 +25,7 @@ module.exports = {
 
     try {
       // Encode message to handle spaces and special characters
-      const apiUrl = `https://markdevs69v2-679r.onrender.com/api/other/nglspam?username=${encodeURIComponent(username)}&message=${encodeURIComponent(message)}&total=${total}`;
+      const apiUrl = `${api.markApi}/api/other/nglspam?username=${encodeURIComponent(username)}&message=${encodeURIComponent(message)}&total=${total}`;
 
       // Perform the API request
       const response = await axios.get(apiUrl);
