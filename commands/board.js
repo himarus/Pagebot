@@ -1,4 +1,5 @@
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'board',
@@ -14,7 +15,7 @@ module.exports = {
     }
 
     const text = args.join(' ');
-    const apiUrl = `https://api-canvass.vercel.app/board?text=${encodeURIComponent(text)}`;
+    const apiUrl = `${api.canvasApi}/board?text=${encodeURIComponent(text)}`;
 
     await sendMessage(senderId, { text: 'Generating board image... Please wait.' }, pageAccessToken);
 
