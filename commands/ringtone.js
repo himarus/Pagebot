@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const query = args.join(' ');
-    const apiUrl = `${api.markApi}/api/search/ringtone?text=${encodeURIComponent(query)}`;
+    const apiUrl = `${api.joshApi}/api/ringtone?q=${encodeURIComponent(query)}`;
 
     await sendMessage(senderId, { text: 'Searching for ringtones... Please wait.' }, pageAccessToken);
 
