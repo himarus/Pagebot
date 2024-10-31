@@ -23,37 +23,21 @@ module.exports = {
 
     try {
       const response = await axios.get(apiUrl);
+      console.log('Full API response:', response.data); // Debug: Log the full API response
+
+      // Check if `url` is properly returned in the response
       const { url } = response.data;
 
       if (url) {
-        // Step 1: Upload the video as a reusable attachment
-        const attachmentUploadResponse = await axios.post(
-          `https://graph.facebook.com/v11.0/me/message_attachments?access_token=${pageAccessToken}`,
-          {
-            message: {
-              attachment: {
-                type: 'video',
-                payload: {
-                  url: url,
-                  is_reusable: true
-                }
-              }
-            }
-          }
-        );
-
-        const attachmentId = attachmentUploadResponse.data.attachment_id;
-
-        // Step 2: Send the video using the reusable attachment ID
+        console.log('Video URL:', url); // Debug: Confirm video URL is correctly extracted
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
             payload: {
-              attachment_id: attachmentId
+              url: url
             }
           }
         }, pageAccessToken);
-        
       } else {
         await sendMessage(senderId, {
           text: 'Failed to retrieve the video. The URL may be invalid or unsupported.'
@@ -61,7 +45,7 @@ module.exports = {
       }
 
     } catch (error) {
-      console.error('Error downloading TikTok video:', error);
+      console.error('Error downloading TikTok video:', error); // Detailed error log
       await sendMessage(senderId, {
         text: 'An error occurred while downloading the TikTok video. Please try again later.'
       }, pageAccessToken);
