@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "tiktok",
@@ -17,7 +18,7 @@ module.exports = {
       sendMessage(senderId, { text: "🤳 | Searching, please wait..." }, pageAccessToken);
 
       
-      const response = await axios.get(`https://markdevs69v2-679r.onrender.com/new/api/tiksearch?search=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`${api.markApi}/new/api/tiksearch?search=${encodeURIComponent(searchQuery)}`);
 
       const videos = response.data.data.videos;
 
