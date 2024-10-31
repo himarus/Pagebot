@@ -25,15 +25,22 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { url, description } = response.data;
 
+  
       await sendMessage(senderId, {
         attachment: {
           type: 'video',
           payload: {
             url: url
           }
-        },
-        text: `Description: ${description}`
+        }
       }, pageAccessToken);
+
+      
+      if (description) {
+        await sendMessage(senderId, {
+          text: `Description: ${description}`
+        }, pageAccessToken);
+      }
 
     } catch (error) {
       console.error('Error downloading TikTok video:', error);
