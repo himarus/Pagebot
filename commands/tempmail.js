@@ -7,38 +7,38 @@ module.exports = {
   description: 'Generate a temporary email and retrieve confirmation codes automatically.',
   author: 'chilli',
 
-  async execute(kupal, args, chilli) {
+  async execute(kupal, pogi, chillax) {
     try {
-      const { data: createResponse } = await axios.get(`${api.nethApi}/tempmail-create?`);
-      if (!createResponse.status || !createResponse.address) {
-        return sendMessage(kupal, { text: 'Failed to generate a temporary email. Please try again.' }, chilli);
+      const { data: kupalResponse } = await axios.get(`${api.nethApi}/tempmail-create?`);
+      if (!kupalResponse.status || !kupalResponse.address) {
+        return sendMessage(kupal, { text: 'Failed to generate a temporary email. Please try again.' }, chillax);
       }
-      
-      const tempEmail = createResponse.address;
 
-      await sendMessage(kupal, { text: tempEmail }, chilli);
+      const tempEmail = kupalResponse.address;
+      await sendMessage(kupal, { text: `Temporary Email: ${tempEmail}` }, chillax);
 
-      const checkInterval = setInterval(async () => {
+      const pogiInterval = setInterval(async () => {
         try {
-          const { data: checkResponse } = await axios.get(`${api.nethApi}/tempmail/get/?email=${encodeURIComponent(tempEmail)}`);
-          if (checkResponse.status && checkResponse.messages.length > 0) {
-            const latestMessage = checkResponse.messages[0];
+          const { data: chillaxResponse } = await axios.get(`${api.nethApi}/tempmail-get?email=${encodeURIComponent(tempEmail)}`);
+          
+          if (chillaxResponse.status && chillaxResponse.messages.length > 0) {
+            const latestMessage = chillaxResponse.messages[0];
 
             if (latestMessage) {
-              const fullMessage = `From: ${latestMessage.from}\nSubject: ${latestMessage.subject}\nDate: ${latestMessage.date}\n\nMessage:\n${latestMessage.message}`;
+              const fullMessage = `📩 *New Email Received*\n\n*From:* ${latestMessage.from}\n*Subject:* ${latestMessage.subject}\n*Date:* ${latestMessage.date}\n\n*Message:*\n${latestMessage.message}`;
 
-              await sendMessage(kupal, { text: fullMessage }, chilli);
-              clearInterval(checkInterval);
+              await sendMessage(kupal, { text: fullMessage }, chillax);
+              clearInterval(pogiInterval);
             }
           }
-        } catch (error) {
-          console.error('Error checking email:', error);
+        } catch (pogiError) {
+          console.error('Error checking email:', pogiError);
         }
       }, 10000);
 
-    } catch (error) {
-      console.error('Error generating temp email:', error);
-      await sendMessage(kupal, { text: 'An error occurred while creating the temporary email. Please try again.' }, chilli);
+    } catch (pogiError) {
+      console.error('Error generating temp email:', pogiError);
+      await sendMessage(kupal, { text: 'An error occurred while creating the temporary email. Please try again.' }, chillax);
     }
   }
 };
