@@ -1,11 +1,12 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'ringtone',
   description: 'Search and send the first ringtone result based on a keyword.',
   usage: 'ringtone <keyword>\nExample: ringtone samsung',
-  author: 'your_username',
+  author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
@@ -15,7 +16,7 @@ module.exports = {
     }
 
     const query = args.join(' ');
-    const apiUrl = `https://markdevs69v2-679r.onrender.com/api/search/ringtone?text=${encodeURIComponent(query)}`;
+    const apiUrl = `${api.markWebApi}/api/search/ringtone?text=${encodeURIComponent(query)}`;
 
     await sendMessage(senderId, { text: 'Searching for ringtones... Please wait.' }, pageAccessToken);
 
