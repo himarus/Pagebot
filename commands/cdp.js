@@ -8,7 +8,7 @@ module.exports = {
   usage: 'cdp\nExample: cdp',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
-    const apiUrl = `${api.markApi}/api/randomgambar/couplepp`;
+    const apiUrl = `${api.joshWebApi}/cdp`;
 
     try {
       // Send a message indicating that the image is being fetched
