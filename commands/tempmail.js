@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'tempmail',
@@ -19,7 +20,7 @@ module.exports = {
 
       const checkInterval = setInterval(async () => {
         try {
-          const { data: checkResponse } = await axios.get(`https://nethwieginedev.vercel.app/tempmail/get/?email=${encodeURIComponent(tempEmail)}`);
+          const { data: checkResponse } = await axios.get(`${api.nethApi}/tempmail/get/?email=${encodeURIComponent(tempEmail)}`);
           if (checkResponse.status && checkResponse.messages.length > 0) {
             const latestMessage = checkResponse.messages[0];
 
