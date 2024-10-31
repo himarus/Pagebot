@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'cdp',
@@ -7,7 +8,7 @@ module.exports = {
   usage: 'cdp\nExample: cdp',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
-    const apiUrl = 'https://markdevs69v2-679r.onrender.com/api/randomgambar/couplepp';
+    const apiUrl = `${api.markApi}/api/randomgambar/couplepp`;
 
     try {
       // Send a message indicating that the image is being fetched
