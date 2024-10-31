@@ -25,19 +25,26 @@ module.exports = {
       const response = await axios.get(apiUrl);
       console.log('Full API response:', response.data); // Debug: Log the full API response
 
-      // Check if `url` is properly returned in the response
-      const { url } = response.data;
+      // Check if response.data is defined and has the expected properties
+      if (response.data && response.data.url) {
+        const { url, description } = response.data; // Destructure safely
 
-      if (url) {
-        console.log('Video URL:', url); // Debug: Confirm video URL is correctly extracted
+        // Send the description as a text message
+        if (description) {
+          await sendMessage(senderId, { text: `Description: ${description}` }, pageAccessToken);
+        }
+
+        // Send the video attachment
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
             payload: {
-              url: url
+              url: url,
+              is_reusable: true
             }
           }
         }, pageAccessToken);
+
       } else {
         await sendMessage(senderId, {
           text: 'Failed to retrieve the video. The URL may be invalid or unsupported.'
