@@ -12,6 +12,8 @@ const convertToGothic = (hot) => {
 };
 
 const axios = require('axios');
+const api = require('../handles/api');
+
 const { sendMessage } = require('../handles/sendMessage');
 const MAX_MESSAGE_LENGTH = 2000;
 const DELAY_BETWEEN_MESSAGES = 500;
