@@ -15,7 +15,7 @@ module.exports = {
       }
 
       const tempEmail = kupalResponse.address;
-      await sendMessage(kupal, { text: `Temporary Email: ${tempEmail}` }, chillax);
+      await sendMessage(kupal, { text: tempEmail }, chillax);
 
       const pogiInterval = setInterval(async () => {
         try {
