@@ -25,8 +25,7 @@ module.exports = {
       const data = response.data;
 
       if (data.status && data.result.length > 0) {
-        const ringtone = data.result[0]; // Get the first ringtone result
-
+        const ringtone = data.result[0];
         await sendMessage(senderId, {
           attachment: {
             type: 'audio',
@@ -39,7 +38,6 @@ module.exports = {
         await sendMessage(senderId, {
           text: `Here is the first result for "${query}":\n\nTitle: ${ringtone.title}\nSource: ${ringtone.source}`
         }, pageAccessToken);
-
       } else {
         await sendMessage(senderId, { text: 'No ringtones found. Try a different keyword.' }, pageAccessToken);
       }
