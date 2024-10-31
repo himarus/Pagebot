@@ -9,7 +9,7 @@ module.exports = {
 
   async execute(kupal, args, chilli) {
     try {
-      const { data: createResponse } = await axios.get('https://nethwieginedev.vercel.app/tempmail/create');
+      const { data: createResponse } = await axios.get(`${api.nethApi}/tempmail/create`);
       if (!createResponse.status || !createResponse.address) {
         return sendMessage(kupal, { text: 'Failed to generate a temporary email. Please try again.' }, chilli);
       }
