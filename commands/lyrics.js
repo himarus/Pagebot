@@ -17,28 +17,28 @@ module.exports = {
     }
 
     try {
-      const res = await axios.get(`${api.markApi}/api/lyrics/song`, {
-        params: { title: songTitle }
+      const res = await axios.get(`${api.joshWebApi}/search/lyrics`, {
+        params: { q: songTitle }
       });
 
-      if (!res.data || !res.data.content) {
+      if (!res.data || !res.data.result) {
         throw new Error("No lyrics found for this song.");
       }
 
-      const { title, artist, lyrics, url, song_thumbnail } = res.data.content;
-      const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}\n\n🔗 Read more: ${url}`;
+      const { title, artist, lyrics, image } = res.data.result;
+      const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
 
       // Send the lyrics first
       await sendChunkedMessage(senderId, lyricsMessage, pageAccessToken);
 
       // Send the image after the lyrics
-      if (song_thumbnail) {
+      if (image) {
         setTimeout(async () => {
           await sendMessage(senderId, {
             attachment: {
               type: "image",
               payload: {
-                url: song_thumbnail
+                url: image
               }
             }
           }, pageAccessToken);
