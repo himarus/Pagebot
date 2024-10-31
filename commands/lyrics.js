@@ -16,7 +16,7 @@ module.exports = {
     }
 
     try {
-      const res = await axios.get(`${api.markWebApi}/api/lyrics/song`, {
+      const res = await axios.get(`${api.markApi}/api/lyrics/song`, {
         params: { title: songTitle }
       });
 
