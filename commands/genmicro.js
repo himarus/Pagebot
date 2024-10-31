@@ -10,7 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: 'Please provide a name to generate a temporary email.\n\nUsage:\n genmicro <name>\nExample: genmicro kupal'
+        text: 'Please provide a name to generate a microsoft acc.\n\nUsage:\n genmicro <name>\nExample: genmicro kupal'
       }, pageAccessToken);
       return;
     }
@@ -18,7 +18,7 @@ module.exports = {
     const name = args.join(' ');
     const apiUrl = `${api.joshWebApi}/api/genmicro?name=${encodeURIComponent(name)}`;
 
-    await sendMessage(senderId, { text: 'Generating microsoft email... Please wait.' }, pageAccessToken);
+    await sendMessage(senderId, { text: 'Generating microsoft account... Please wait.' }, pageAccessToken);
 
     try {
       const response = await axios.get(apiUrl);
