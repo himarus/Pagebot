@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'removebg',
@@ -16,7 +17,7 @@ module.exports = {
     await sendMessage(senderId, { text: 'Removing background from the image, please wait... 🖼️' }, pageAccessToken);
 
     try {
-      const removeBgUrl = `https://appjonellccapis.zapto.org/api/removebg?url=${encodeURIComponent(imageUrl)}`;
+      const removeBgUrl = `${api.jonelApi}/api/removebg?url=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(senderId, {
         attachment: {
