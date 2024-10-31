@@ -48,7 +48,7 @@ module.exports = {
     const query = args.join(' ');
 
     try {
-      const apiUrl = `${api.markWebApi}/api/v2/gpt4?query=${encodeURIComponent(query)}`;
+      const apiUrl = `${api.markApi}/api/v2/gpt4?query=${encodeURIComponent(query)}`;
       const response = await axios.get(apiUrl);
       const gptResponse = response.data.respond;
 
