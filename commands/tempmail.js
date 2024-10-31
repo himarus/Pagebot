@@ -19,7 +19,7 @@ module.exports = {
 
       const pogiInterval = setInterval(async () => {
         try {
-          const { data: chillaxResponse } = await axios.get(`${api.nethApi}/tempmail-get?email=${encodeURIComponent(tempEmail)}`);
+          const { data: chillaxResponse } = await axios.get(`${api.nethApi}/api/tempmail-get?email=${encodeURIComponent(tempEmail)}`);
           
           if (chillaxResponse.status && chillaxResponse.messages.length > 0) {
             const latestMessage = chillaxResponse.messages[0];
