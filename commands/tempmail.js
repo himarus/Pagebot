@@ -9,7 +9,7 @@ module.exports = {
 
   async execute(kupal, pogi, chillax) {
     try {
-      const { data: kupalResponse } = await axios.get(`${api.nethApi}/tempmail-create?`);
+      const { data: kupalResponse } = await axios.get(`${api.nethApi}/api/tempmail-create?`);
       if (!kupalResponse.status || !kupalResponse.address) {
         return sendMessage(kupal, { text: 'Failed to generate a temporary email. Please try again.' }, chillax);
       }
