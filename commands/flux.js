@@ -1,7 +1,7 @@
 const axios = require('axios');
+const FormData = require('form-data');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
-const fs = require('fs');
 
 module.exports = {
   name: 'flux',
@@ -23,16 +23,15 @@ module.exports = {
     await sendMessage(kupal, { text: 'Generating image... This may take a few moments. Please wait.' }, pogi);
 
     try {
-      // Fetch the image from the API as a buffer
-      const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-      const imagePath = '/tmp/generated_image.jpg';
-      fs.writeFileSync(imagePath, response.data);
+      // Step 1: Fetch the image directly from the API as binary data
+      const response = await axios.get(apiUrl, { responseType: 'stream' });
 
-      // Step 1: Upload the image to get an attachment ID
+      // Step 2: Create form data for the Facebook Attachment Upload API
       const formData = new FormData();
       formData.append('message', JSON.stringify({ attachment: { type: 'image' } }));
-      formData.append('filedata', fs.createReadStream(imagePath));
+      formData.append('filedata', response.data, { filename: 'image.jpg', contentType: 'image/jpeg' });
 
+      // Step 3: Upload image to Facebook and retrieve attachment ID
       const uploadResponse = await axios.post(
         `https://graph.facebook.com/v21.0/me/message_attachments?access_token=${pogi}`,
         formData,
@@ -41,7 +40,7 @@ module.exports = {
 
       const attachmentId = uploadResponse.data.attachment_id;
 
-      // Step 2: Send the image using the attachment ID
+      // Step 4: Send the image using the attachment ID
       await sendMessage(kupal, {
         attachment: {
           type: 'image',
