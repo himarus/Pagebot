@@ -25,16 +25,35 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { url } = response.data;
 
-      // Send only the video attachment, without additional fields
       if (url) {
+        // Step 1: Upload the video as a reusable attachment
+        const attachmentUploadResponse = await axios.post(
+          `https://graph.facebook.com/v11.0/me/message_attachments?access_token=${pageAccessToken}`,
+          {
+            message: {
+              attachment: {
+                type: 'video',
+                payload: {
+                  url: url,
+                  is_reusable: true
+                }
+              }
+            }
+          }
+        );
+
+        const attachmentId = attachmentUploadResponse.data.attachment_id;
+
+        // Step 2: Send the video using the reusable attachment ID
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
             payload: {
-              url: url
+              attachment_id: attachmentId
             }
           }
         }, pageAccessToken);
+        
       } else {
         await sendMessage(senderId, {
           text: 'Failed to retrieve the video. The URL may be invalid or unsupported.'
