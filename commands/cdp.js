@@ -18,14 +18,14 @@ module.exports = {
 
       // Fetch the random couple DP from the API
       const response = await axios.get(apiUrl);
-      const { male, female } = response.data.result;
+      const { one, two } = response.data.result;
 
       // Send the male DP image
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: male,
+            url: one,
             is_reusable: true
           }
         }
@@ -36,7 +36,7 @@ module.exports = {
         attachment: {
           type: 'image',
           payload: {
-            url: female,
+            url: two,
             is_reusable: true
           }
         }
