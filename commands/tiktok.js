@@ -18,7 +18,7 @@ module.exports = {
       sendMessage(senderId, { text: "🤳 | Searching, please wait..." }, pageAccessToken);
 
       
-      const response = await axios.get(`${api.markApi}/new/api/tiksearch?search=${encodeURIComponent(searchQuery)}`);
+      const response = await axios.get(`${api.markApi}/api/tiksearch?search=${encodeURIComponent(searchQuery)}`);
 
       const videos = response.data.data.videos;
 
