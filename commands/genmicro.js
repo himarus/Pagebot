@@ -25,7 +25,7 @@ module.exports = {
       const { email, password } = response.data.result;
 
       await sendMessage(senderId, {
-        text: `Generated Micro Email:\n\nEmail: ${email}\nPassword: ${password}`
+        text: `Generated Micro account Email:\n\nEmail: ${email}\nPassword: ${password}`
       }, pageAccessToken);
 
     } catch (error) {
