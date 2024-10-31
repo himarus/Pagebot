@@ -1,6 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../api'); // Import the API configuration
+const api = require('../handles/api');
 
 module.exports = {
   name: 'bible',
