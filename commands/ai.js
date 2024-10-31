@@ -44,7 +44,7 @@ module.exports = {
       }
 
     } catch (error) {
-      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again or use gpt4." }, kalamansi);
+      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again or use gpt4o" }, kalamansi);
     }
   }
 };
