@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "ai",
@@ -16,7 +17,7 @@ module.exports = {
     sendMessage(chilli, { text: `✍️ Answering...` }, kalamansi);
 
     try {
-      const response = await axios.get("https://appjonellccapis.zapto.org/api/gpt4o-v2", {
+      const response = await axios.get("${api.jonel}/api/gpt4o-v2", {
         params: { prompt: prompt }
       });
 
