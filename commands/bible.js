@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../api'); // Import the API configuration
 
 module.exports = {
   name: 'bible',
@@ -7,7 +8,7 @@ module.exports = {
   usage: 'bible\nExample: bible',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
-    const apiUrl = 'https://joshweb.click/bible';
+    const apiUrl = `${api.joshWebApi}/bible`; // Use the base URL from api.js
 
     try {
       const response = await axios.get(apiUrl);
