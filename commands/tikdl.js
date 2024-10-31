@@ -25,15 +25,21 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { url } = response.data;
 
-      // Send video attachment only, no additional fields
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: url
+      // Send only the video attachment, without additional fields
+      if (url) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'video',
+            payload: {
+              url: url
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: 'Failed to retrieve the video. The URL may be invalid or unsupported.'
+        }, pageAccessToken);
+      }
 
     } catch (error) {
       console.error('Error downloading TikTok video:', error);
