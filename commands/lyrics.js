@@ -1,49 +1,74 @@
-const axios = require('axios');
+const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'ringtone',
-  description: 'Search and send the first ringtone result based on a keyword.',
-  usage: 'ringtone <keyword>\nExample: ringtone samsung',
-  author: 'chilli',
+  name: "lyrics",
+  description: "Get song lyrics by title",
+  author: "chilli",
+
   async execute(senderId, args, pageAccessToken) {
-    if (!args || args.length === 0) {
-      await sendMessage(senderId, {
-        text: 'Please provide a keyword to search for ringtones.\n\nUsage:\n ringtone <keyword>\nExample: ringtone samsung'
+    const songTitle = args.join(" ");
+
+    if (!songTitle) {
+      return sendMessage(senderId, {
+        text: `Usage: lyrics [song title]`
       }, pageAccessToken);
-      return;
     }
 
-    const query = args.join(' ');
-    const apiUrl = `${api.joshWebApi}/api/ringtone?q=${encodeURIComponent(query)}`;
-
-    await sendMessage(senderId, { text: 'Searching for ringtones... Please wait.' }, pageAccessToken);
-
     try {
-      const response = await axios.get(apiUrl);
-      const data = response.data;
+      const res = await axios.get(`${api.joshWebApi}/search/lyrics`, {
+        params: { q: songTitle }
+      });
 
-      if (data.status && data.result.length > 0) {
-        const ringtone = data.result[0];
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'audio',
-            payload: {
-              url: ringtone.audio
-            }
-          }
-        }, pageAccessToken);
-
-        await sendMessage(senderId, {
-          text: `Here is the first result for "${query}":\n\nTitle: ${ringtone.title}\nSource: ${ringtone.source}`
-        }, pageAccessToken);
-      } else {
-        await sendMessage(senderId, { text: 'No ringtones found. Try a different keyword.' }, pageAccessToken);
+      if (!res.data || !res.data.result) {
+        throw new Error("No lyrics found for this song.");
       }
+
+      const { title, artist, lyrics, image } = res.data.result;
+      const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
+
+      // Send the lyrics first
+      await sendChunkedMessage(senderId, lyricsMessage, pageAccessToken);
+
+      // Send the image after the lyrics
+      if (image) {
+        setTimeout(async () => {
+          await sendMessage(senderId, {
+            attachment: {
+              type: "image",
+              payload: {
+                url: image
+              }
+            }
+          }, pageAccessToken);
+        }, 1000); // Delay sending the image by 1 second to ensure the lyrics go first
+      }
+
     } catch (error) {
-      console.error('Error fetching ringtones:', error);
-      await sendMessage(senderId, { text: 'An error occurred while fetching ringtones. Please try again later.' }, pageAccessToken);
+      console.error("Error retrieving lyrics:", error);
+      sendMessage(senderId, {
+        text: `Error retrieving lyrics. Please try again or check your input.`
+      }, pageAccessToken);
     }
   }
 };
+
+function sendChunkedMessage(senderId, text, pageAccessToken) {
+  const maxMessageLength = 2000;
+  const delayBetweenMessages = 1000; // Delay of 1 second
+
+  if (text.length > maxMessageLength) {
+    const halfLength = Math.ceil(text.length / 2);
+    const firstHalf = text.slice(0, halfLength);
+    const secondHalf = text.slice(halfLength);
+
+    sendMessage(senderId, { text: firstHalf }, pageAccessToken);
+
+    setTimeout(() => {
+      sendMessage(senderId, { text: secondHalf }, pageAccessToken);
+    }, delayBetweenMessages);
+  } else {
+    sendMessage(senderId, { text }, pageAccessToken);
+  }
+}
