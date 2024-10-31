@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "gemini",
@@ -36,7 +37,7 @@ Examples:
         }
       }
 
-      const apiUrl = `https://joshweb.click/gemini`;
+      const apiUrl = `${api.joshWebApi}/gemini`;
       const response = await handleImageRecognition(apiUrl, userPrompt, imageUrl);
       const result = response.gemini;
 
