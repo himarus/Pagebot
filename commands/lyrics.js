@@ -16,7 +16,7 @@ module.exports = {
     }
 
     try {
-      const res = await axios.get(`https://markdevs69v2-679r.onrender.com/api/lyrics/song`, {
+      const res = await axios.get(`${api.markWebApi}/api/lyrics/song`, {
         params: { title: songTitle }
       });
 
