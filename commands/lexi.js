@@ -1,5 +1,6 @@
 
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'lexi',
@@ -13,7 +14,7 @@ module.exports = {
     }
 
     const text = args.join(' ');
-    const apiUrl = `https://api-canvass.vercel.app/lexi?text=${encodeURIComponent(text)}`;
+    const apiUrl = `${api.canvasApi}/lexi?text=${encodeURIComponent(text)}`;
 
     try {
       await sendMessage(senderId, { 
