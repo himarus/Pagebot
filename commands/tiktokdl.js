@@ -17,27 +17,36 @@ module.exports = {
     }
 
     try {
-      const { data } = await axios.get(`${api.joshWebApi}/tiktokdl?url=${encodeURIComponent(url)}`);
+      const response = await axios.get(`${api.joshWebApi}/tiktokdl?url=${encodeURIComponent(url)}`);
+      const data = response.data;
+
+      if (!data || !data.url) {
+        await sendMessage(senderId, { text: 'Error: Unable to fetch video. API may have returned invalid data.' }, token);
+        console.error('Invalid API response:', data);
+        return;
+      }
+
       const videoUrl = data.url;
       const description = data.description || 'No description';
       const author = data.author || 'Unknown';
 
-      if (videoUrl) {
-        await sendMessage(senderId, { text: `🎬 TikTok Video by Kupal\n\n${description}` }, token);
-        await sendMessage(senderId, {
+      await sendMessage(senderId, { text: `🎬 TikTok Video by ${author}\n\n${description}` }, token);
+      await sendMessage(
+        senderId,
+        {
           attachment: {
             type: 'video',
             payload: {
               url: videoUrl,
             },
           },
-        }, token);
-      } else {
-        await sendMessage(senderId, { text: 'Error: Unable to fetch video.' }, token);
-      }
+        },
+        token
+      );
+
     } catch (error) {
-      console.error('Error:', error);
-      await sendMessage(senderId, { text: 'Error: Unexpected error occurred.' }, token);
+      console.error('Error fetching TikTok video:', error);
+      await sendMessage(senderId, { text: 'Error: Unexpected error occurred while trying to fetch the video.' }, token);
     }
   }
 };
