@@ -4,7 +4,7 @@ const fs = require('fs');
 const pageAccessToken = fs.readFileSync('token.txt', 'utf8');
 
 module.exports = {
-  name: 'uid',
+  name: 'id',
   description: 'get ur actual id',
   author: 'coffee',
   
