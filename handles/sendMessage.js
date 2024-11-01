@@ -10,7 +10,8 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Optional delay
+    // Add delay here if needed to simulate typing
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
       recipient: { id: senderId },
@@ -42,6 +43,10 @@ function sendMessage(senderId, message, pageAccessToken) {
     payload.message.attachment = message.attachment;
   }
 
+  if (message.quick_replies) {
+    payload.message.quick_replies = message.quick_replies;
+  }
+
   typingIndicator(senderId, pageAccessToken);
 
   request({
@@ -60,41 +65,4 @@ function sendMessage(senderId, message, pageAccessToken) {
   });
 }
 
-async function handleTikTokDownload(senderId, url, pageAccessToken) {
-  try {
-    const response = await axios.get(`https://www.tikwm.com/api/`, {
-      params: { url: url }
-    });
-
-    const videoUrl = response.data.data?.play ?? null;
-
-    if (videoUrl) {
-      sendMessage(senderId, {
-        attachment: {
-          type: 'video',
-          payload: { url: videoUrl, is_reusable: true }
-        }
-      }, pageAccessToken);
-    } else {
-      sendMessage(senderId, { text: 'Unable to fetch video.' }, pageAccessToken);
-    }
-  } catch (error) {
-    console.error('Error fetching TikTok video:', error.message);
-    sendMessage(senderId, { text: 'An error occurred while fetching the TikTok video.' }, pageAccessToken);
-  }
-}
-
-module.exports = async function handleMessage(event, pageAccessToken) {
-  const messageText = event.message.text;
-  const senderId = event.sender.id;
-
-  const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s/?#]+\/?|https?:\/\/vt\.tiktok\.com\/[^\s/?#]+\/?/;
-  const match = messageText.match(tiktokRegex);
-
-  if (messageText.startsWith('Tiktokdl') && match) {
-    const tiktokUrl = match[0];
-    await handleTikTokDownload(senderId, tiktokUrl, pageAccessToken);
-  } else {
-    sendMessage(senderId, { text: 'Please send a valid TikTok URL with the command "Tiktokdl".' }, pageAccessToken);
-  }
-};
+module.exports = { sendMessage, typingIndicator };
