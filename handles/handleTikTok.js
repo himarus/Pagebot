@@ -1,34 +1,39 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
-async function handleTikTokVideo(event, pageAccessToken) {
-  const senderId = event.sender.id;
-  const messageText = event.message.text;
+async function handleTikTokVideo(chilli, kupal) {
+  const pogi = chilli.sender.id;
+  const messageText = chilli.message.text;
 
   const regEx_tiktok = /https:\/\/(www\.|vt\.)?tiktok\.com\//;
   if (regEx_tiktok.test(messageText)) {
-    await sendMessage(senderId, { text: 'Downloading your TikTok video, please wait...' }, pageAccessToken);
+    await sendMessage(pogi, { text: 'Downloading your TikTok video, please wait...' }, kupal);
     try {
       const response = await axios.post(`https://www.tikwm.com/api/`, { url: messageText });
       const data = response.data.data;
       const videoUrl = data.play;
+      const videoSize = data.size;
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: videoUrl,
-            is_reusable: true
+      if (videoSize && videoSize <= 25 * 1024 * 1024) {
+        await sendMessage(pogi, {
+          attachment: {
+            type: 'video',
+            payload: {
+              url: videoUrl,
+              is_reusable: true
+            }
           }
-        }
-      }, pageAccessToken);
-    } catch (error) {
-      console.error('Error downloading TikTok video:', error);
-      await sendMessage(senderId, { text: 'An error occurred while downloading the TikTok video. Please try again later.' }, pageAccessToken);
+        }, kupal);
+      } else {
+        await sendMessage(pogi, { text: 'The video is too large to download (limit is 25 MB). Please try a shorter video.' }, kupal);
+      }
+    } catch (chilliError) {
+      console.error('Error downloading TikTok video:', chilliError);
+      await sendMessage(pogi, { text: 'An error occurred while downloading the TikTok video. Please try again later.' }, kupal);
     }
-    return true; // Indicates that a TikTok video was handled
+    return true;
   }
-  return false; // Indicates that the message is not a TikTok link
+  return false;
 }
 
 module.exports = { handleTikTokVideo };
