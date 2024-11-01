@@ -4,7 +4,6 @@ const fs = require('fs');
 const { handleMessage } = require('./handles/handleMessage');
 const { handlePostback } = require('./handles/handlePostback');
 
-// Load commands dynamically and log each loaded command
 const commandsPath = './commands';
 fs.readdirSync(commandsPath).forEach(file => {
   console.log(`Loaded command: ${file}`);
@@ -17,10 +16,7 @@ const VERIFY_TOKEN = 'pagebot';
 const PAGE_ACCESS_TOKEN = fs.readFileSync('token.txt', 'utf8').trim();
 
 app.get('/webhook', (req, res) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-
+  const { 'hub.mode': mode, 'hub.verify_token': token, 'hub.challenge': challenge } = req.query;
   if (mode && token) {
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       res.status(200).send(challenge);
@@ -31,7 +27,7 @@ app.get('/webhook', (req, res) => {
 });
 
 app.post('/webhook', (req, res) => {
-  const body = req.body;
+  const { body } = req;
 
   if (body.object === 'page') {
     body.entry.forEach(entry => {
@@ -40,7 +36,7 @@ app.post('/webhook', (req, res) => {
           if (event.message) {
             console.log(`Received message: ${JSON.stringify(event.message)}`);
             handleMessage(event, PAGE_ACCESS_TOKEN);
-            console.log(`Command executed for message: ${event.message.text}`);
+            console.log(`Command message: ${event.message.text}`);
           } else if (event.postback) {
             console.log(`Received postback: ${JSON.stringify(event.postback)}`);
             handlePostback(event, PAGE_ACCESS_TOKEN);
