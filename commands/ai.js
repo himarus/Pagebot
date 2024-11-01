@@ -13,7 +13,9 @@ module.exports = {
       return sendMessage(chilli, { text: `Usage: ai [your question]` }, kalamansi);
     }
 
-    sendMessage(chilli, { text: `✍️ Answering...` }, kalamansi);
+    // Initial "Answering..." message with a delay to allow it to send before the AI response
+    await sendMessage(chilli, { text: `✍️ Answering...` }, kalamansi);
+    await new Promise(resolve => setTimeout(resolve, 1000));  // 1-second delay
 
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
@@ -56,7 +58,7 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
 
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));  // Delay between chunks
       await sendMessage(chilli, { text: message }, kalamansi);
     }
   } else {
