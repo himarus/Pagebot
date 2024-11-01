@@ -1,4 +1,3 @@
-const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const fs = require('fs');
 const api = require('../handles/api');
@@ -29,7 +28,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kenlie}/fbcover?avatar=https://graph.facebook.com/${senderId}/picture?type=large&fullname=${encodeURIComponent(fullname)}&firstname=${encodeURIComponent(firstname)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}&location=${encodeURIComponent(location)}`;
+    const apiUrl = `${api.kenlie}/fbcover?avatar=${senderId}&fullname=${encodeURIComponent(fullname)}&firstname=${encodeURIComponent(firstname)}&phone=${encodeURIComponent(phone)}&email=${encodeURIComponent(email)}&location=${encodeURIComponent(location)}`;
 
     await sendMessage(senderId, { text: 'Generating cover image... Please wait.' }, pageAccessToken);
 
