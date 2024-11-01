@@ -22,14 +22,21 @@ module.exports = {
     try {
       // Fetch the video download link
       const { data } = await axios.get(`https://hiroshi-api.onrender.com/tiktok/download?url=${encodeURIComponent(url)}`);
-      const videoUrl = data.code === 0 && data.data?.play;
+      
+      // Check if the response contains a valid play link
+      const videoUrl = data.data?.play;
 
-      // Send the video or an error message
-      sendMessage(senderId, videoUrl ? 
-        { attachment: { type: 'video', payload: { url: videoUrl } } } :
-        { text: 'Error: Unable to fetch video.' },
-        token
-      );
+      // Send the video or an error message if play URL is missing
+      if (videoUrl) {
+        sendMessage(senderId, {
+          attachment: {
+            type: 'video',
+            payload: { url: videoUrl }
+          }
+        }, token);
+      } else {
+        sendMessage(senderId, { text: 'Error: Unable to fetch video.' }, token);
+      }
     } catch (error) {
       console.error('Error:', error);
       sendMessage(senderId, { text: 'Error: Unexpected error occurred.' }, token);
