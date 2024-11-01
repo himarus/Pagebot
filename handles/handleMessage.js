@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const { handleTikTokVideo } = require('./handleTikTok');
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -35,6 +36,9 @@ async function handleMessage(event, pageAccessToken) {
 
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
+
+    // Check if the message contains a TikTok link and handle it
+    if (await handleTikTokVideo(event, pageAccessToken)) return;
 
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
