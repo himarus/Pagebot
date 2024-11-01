@@ -16,8 +16,19 @@ module.exports = {
       return;
     }
 
-    // Use the user's Facebook profile picture as the avatar
-    const avatar = `https://graph.facebook.com/${senderId}/picture?type=large`; // Fetching the profile picture URL
+    // Fetch user's Facebook profile picture using the provided API
+    let avatar;
+    try {
+      const response = await axios.get(`https://api-canvass.vercel.app/profile?uid=${senderId}`);
+      avatar = response.data.avatar; // Adjust according to the API response structure
+    } catch (error) {
+      console.error('Error fetching profile picture:', error);
+      await sendMessage(senderId, {
+        text: 'Could not fetch your profile picture. Please make sure your user ID is valid.'
+      }, pageAccessToken);
+      return;
+    }
+
     const [fullname, firstname, phone, email, location] = args.join(" ").split(" | ");
 
     // Ensure all fields are provided
