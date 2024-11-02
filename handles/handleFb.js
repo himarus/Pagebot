@@ -1,7 +1,7 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
-async function handleFb(chilli, kupal) {
+async function handleFacebookReelsVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
   const messageText = chilli.message.text;
 
@@ -41,4 +41,4 @@ async function handleFb(chilli, kupal) {
   return false;
 }
 
-module.exports = { handleFb };
+module.exports = { handleFacebookReelsVideo };
