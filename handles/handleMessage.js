@@ -3,6 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
+const { handleFacebookReelsVideo } = require('./handleFb'); // Import handleFb
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -36,6 +37,9 @@ async function handleMessage(event, pageAccessToken) {
 
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
+
+    // Check if the message contains a Facebook Reels link and handle it
+    if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
 
     // Check if the message contains a TikTok link and handle it
     if (await handleTikTokVideo(event, pageAccessToken)) return;
