@@ -1,23 +1,24 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const api = require('../handles/api');
 
 async function handleFacebookReelsVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
   const messageText = chilli.message.text;
 
-  // Check if the message contains a Facebook Reels link
+  
   const regEx_facebookReels = /https:\/\/www\.facebook\.com\/reel\//;
   if (regEx_facebookReels.test(messageText)) {
-    // Notify the user that the download is in progress
+    
     await sendMessage(pogi, { text: 'Downloading your Facebook Reel, please wait...' }, kupal);
 
     try {
-      // Make a request to the Facebook Reels downloader API
-      const response = await axios.get(`https://joshweb.click/api/fbdl2?url=${encodeURIComponent(messageText)}`);
+      
+      const response = await axios.get(`${api.joshWebApi}/api/fbdl2?url=${encodeURIComponent(messageText)}`);
       const data = response.data.result;
       const videoUrl = data.HD || data.normal_video;
 
-      // Check if there's an available video URL
+
       if (videoUrl) {
         // Send the video as an attachment
         await sendMessage(pogi, {
