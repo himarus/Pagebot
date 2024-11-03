@@ -6,7 +6,7 @@ module.exports = {
   name: 'help',
   description: 'Show available commands',
   author: 'chilli',
-  async execute(senderId, args, pageAccessToken) {
+  execute(senderId, args, pageAccessToken) {
     const commandsDir = path.join(__dirname, '../commands');
     const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js'));
 
@@ -32,18 +32,12 @@ module.exports = {
       page = 1;
     }
 
-    // Function to generate hidden features section
-    const getHiddenFeaturesText = () => `
-━━━━━━━━━━
-💡 Hidden Features:
-- Auto-download TikTok videos (no watermark) by sending a TikTok link.
-- Auto-download Facebook Reels videos by sending an FB Reels link.
-━━━━━━━━━━`;
-
     if (args[0] && args[0].toLowerCase() === 'all') {
-      const helpTextMessage = `📋 | CMD List:\n🏷 Total Commands: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}${getHiddenFeaturesText()}`;
+      const helpTextMessage = `📋 | CMD List:\n🏷 Total Commands: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\nIf you have any problems with the pagebot, contact the developer:\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
-      return sendMessage(senderId, { text: helpTextMessage }, pageAccessToken);
+      return sendMessage(senderId, {
+        text: helpTextMessage
+      }, pageAccessToken);
     }
 
     const startIndex = (page - 1) * commandsPerPage;
@@ -54,7 +48,7 @@ module.exports = {
       return sendMessage(senderId, { text: `Invalid page number. There are only ${totalPages} pages.` }, pageAccessToken);
     }
 
-    const helpTextMessage = `📋 | CMD List (Page ${page} of ${totalPages}):\n🏷 Total Commands: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\nType "help [page]" to see another page, or "help all" to show all commands.${getHiddenFeaturesText()}`;
+    const helpTextMessage = `📋 | CMD List (Page ${page} of ${totalPages}):\n🏷 Total Commands: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\nType "help [page]" to see another page, or "help all" to show all commands.\n\nIf you have any problems with the pagebot, contact the developer:\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
     const quickRepliesPage = commandsForPage.map((cmd) => ({
       content_type: "text",
@@ -62,6 +56,9 @@ module.exports = {
       payload: cmd.payload
     }));
 
-    return sendMessage(senderId, { text: helpTextMessage, quick_replies: quickRepliesPage }, pageAccessToken);
+    sendMessage(senderId, {
+      text: helpTextMessage,
+      quick_replies: quickRepliesPage
+    }, pageAccessToken);
   }
 };
