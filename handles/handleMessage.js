@@ -3,7 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
-const { handleFacebookReelsVideo } = require('./handleFb'); // Import handleFb
+const { handleFacebookReelsVideo } = require('./handleFb');
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -38,11 +38,25 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-    // Check if the message contains a Facebook Reels link and handle it
     if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
 
-    // Check if the message contains a TikTok link and handle it
     if (await handleTikTokVideo(event, pageAccessToken)) return;
+
+    if (messageText === 'zombie') {
+      const lastImage = lastImageByUser.get(senderId);
+
+      if (lastImage) {
+        try {
+          await commands.get('zombie').execute(senderId, [], pageAccessToken, lastImage);
+          lastImageByUser.delete(senderId);
+        } catch (error) {
+          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
+        }
+      } else {
+        await sendMessage(senderId, { text: 'Please send an image first, then type "zombie" to transform it.' }, pageAccessToken);
+      }
+      return;
+    }
 
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
