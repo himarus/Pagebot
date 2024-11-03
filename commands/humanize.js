@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const text = pogi.join(' ');
-    const apiUrl = `${api.jonelApi}/aihuman?text=${encodeURIComponent(text)}`;
+    const apiUrl = `${api.jonelApi}/api/aihuman?text=${encodeURIComponent(text)}`;
 
     await sendMessage(chilli, { text: 'Humanizing your text, please wait...' }, kupal);
 
