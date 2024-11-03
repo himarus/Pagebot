@@ -32,18 +32,30 @@ module.exports = {
       page = 1;
     }
 
+    const hiddenFeatures = `
+━━━━━━━━
+💡 Hidden Features:
+- Auto-download TikTok videos (no watermark) by sending a TikTok video link.
+- Auto-download Facebook Reels videos by sending an FB Reels link.`;
+
     if (args[0] && args[0].toLowerCase() === 'all') {
-      const helpTextMessage = `📋 | CMD List:\n🏷 Total Commands: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}`;
+      const helpTextMessage = `📋 | CMD List:\n🏷 Total Commands: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}${hiddenFeatures}`;
 
       return sendMessage(senderId, {
-        text: helpTextMessage,
-        buttons: [
-          {
-            type: "web_url",
-            url: "https://www.facebook.com/Churchill.Dev4100",
-            title: "Contact Developer"
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text: helpTextMessage,
+            buttons: [
+              {
+                type: "web_url",
+                url: "https://www.facebook.com/Churchill.Dev4100",
+                title: "Contact Developer"
+              }
+            ]
           }
-        ]
+        }
       }, pageAccessToken);
     }
 
@@ -55,7 +67,7 @@ module.exports = {
       return sendMessage(senderId, { text: `Invalid page number. There are only ${totalPages} pages.` }, pageAccessToken);
     }
 
-    const helpTextMessage = `📋 | CMD List (Page ${page} of ${totalPages}):\n🏷 Total Commands: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\nType "help [page]" to see another page, or "help all" to show all commands.`;
+    const helpTextMessage = `📋 | CMD List (Page ${page} of ${totalPages}):\n🏷 Total Commands: ${totalCommands}\n\n${commandsForPage.map((cmd, index) => `${startIndex + index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}\n\nType "help [page]" to see another page, or "help all" to show all commands.${hiddenFeatures}`;
 
     const quickRepliesPage = commandsForPage.map((cmd) => ({
       content_type: "text",
@@ -63,18 +75,23 @@ module.exports = {
       payload: cmd.payload
     }));
 
-    const buttons = [
-      {
-        type: "web_url",
-        url: "https://www.facebook.com/Churchill.Dev4100",
-        title: "Contact Developer"
-      }
-    ];
-
     sendMessage(senderId, {
       text: helpTextMessage,
       quick_replies: quickRepliesPage,
-      buttons: buttons
+      attachment: {
+        type: "template",
+        payload: {
+          template_type: "button",
+          text: "Need help or have questions?",
+          buttons: [
+            {
+              type: "web_url",
+              url: "https://www.facebook.com/Churchill.Dev4100",
+              title: "Contact Developer"
+            }
+          ]
+        }
+      }
     }, pageAccessToken);
   }
 };
