@@ -23,6 +23,18 @@ module.exports = {
       return null;
     }).filter(cmd => cmd !== null);
 
+    // Add auto download commands to the list
+    commands.push({
+      title: "Download TikTok Video",
+      description: "Automatically downloads TikTok videos without watermark if you send a TikTok video link.",
+      payload: "TIKTOK_DOWNLOAD_PAYLOAD"
+    });
+    commands.push({
+      title: "Download Facebook Reels",
+      description: "Automatically downloads Facebook Reels videos if you send a Reels link.",
+      payload: "FBREELS_DOWNLOAD_PAYLOAD"
+    });
+
     const totalCommands = commands.length;
     const commandsPerPage = 5;
     const totalPages = Math.ceil(totalCommands / commandsPerPage);
