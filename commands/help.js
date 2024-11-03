@@ -6,7 +6,7 @@ module.exports = {
   name: 'help',
   description: 'Show available commands',
   author: 'chilli',
-  execute(senderId, args, pageAccessToken) {
+  async execute(senderId, args, pageAccessToken) {
     const commandsDir = path.join(__dirname, '../commands');
     const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js'));
 
@@ -35,18 +35,21 @@ module.exports = {
     const hiddenFeatures = `
 ━━━━━━━━
 💡 Hidden Features:
-- Auto-download TikTok videos (no watermark) by sending a TikTok video link.
+- Auto-download TikTok videos (no watermark) by sending a TikTok link.
 - Auto-download Facebook Reels videos by sending an FB Reels link.`;
 
     if (args[0] && args[0].toLowerCase() === 'all') {
       const helpTextMessage = `📋 | CMD List:\n🏷 Total Commands: ${totalCommands}\n\n${commands.map((cmd, index) => `${index + 1}. ${cmd.title} - ${cmd.description}`).join('\n\n')}${hiddenFeatures}`;
 
+      await sendMessage(senderId, { text: helpTextMessage }, pageAccessToken);
+
+      // Sending Contact Developer button separately
       return sendMessage(senderId, {
         attachment: {
           type: "template",
           payload: {
             template_type: "button",
-            text: helpTextMessage,
+            text: "Need help or have questions?",
             buttons: [
               {
                 type: "web_url",
@@ -75,9 +78,10 @@ module.exports = {
       payload: cmd.payload
     }));
 
-    sendMessage(senderId, {
-      text: helpTextMessage,
-      quick_replies: quickRepliesPage,
+    await sendMessage(senderId, { text: helpTextMessage, quick_replies: quickRepliesPage }, pageAccessToken);
+
+    // Sending Contact Developer button separately
+    return sendMessage(senderId, {
       attachment: {
         type: "template",
         payload: {
