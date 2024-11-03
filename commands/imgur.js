@@ -9,7 +9,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: 'No attachment detected. Please send an image or video first.'
+        text: 'No attachment detected. Please send an image or video first then type "imgur".'
       }, pageAccessToken);
     }
 
