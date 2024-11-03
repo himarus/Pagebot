@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'zombie',
-  description: 'Transformzombie.',
+  description: 'Transform an image to zombie style.',
   usage: 'zombie',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken, lastImage) {
@@ -17,11 +17,13 @@ module.exports = {
     await sendMessage(senderId, { text: 'Transforming image... Please wait.' }, pageAccessToken);
 
     try {
+      // Attempt to send the transformed image with the reusable payload structure
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: apiUrl
+            url: apiUrl,
+            is_reusable: true
           }
         }
       }, pageAccessToken);
