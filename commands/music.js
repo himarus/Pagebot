@@ -66,7 +66,7 @@ module.exports = {
     } catch (error) {
       console.error('Error fetching music data:', error);
       await sendMessage(senderId, {
-        text: 'An error occurred while fetching the music. Please try again later.'
+        text: 'An error occurred while fetching the music. Please try again later. or use spotify'
       }, pageAccessToken);
     }
   }
