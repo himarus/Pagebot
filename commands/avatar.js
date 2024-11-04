@@ -4,7 +4,7 @@ const pogi = require('../handles/api');
 
 module.exports = {
   name: 'avatar',
-  description: 'Generate an avatar image using the JoshWeb API with customizable options.',
+  description: 'Generate an avatar image',
   usage: 'avatar <id> | <bgtext> | <signature> | <color>\nExample: avatar 4 | chilli | chillibot | black',
   author: 'chilli',
   async execute(kupal, args, pageAccessToken) {
