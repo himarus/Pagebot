@@ -39,7 +39,7 @@ module.exports = {
     }
 
     const query = args.join(' ');
-    const apiUrl = `${api.joshWebApi}/mixtral-8b?q=${encodeURIComponent(query)}`;
+    const apiUrl = `${api.joshWebApi}/api/mixtral-8b?q=${encodeURIComponent(query)}`;
 
     await sendMessage(kupal, {
       text: 'Answering your question, please wait... 🤖'
