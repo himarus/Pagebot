@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const api = require('../handles/api');
 
 async function handleInstagramVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
@@ -10,7 +11,7 @@ async function handleInstagramVideo(chilli, kupal) {
     await sendMessage(pogi, { text: 'Downloading your Instagram video, please wait...' }, kupal);
     
     try {
-      const response = await axios.get(`https://jerome-web.gleeze.com/service/api/alldl?url=${encodeURIComponent(messageText)}`);
+      const response = await axios.get(`${api.jerome}/service/api/alldl?url=${encodeURIComponent(messageText)}`);
       const data = response.data;
 
       if (data.status) {
