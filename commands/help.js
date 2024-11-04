@@ -45,7 +45,7 @@ module.exports = {
     }
 
     if (args[0] && args[0].toLowerCase() === 'all') {
-      const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((cmd, index) => `${convertToGothic(`${index + 1}. ${cmd.title}`)}`).join('\n\n')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
+      const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((cmd, index) => `${convertToGothic(`${index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
       return sendMessage(senderId, {
         text: helpTextMessage
@@ -60,7 +60,7 @@ module.exports = {
       return sendMessage(senderId, { text: convertToGothic(`Invalid page number. There are only ${totalPages} pages.`) }, pageAccessToken);
     }
 
-    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕 (Page ')}${page}${convertToGothic(` of ${totalPages}):`)}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commandsForPage.map((cmd, index) => `${convertToGothic(`${startIndex + index + 1}. ${cmd.title}`)}`).join('\n\n')}\n\n${convertToGothic('Type "help [page]" to see another page, or "help all" to show all commands.')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
+    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕 (Page ')}${page}${convertToGothic(` of ${totalPages}):`)}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commandsForPage.map((cmd, index) => `${convertToGothic(`${startIndex + index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('Type "help [page]" to see another page, or "help all" to show all commands.')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
     const quickRepliesPage = commandsForPage.map((cmd) => ({
       content_type: "text",
