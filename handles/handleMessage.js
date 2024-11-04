@@ -4,6 +4,7 @@ const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
 const { handleFacebookReelsVideo } = require('./handleFb');
+const { handleInstagramVideo } = require('./handleInstadl');
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -27,40 +28,19 @@ async function handleMessage(event, pageAccessToken) {
     const imageAttachment = event.message.attachments.find(att => att.type === 'image');
     const videoAttachment = event.message.attachments.find(att => att.type === 'video');
 
-    if (imageAttachment) {
-      lastImageByUser.set(senderId, imageAttachment.payload.url);
-    }
-    if (videoAttachment) {
-      lastVideoByUser.set(senderId, videoAttachment.payload.url);
-    }
+    if (imageAttachment) lastImageByUser.set(senderId, imageAttachment.payload.url);
+    if (videoAttachment) lastVideoByUser.set(senderId, videoAttachment.payload.url);
   }
 
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
     if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
-
     if (await handleTikTokVideo(event, pageAccessToken)) return;
-
-    if (messageText === 'zombie') {
-      const lastImage = lastImageByUser.get(senderId);
-
-      if (lastImage) {
-        try {
-          await commands.get('zombie').execute(senderId, [], pageAccessToken, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: 'Please send an image first, then type "zombie" to transform it.' }, pageAccessToken);
-      }
-      return;
-    }
+    if (await handleInstagramVideo(event, pageAccessToken)) return;
 
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
-
       if (lastImage) {
         try {
           await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
