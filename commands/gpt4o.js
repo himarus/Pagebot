@@ -15,30 +15,34 @@ const convertToGothic = (text) => {
   return text.split('').map(char => gothicFont[char] || char).join('');
 };
 
-const MAX_MESSAGE_LENGTH = 2000;
-const DELAY_BETWEEN_MESSAGES = 500;
+async function sendConcatenatedMessage(chilli, text, kalamansi) {
+  const maxMessageLength = 2000;
 
-function sendLongMessage(senderId, text, pageAccessToken) {
-  if (text.length > MAX_MESSAGE_LENGTH) {
-    const messages = splitMessageIntoChunks(text, MAX_MESSAGE_LENGTH);
-    messages.forEach((messageGroup, index) => {
-      setTimeout(() => sendMessage(senderId, { text: messageGroup }, pageAccessToken), index * DELAY_BETWEEN_MESSAGES);
-    });
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 1000));  // Delay between chunks
+      await sendMessage(chilli, { text: message }, kalamansi);
+    }
   } else {
-    sendMessage(senderId, { text }, pageAccessToken);
+    await sendMessage(chilli, { text }, kalamansi);
   }
 }
 
 function splitMessageIntoChunks(message, chunkSize) {
-  const regex = new RegExp(`.{1,${chunkSize}}`, 'g');
-  return message.match(regex);
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
 }
 
 module.exports = {
   name: 'gpt4o',
   description: 'Ask GPT-4o for a response to a given query',
   usage: 'gpt4o <query>',
-  author: 'Churchill',
+  author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, { text: 'Please provide a query for GPT-4o.' }, pageAccessToken);
@@ -52,7 +56,7 @@ module.exports = {
       const response = await axios.get(apiUrl);
       if (response.data.status) {
         const gothicResponse = convertToGothic(response.data.result);
-        sendLongMessage(senderId, gothicResponse, pageAccessToken);
+        await sendConcatenatedMessage(senderId, gothicResponse, pageAccessToken);
       } else {
         await sendMessage(senderId, { text: 'Error: GPT-4o could not provide a response.' }, pageAccessToken);
       }
