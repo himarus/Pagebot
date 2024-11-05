@@ -9,7 +9,7 @@ module.exports = {
   async execute(kupal, pogi, pageAccessToken) {
     if (!pogi || pogi.length === 0) {
       await sendMessage(kupal, {
-        text: 'Please provide a keyword to search for a video.\n\nUsage:\n video <keyword>\nExample: video apt'
+        text: 'Please provide a keyword to search for a video.\nExample: video apt'
       }, pageAccessToken);
       return;
     }
@@ -34,14 +34,23 @@ module.exports = {
         text: `**Video Found!**\n\nTitle: ${videoData.title}\nChannel: ${videoData.channelName}\nViews: ${videoData.views}\nDuration: ${videoData.time}`
       }, pageAccessToken);
 
-      await sendMessage(kupal, {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: videoData.downloadUrl
+      const videoResponse = await axios.head(videoData.downloadUrl);
+      const fileSize = parseInt(videoResponse.headers['content-length'], 10);
+
+      if (fileSize <= 25 * 1024 * 1024) {
+        await sendMessage(kupal, {
+          attachment: {
+            type: 'video',
+            payload: {
+              url: videoData.downloadUrl
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } else {
+        await sendMessage(kupal, {
+          text: `The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${videoData.downloadUrl}`
+        }, pageAccessToken);
+      }
 
     } catch (error) {
       console.error('Error fetching video:', error);
