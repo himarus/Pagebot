@@ -10,7 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: 'Please provide a prompt to generate an image.\n\nUsage:\n art <prompt>\nExample: art dog'
+        text: 'Please provide a prompt to generate an image.\nExample: art dog'
       }, pageAccessToken);
       return;
     }
