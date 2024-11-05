@@ -21,7 +21,7 @@ module.exports = {
 
     try {
       const response = await axios.get(apiUrl);
-      const { title, downloadUrl, time, views, image, channelName } = response.data;
+      const { title, downloadUrl, time, views, channelName } = response.data;
 
       if (!downloadUrl) {
         await sendMessage(kupal, {
@@ -30,21 +30,19 @@ module.exports = {
         return;
       }
 
+      const videoDetails = `**Video Found!**\n\nTitle: ${title}\nChannel: ${channelName}\nViews: ${views}\nDuration: ${time}`;
+
       await sendMessage(kupal, {
         attachment: {
           type: 'template',
           payload: {
-            template_type: 'generic',
-            elements: [
+            template_type: 'button',
+            text: videoDetails,
+            buttons: [
               {
-                title: title,
-                image_url: image,
-                subtitle: `${views} • ${channelName} • ${time}`,
-                default_action: {
-                  type: 'web_url',
-                  url: downloadUrl,
-                  webview_height_ratio: 'tall'
-                }
+                type: 'web_url',
+                url: downloadUrl,
+                title: 'Download Video'
               }
             ]
           }
