@@ -9,7 +9,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: 'Please provide a song name to search.\n\nUsage:\n music <song name>\nExample: music just know'
+        text: 'Please provide a song name to search.\nExample: music just know'
       }, pageAccessToken);
       return;
     }
@@ -23,7 +23,7 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { title, downloadUrl, time, views, thumbnail, channelName } = response.data;
 
-      // Sending the generic template with song details
+      
       await sendMessage(senderId, {
         attachment: {
           type: 'template',
