@@ -10,12 +10,12 @@ module.exports = {
   async execute(chilli, args, kalamansi) {
     const prompt = args.join(" ");
     if (!prompt) {
-      return sendMessage(chilli, { text: `Usage: ai [your question]` }, kalamansi);
+      return sendMessage(chilli, { text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\nex: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪` }, kalamansi);
     }
 
-    // Initial "Answering..." message with a delay to allow it to send before the AI response
+  
     await sendMessage(chilli, { text: `✍️ Answering...` }, kalamansi);
-    await new Promise(resolve => setTimeout(resolve, 1000));  // 1-second delay
+    await new Promise(resolve => setTimeout(resolve, 500));  // 1-second delay
 
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
