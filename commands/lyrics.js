@@ -7,18 +7,18 @@ module.exports = {
   description: "Get song lyrics by title",
   author: "chilli",
 
-  async execute(senderId, args, pageAccessToken) {
-    const songTitle = args.join(" ");
+  async execute(kupal, pogi, sili) {
+    const kanta = pogi.join(" ");
 
-    if (!songTitle) {
-      return sendMessage(senderId, {
+    if (!kanta) {
+      return sendMessage(kupal, {
         text: `Usage: lyrics [song title]`
-      }, pageAccessToken);
+      }, sili);
     }
 
     try {
       const res = await axios.get(`${api.joshWebApi}/search/lyrics`, {
-        params: { q: songTitle }
+        params: { q: kanta }
       });
 
       if (!res.data || !res.data.result) {
@@ -28,47 +28,49 @@ module.exports = {
       const { title, artist, lyrics, image } = res.data.result;
       const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
 
-      // Send the lyrics first
-      await sendChunkedMessage(senderId, lyricsMessage, pageAccessToken);
+      await sendConcatenatedMessage(kupal, lyricsMessage, sili);
 
-      // Send the image after the lyrics
       if (image) {
         setTimeout(async () => {
-          await sendMessage(senderId, {
+          await sendMessage(kupal, {
             attachment: {
               type: "image",
               payload: {
                 url: image
               }
             }
-          }, pageAccessToken);
-        }, 1000); // Delay sending the image by 1 second to ensure the lyrics go first
+          }, sili);
+        }, 1000);
       }
 
     } catch (error) {
       console.error("Error retrieving lyrics:", error);
-      sendMessage(senderId, {
+      sendMessage(kupal, {
         text: `Error retrieving lyrics. Please try again or check your input.`
-      }, pageAccessToken);
+      }, sili);
     }
   }
 };
 
-function sendChunkedMessage(senderId, text, pageAccessToken) {
+async function sendConcatenatedMessage(kupal, text, sili) {
   const maxMessageLength = 2000;
-  const delayBetweenMessages = 1000; // Delay of 1 second
 
   if (text.length > maxMessageLength) {
-    const halfLength = Math.ceil(text.length / 2);
-    const firstHalf = text.slice(0, halfLength);
-    const secondHalf = text.slice(halfLength);
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
 
-    sendMessage(senderId, { text: firstHalf }, pageAccessToken);
-
-    setTimeout(() => {
-      sendMessage(senderId, { text: secondHalf }, pageAccessToken);
-    }, delayBetweenMessages);
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sendMessage(kupal, { text: message }, sili);
+    }
   } else {
-    sendMessage(senderId, { text }, pageAccessToken);
+    await sendMessage(kupal, { text }, sili);
   }
+}
+
+function splitMessageIntoChunks(mensahe, laki) {
+  const chunks = [];
+  for (let i = 0; i < mensahe.length; i += laki) {
+    chunks.push(mensahe.slice(i, i + laki));
+  }
+  return chunks;
 }
