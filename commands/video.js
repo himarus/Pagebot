@@ -21,9 +21,9 @@ module.exports = {
 
     try {
       const response = await axios.get(apiUrl);
-      const videoData = response.data;
+      const { title, downloadUrl, time, views, image, channelName } = response.data;
 
-      if (!videoData || !videoData.downloadUrl) {
+      if (!downloadUrl) {
         await sendMessage(kupal, {
           text: `No video found for the keyword "${chilli}". Please try another keyword.`
         }, pageAccessToken);
@@ -31,10 +31,27 @@ module.exports = {
       }
 
       await sendMessage(kupal, {
-        text: `**Video Found!**\n\nTitle: ${videoData.title}\nChannel: ${videoData.channelName}\nViews: ${videoData.views}\nDuration: ${videoData.time}`
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'generic',
+            elements: [
+              {
+                title: title,
+                image_url: image,
+                subtitle: `${views} • ${channelName} • ${time}`,
+                default_action: {
+                  type: 'web_url',
+                  url: downloadUrl,
+                  webview_height_ratio: 'tall'
+                }
+              }
+            ]
+          }
+        }
       }, pageAccessToken);
 
-      const videoResponse = await axios.head(videoData.downloadUrl);
+      const videoResponse = await axios.head(downloadUrl);
       const fileSize = parseInt(videoResponse.headers['content-length'], 10);
 
       if (fileSize <= 25 * 1024 * 1024) {
@@ -42,18 +59,17 @@ module.exports = {
           attachment: {
             type: 'video',
             payload: {
-              url: videoData.downloadUrl
+              url: downloadUrl
             }
           }
         }, pageAccessToken);
       } else {
         await sendMessage(kupal, {
-          text: `The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${videoData.downloadUrl}`
+          text: `The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${downloadUrl}`
         }, pageAccessToken);
       }
 
     } catch (error) {
-      console.error('Error fetching video:', error);
       await sendMessage(kupal, {
         text: 'An error occurred while fetching the video. Please try again later.'
       }, pageAccessToken);
