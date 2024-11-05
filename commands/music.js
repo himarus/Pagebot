@@ -23,7 +23,6 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { title, downloadUrl, time, views, thumbnail, channelName } = response.data;
 
-      
       await sendMessage(senderId, {
         attachment: {
           type: 'template',
@@ -38,14 +37,7 @@ module.exports = {
                   type: 'web_url',
                   url: thumbnail,
                   webview_height_ratio: 'tall'
-                },
-                buttons: [
-                  {
-                    type: 'web_url',
-                    url: downloadUrl,
-                    title: 'Listen'
-                  }
-                ]
+                }
               }
             ]
           }
