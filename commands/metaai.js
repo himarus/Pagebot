@@ -30,7 +30,7 @@ module.exports = {
 
     try {
       const question = args.join(" ");
-      const waitingMessage = await sendMessage(senderId, { text: `Meta AI answering: ${question}` }, pageAccessToken);
+      const waitingMessage = await sendMessage(senderId, { text: `𝗠𝗶𝘁𝗮𝗸𝘂𝗽𝗮𝗹 𝗔𝗻𝘀𝘄𝗲𝗿𝗶𝗻𝗴...` }, pageAccessToken);
 
       const apiUrl = `https://echavie3.nethprojects.workers.dev/ai?model=@cf/meta/llama-3.2-3b-instruct&q=${encodeURIComponent(question)}`;
       const response = await axios.get(apiUrl);
