@@ -23,7 +23,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (args.length === 0) {
       await sendMessage(senderId, {
-        text: "Please provide a question after the command. Example: metaai What is chilli?"
+        text: "Please provide a question to the mita kupal"
       }, pageAccessToken);
       return;
     }
