@@ -17,8 +17,6 @@ module.exports = {
     const query = args.join(' ');
     const apiUrl = `https://dlvc.vercel.app/yt-audio?search=${encodeURIComponent(query)}`;
 
-    await sendMessage(senderId, { text: 'Searching for music... Please wait.' }, pageAccessToken);
-
     try {
       const response = await axios.get(apiUrl);
       const { title, downloadUrl, time, views, thumbnail, channelName } = response.data;
@@ -58,7 +56,7 @@ module.exports = {
     } catch (error) {
       console.error('Error fetching music data:', error);
       await sendMessage(senderId, {
-        text: 'An error occurred while fetching the music. Please try again later. or use spotify'
+        text: 'An error occurred while fetching the music. Please try again later, or use Spotify.'
       }, pageAccessToken);
     }
   }
