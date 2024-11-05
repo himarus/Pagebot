@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'flux',
@@ -15,7 +16,7 @@ module.exports = {
     }
 
     const prompt = args.join(' ');
-    const apiUrl = `https://api.kenliejugarap.com/fluxv2/?prompt=${encodeURIComponent(prompt)}`;
+    const apiUrl = `${api.kenlie}/fluxv2/?prompt=${encodeURIComponent(prompt)}`;
 
     try {
       const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
