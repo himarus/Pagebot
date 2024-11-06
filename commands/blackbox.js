@@ -48,25 +48,33 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const footer = '\n━━━━━━━━━━━━';
   const chunkSize = maxMessageLength - header.length - footer.length;
 
-  if (text.length > chunkSize) {
-    const messages = splitMessageIntoChunks(text, chunkSize);
+  // Check if the text needs to be split into chunks
+  const messages = splitMessageIntoChunks(text, chunkSize);
 
-    for (const message of messages) {
-      const formattedMessage = `${header}${message}${footer}`;
-      await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
-      await sendMessage(chilli, { text: formattedMessage }, kalamansi);
-    }
-  } else {
-    const singleMessage = `${header}${text}${footer}`;
-    await sendMessage(chilli, { text: singleMessage }, kalamansi);
+  for (const message of messages) {
+    const formattedMessage = `${header}${message}${footer}`;
+    await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
+    await sendMessage(chilli, { text: formattedMessage }, kalamansi);
   }
 }
 
 // Helper function to split text into chunks
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
+  let currentChunk = '';
+
+  for (const part of message.split(' ')) {
+    if ((currentChunk + part).length > chunkSize) {
+      chunks.push(currentChunk);
+      currentChunk = part;
+    } else {
+      currentChunk += (currentChunk ? ' ' : '') + part;
+    }
   }
+  
+  if (currentChunk) {
+    chunks.push(currentChunk);
+  }
+
   return chunks;
 }
