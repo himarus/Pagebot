@@ -17,7 +17,7 @@ module.exports = {
     const prompt = args.join(' ');
     const apiUrl = `https://heru-apiv2.onrender.com/api/flux?prompt=${encodeURIComponent(prompt)}`;
 
-    await sendMessage(senderId, { text: 'Generating image... Please wait.' }, pageAccessToken);
+    await sendMessage(senderId, { text: '🖌️ Generating image...' }, pageAccessToken);
 
     try {
       await sendMessage(senderId, {
