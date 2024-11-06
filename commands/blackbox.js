@@ -23,6 +23,9 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { response: answer } = response.data;
 
+      // Log the answer length to check if chunking is needed
+      console.log(`Answer length: ${answer.length}`);
+
       await sendConcatenatedMessage(senderId, answer, pageAccessToken);
     } catch (error) {
       console.error('Error fetching response from Blackbox:', error);
@@ -37,11 +40,13 @@ module.exports = {
 async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const maxMessageLength = 2000;
 
+  // If the message is too long, split it
   if (text.length > maxMessageLength) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
+    console.log(`Message is too long. Splitting into ${messages.length} chunks.`);
 
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300));  // Delay between chunks
+      await new Promise(resolve => setTimeout(resolve, 1000));  // Delay between chunks
       await sendMessage(chilli, { text: message }, kalamansi);
     }
   } else {
