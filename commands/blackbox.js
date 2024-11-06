@@ -2,32 +2,6 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
-// Function to send concatenated messages with chunking, headers, and footers
-async function sendConcatenatedMessage(chilli, text, kalamansi) {
-  const maxMessageLength = 2000;
-  const header = '⿻ | 𝗕𝗟𝗔𝗖𝗞𝗕𝗢𝗫 𝗔𝗜\n━━━━━━━━━━━━\n';
-  const footer = '\n━━━━━━━━━━━━';
-  const chunkSize = maxMessageLength - header.length - footer.length;
-
-  // Split the text into manageable chunks
-  const messages = splitMessageIntoChunks(text, chunkSize);
-
-  // Send each chunk with the header and footer
-  for (const message of messages) {
-    await new Promise(resolve => setTimeout(resolve, 300)); // Delay to avoid rate limits
-    await sendMessage(chilli, { text: `${header}${message}${footer}` }, kalamansi);
-  }
-}
-
-// Helper function to split text into chunks
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
-
 // Main command module for the blackbox command
 module.exports = {
   name: 'blackbox',
@@ -66,3 +40,29 @@ module.exports = {
     }
   }
 };
+
+// Function to send concatenated messages with chunking, headers, and footers
+async function sendConcatenatedMessage(chilli, text, kalamansi) {
+  const maxMessageLength = 2000;
+  const header = '⿻ | 𝗕𝗟𝗔𝗖𝗞𝗕𝗢𝗫 𝗔𝗜\n━━━━━━━━━━━━\n';
+  const footer = '\n━━━━━━━━━━━━';
+  const chunkSize = maxMessageLength - header.length - footer.length;
+
+  // Split the text into manageable chunks
+  const messages = splitMessageIntoChunks(text, chunkSize);
+
+  // Send each chunk with the header and footer
+  for (const message of messages) {
+    await new Promise(resolve => setTimeout(resolve, 300)); // Delay to avoid rate limits
+    await sendMessage(chilli, { text: `${header}${message}${footer}` }, kalamansi);
+  }
+}
+
+// Helper function to split text into chunks
+function splitMessageIntoChunks(message, chunkSize) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
