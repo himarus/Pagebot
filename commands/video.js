@@ -9,7 +9,7 @@ module.exports = {
   async execute(kupal, pogi, pageAccessToken) {
     if (!pogi || pogi.length === 0) {
       await sendMessage(kupal, {
-        text: 'Please provide a keyword to search for a video.\nExample: video apt'
+        text: 'Please provide a keyword to search for a video.\n\nExample: video apt'
       }, pageAccessToken);
       return;
     }
@@ -69,7 +69,7 @@ module.exports = {
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: 'An error occurred while fetching the video. Please try again later.'
+        text: 'An error because of many user, just try again later.'
       }, pageAccessToken);
     }
   }
