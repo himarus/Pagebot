@@ -48,18 +48,17 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const footer = '\n━━━━━━━━━━━━';
   const chunkSize = maxMessageLength - header.length - footer.length;
 
-  // Check if the text needs to be split into chunks
   if (text.length > chunkSize) {
     const messages = splitMessageIntoChunks(text, chunkSize);
 
-    // Send each chunk with the header and footer
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300)); // Delay to avoid rate limits
-      await sendMessage(chilli, { text: `${header}${message}${footer}` }, kalamansi);
+      const formattedMessage = `${header}${message}${footer}`;
+      await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
+      await sendMessage(chilli, { text: formattedMessage }, kalamansi);
     }
   } else {
-    // Send the message as a single chunk if it's short enough
-    await sendMessage(chilli, { text: `${header}${text}${footer}` }, kalamansi);
+    const singleMessage = `${header}${text}${footer}`;
+    await sendMessage(chilli, { text: singleMessage }, kalamansi);
   }
 }
 
