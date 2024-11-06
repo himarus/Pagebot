@@ -10,7 +10,7 @@ module.exports = {
   async execute(kupal, args, pageAccessToken) {
     if (args.length === 0) {
       await sendMessage(kupal, {
-        text: 'Please provide a prompt.\n\ngen dog with its owner'
+        text: 'Please provide a prompt.\n\nex: gen dog with its owner'
       }, pageAccessToken);
       return;
     }
