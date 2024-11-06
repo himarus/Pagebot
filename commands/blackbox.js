@@ -6,8 +6,8 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const maxMessageLength = 2000;
   const header = '⿻ | 𝗕𝗟𝗔𝗖𝗞𝗕𝗢𝗫 𝗔𝗜\n━━━━━━━━━━━━\n';
   const footer = '\n━━━━━━━━━━━━';
-
   const chunkSize = maxMessageLength - header.length - footer.length;
+
   const messages = splitMessageIntoChunks(text, chunkSize);
 
   for (const message of messages) {
@@ -40,7 +40,7 @@ module.exports = {
     const query = args.join(' ');
     const apiUrl = `${api.kaizen}/api/blackbox?q=${encodeURIComponent(query)}&uid=911`;
 
-    await sendMessage(chilli, { text: 'Processing your request... Please wait.' }, kalamansi);
+    await sendMessage(chilli, { text: '𝘚𝘦𝘢𝘳𝘤𝘩𝘪𝘯𝘨... Please wait.' }, kalamansi);
 
     try {
       const response = await axios.get(apiUrl);
