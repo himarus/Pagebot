@@ -1,38 +1,39 @@
-const axios = require("axios");
+const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: "flux",
-  description: "Generate an image based on the given prompt using the Flux API.",
-  author: "chilli",
+  name: 'flux',
+  description: 'Generate an image based on a prompt using the Flux API.',
+  usage: 'flux <prompt>\nExample: flux dog',
+  author: 'chilli',
+  async execute(senderId, args, pageAccessToken) {
+    if (!args || args.length === 0) {
+      await sendMessage(senderId, {
+        text: 'Please provide a prompt to generate an image.\n\nExample: flux dog'
+      }, pageAccessToken);
+      return;
+    }
 
-  async execute(data, args, pageBot) {
-    const prompt = args.join(" ");
-    if (!prompt) return sendMessage(data, { text: `Please provide a description for the image.\nex: flux dog` }, pageBot);
+    const prompt = args.join(' ');
+    const apiUrl = `https://heru-apiv2.onrender.com/api/flux?prompt=${encodeURIComponent(prompt)}`;
 
-    await sendMessage(data, { text: `🖌️ Generating image...` }, pageBot);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await sendMessage(senderId, { text: 'Generating image... Please wait.' }, pageAccessToken);
 
     try {
-      const response = await axios.get("https://heru-apiv2.onrender.com/api/flux", {
-        params: { prompt: prompt },
-        responseType: 'arraybuffer'  // Set response type to arraybuffer for image binary data
-      });
-
-      const imageBuffer = Buffer.from(response.data, 'binary'); // Convert binary data to Buffer
-
-      await sendMessage(data, {
+      await sendMessage(senderId, {
         attachment: {
           type: 'image',
-          payload: { is_reusable: true }
-        },
-        file: imageBuffer // Attach the image buffer as the file
-      }, pageBot);
+          payload: {
+            url: apiUrl
+          }
+        }
+      }, pageAccessToken);
 
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "⚠️ An unexpected error occurred. Please try again.";
-      sendMessage(data, { text: `⚠️ Error: ${errorMessage}` }, pageBot);
+      console.error('Error generating image:', error);
+      await sendMessage(senderId, {
+        text: 'An error occurred while generating the image. Please try again later.'
+      }, pageAccessToken);
     }
   }
 };
-
