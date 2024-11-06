@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const maxMessageLength = 2000;
@@ -40,7 +41,7 @@ module.exports = {
     }
 
     const query = args.join(' ');
-    const apiUrl = `https://kaiz-apis.gleeze.com/api/blackbox?q=${encodeURIComponent(query)}&uid=911`;
+    const apiUrl = `${api.kaizen}/api/blackbox?q=${encodeURIComponent(query)}&uid=911`;
 
     await sendMessage(chilli, { text: 'Processing your request... Please wait.' }, kalamansi);
 
