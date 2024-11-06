@@ -2,79 +2,57 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
-// Main command module for the blackbox command
 module.exports = {
   name: 'blackbox',
-  description: 'Interact with the Blackbox API to receive responses based on a query.',
-  usage: 'blackbox <query>',
-  author: 'chilli',
-  
-  async execute(chilli, args, kalamansi) {
+  description: 'Get an insightful response from Blackbox based on a query.',
+  usage: 'blackbox <query>\nExample: blackbox what is love?',
+  async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
-      await sendMessage(chilli, {
-        text: 'Please provide a query.\n\nExample: blackbox yokoso'
-      }, kalamansi);
+      await sendMessage(senderId, {
+        text: 'Please provide a query.\n\nExample: blackbox what is love?'
+      }, pageAccessToken);
       return;
     }
 
-    // Construct the Blackbox API URL with the query
     const query = args.join(' ');
-    const apiUrl = `${api.kaizen}/api/blackbox?q=${encodeURIComponent(query)}&uid=911`;
+    const apiUrl = `${api.kaizen}/api/blackbox?q=${encodeURIComponent(query)}&uid=199`;
 
-    // Inform the user that the request is being processed
-    await sendMessage(chilli, { text: 'Processing your request... Please wait.' }, kalamansi);
+    await sendMessage(senderId, { text: '𝘚𝘦𝘢𝘳𝘤𝘩𝘪𝘯𝘨 𝘗𝘭𝘦𝘢𝘴𝘦𝘸𝘢𝘪𝘵...' }, pageAccessToken);
 
     try {
-      // Make a request to the Blackbox API
       const response = await axios.get(apiUrl);
-      const { response: apiResponse } = response.data;
+      const { response: answer } = response.data;
 
-      // Send the API response in chunks if it's too long
-      await sendConcatenatedMessage(chilli, apiResponse, kalamansi);
-      
+      await sendConcatenatedMessage(senderId, answer, pageAccessToken);
     } catch (error) {
-      console.error('Error with Blackbox API:', error);
-      await sendMessage(chilli, {
-        text: 'An error occurred while fetching the response. Please try again later.'
-      }, kalamansi);
+      console.error('Error fetching response from Blackbox:', error);
+      await sendMessage(senderId, {
+        text: 'An error occurred while processing your query. Please try again later.'
+      }, pageAccessToken);
     }
   }
 };
 
-// Function to send concatenated messages with chunking, headers, and footers
+// Helper functions
 async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const maxMessageLength = 2000;
-  const header = '⿻ | 𝗕𝗟𝗔𝗖𝗞𝗕𝗢𝗫 𝗔𝗜\n━━━━━━━━━━━━\n';
-  const footer = '\n━━━━━━━━━━━━';
-  const chunkSize = maxMessageLength - header.length - footer.length;
 
-  // Check if the text needs to be split into chunks
-  const messages = splitMessageIntoChunks(text, chunkSize);
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
 
-  for (const message of messages) {
-    const formattedMessage = `${header}${message}${footer}`;
-    await new Promise(resolve => setTimeout(resolve, 500)); // Delay to avoid rate limits
-    await sendMessage(chilli, { text: formattedMessage }, kalamansi);
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 300));  // Delay between chunks
+      await sendMessage(chilli, { text: message }, kalamansi);
+    }
+  } else {
+    await sendMessage(chilli, { text }, kalamansi);
   }
 }
 
-// Helper function to split text into chunks
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
-  let currentChunk = '';
-
-  for (const part of message.split(' ')) {
-    if ((currentChunk + part).length > chunkSize) {
-      chunks.push(currentChunk);
-      currentChunk = part;
-    } else {
-      currentChunk += (currentChunk ? ' ' : '') + part;
-    }
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
   }
-  
-  if (currentChunk) {
-    chunks.push(currentChunk);
-  }
-
   return chunks;
 }
