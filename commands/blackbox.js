@@ -7,15 +7,12 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
   const header = '⿻ | 𝗕𝗟𝗔𝗖𝗞𝗕𝗢𝗫 𝗔𝗜\n━━━━━━━━━━━━\n';
   const footer = '\n━━━━━━━━━━━━';
 
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength - header.length - footer.length);
+  const chunkSize = maxMessageLength - header.length - footer.length;
+  const messages = splitMessageIntoChunks(text, chunkSize);
 
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300));  // Delay between chunks
-      await sendMessage(chilli, { text: `${header}${message}${footer}` }, kalamansi);
-    }
-  } else {
-    await sendMessage(chilli, { text: `${header}${text}${footer}` }, kalamansi);
+  for (const message of messages) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await sendMessage(chilli, { text: `${header}${message}${footer}` }, kalamansi);
   }
 }
 
@@ -49,7 +46,6 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const { response: apiResponse } = response.data;
 
-      // Send the response in chunks with header and footer
       await sendConcatenatedMessage(chilli, apiResponse, kalamansi);
       
     } catch (error) {
