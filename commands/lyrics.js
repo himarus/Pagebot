@@ -59,7 +59,7 @@ async function sendConcatenatedMessage(kupal, text, sili) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
 
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       await sendMessage(kupal, { text: message }, sili);
     }
   } else {
