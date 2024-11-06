@@ -32,20 +32,26 @@ module.exports = {
 
 async function sendConcatenatedMessage(data, text, pageBot) {
   const maxMessageLength = 2000;
-  if (text.length > maxMessageLength) {
-    for (const message of splitMessageIntoChunks(text, maxMessageLength)) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      await sendMessage(data, { text: message }, pageBot);
-    }
-  } else {
-    await sendMessage(data, { text }, pageBot);
+  const messages = splitMessageIntoChunks(text, maxMessageLength);
+  
+  for (const message of messages) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    await sendMessage(data, { text: message }, pageBot);
   }
 }
 
 function splitMessageIntoChunks(message, chunkSize) {
   const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
+  let currentChunk = "";
+
+  message.split("\n").forEach(line => {
+    if ((currentChunk + line + "\n").length > chunkSize) {
+      chunks.push(currentChunk);
+      currentChunk = "";
+    }
+    currentChunk += line + "\n";
+  });
+
+  if (currentChunk) chunks.push(currentChunk);
   return chunks;
 }
