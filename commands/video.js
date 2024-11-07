@@ -69,7 +69,7 @@ module.exports = {
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: 'An error because of many user, just try again later.'
+        text: 'An error because of many user, just try again.'
       }, pageAccessToken);
     }
   }
