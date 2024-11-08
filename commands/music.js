@@ -42,7 +42,7 @@ module.exports = {
         }
       }, pageAccessToken);
 
-      // Sending the audio attachment
+      // Sending the audio kupal
       await sendMessage(senderId, {
         attachment: {
           type: 'audio',
