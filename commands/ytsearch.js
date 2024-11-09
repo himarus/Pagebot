@@ -18,7 +18,7 @@ module.exports = {
     const chilli = pogi.join(' ');
     const apiUrl = `${api.kenlie}/ytsearch?title=${encodeURIComponent(chilli)}`;
 
-    await sendMessage(kupal, { text: `Searching for YouTube video: "${chilli}"... Please wait.` }, pageAccessToken);
+    await sendMessage(kupal, { text: `🔍 Searching for YouTube video: "${chilli}"... Please wait.` }, pageAccessToken);
 
     try {
       const response = await axios.get(apiUrl);
@@ -31,30 +31,11 @@ module.exports = {
         return;
       }
 
-      const { title, url, duration, views, channelName, thumbnail } = videos[0];
-      const videoDetails = `**Video Found!**\n\nTitle: ${title}\nChannel: ${channelName}\nViews: ${views}\nDuration: ${duration}`;
+      const firstVideo = videos[0];
+      const { title, url, thumbnail, views, duration } = firstVideo;
 
       await sendMessage(kupal, {
-        attachment: {
-          type: 'template',
-          payload: {
-            template_type: 'generic',
-            elements: [
-              {
-                title: title,
-                image_url: thumbnail,
-                subtitle: `${channelName} | ${views} views | ${duration}`,
-                buttons: [
-                  {
-                    type: 'web_url',
-                    url: url,
-                    title: 'Watch Video'
-                  }
-                ]
-              }
-            ]
-          }
-        }
+        text: `🎬 **${title}**\n📺 **Views**: ${views}\n⏰ **Duration**: ${duration}\n📲 [Watch on YouTube](${url})`,
       }, pageAccessToken);
 
       const videoResponse = await axios.head(url);
@@ -71,7 +52,30 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(kupal, {
-          text: `The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can watch it here:\n${url}`
+          text: `⚠️ The video exceeds the 25 MB limit. Please click "Watch Video" below to view it on YouTube.`,
+        }, pageAccessToken);
+
+        await sendMessage(kupal, {
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'generic',
+              elements: [
+                {
+                  title: title,
+                  image_url: thumbnail,
+                  subtitle: `${views} views | ${duration}`,
+                  buttons: [
+                    {
+                      type: 'web_url',
+                      url: url,
+                      title: 'Watch Video'
+                    }
+                  ]
+                }
+              ]
+            }
+          }
         }, pageAccessToken);
       }
 
