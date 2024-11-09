@@ -10,11 +10,13 @@ module.exports = {
   async execute(chilli, args, kalamansi) {
     const prompt = args.join(" ");
     if (!prompt) {
-      return sendMessage(chilli, { text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\nExample: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪` }, kalamansi);
+      return sendMessage(chilli, { 
+        text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\n𝘌𝘹𝘢𝘮𝘱𝘭𝘦: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪` 
+      }, kalamansi);
     }
 
-    await sendMessage(chilli, { text: `✍️ Processing your request...` }, kalamansi);
-    await new Promise(resolve => setTimeout(resolve, 500));  // Short delay
+    
+    await sendMessage(chilli, { text: `💬 Thinking about your question...` }, kalamansi);
 
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
@@ -23,8 +25,9 @@ module.exports = {
 
       const result = response.data.response;
 
+      // Detecting image generation request
       if (result.includes('TOOL_CALL: generateImage')) {
-        await sendMessage(chilli, { text: `🎨 𝘎𝘦𝘯𝘦𝘳𝘢𝘵𝘪𝘯𝘨, 𝘱𝘭𝘦𝘢𝘴𝘦 𝘸𝘢𝘪𝘵...` }, kalamansi);  // Stylish "generating" message
+        await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
 
         const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
         
@@ -43,12 +46,14 @@ module.exports = {
           await sendConcatenatedMessage(chilli, result, kalamansi);
         }
         
+      // Detecting web browsing request
       } else if (result.includes('TOOL_CALL: browseWeb')) {
-        await sendMessage(chilli, { text: `🌐 𝘉𝘳𝘰𝘸𝘴𝘪𝘯𝘨, 𝘱𝘭𝘦𝘢𝘴𝘦 𝘸𝘢𝘪𝘵...` }, kalamansi);  // Stylish "browsing" message
+        await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
         
         const browseData = result.replace('TOOL_CALL: browseWeb', '').trim();
         await sendConcatenatedMessage(chilli, browseData, kalamansi);
 
+      
       } else {
         await sendConcatenatedMessage(chilli, result, kalamansi);
       }
