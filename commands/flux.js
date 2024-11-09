@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const prompt = args.join(' ');
-    const apiUrl = `${api.jonel}/api/flux?prompt=${encodeURIComponent(prompt)}`;
+    const apiUrl = `${api.jonelApi}/api/flux?prompt=${encodeURIComponent(prompt)}`;
 
     await sendMessage(senderId, { text: '✨ Generating your image... please wait a moment! ✨' }, pageAccessToken);
 
