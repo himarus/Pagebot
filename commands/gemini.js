@@ -4,7 +4,7 @@ const api = require('../handles/api');
 
 module.exports = {
   name: "gemini",
-  description: "Interact with Google Gemini for image recognition and text queries.",
+  description: "Interact with Google Gemini for image recognition or text-based queries.",
   author: "Churchill",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
@@ -12,24 +12,26 @@ module.exports = {
 
     if (!userPrompt && !imageUrl) {
       return sendMessage(senderId, { 
-        text: `Usage Instructions:
-To use the Gemini command, you can either:
-1. Send an image with the message "gemini" followed by your question or description, and Gemini will analyze the image.
-2. Reply to an image with "gemini" and your question, and Gemini will analyze the replied image.
-3. Send only "gemini" followed by your question for text-only queries without image analysis.
+        text: `✨ How to Use:
+1️⃣ Send an image with "gemini" + question.
+2️⃣ Reply to an image with "gemini" + question.
+3️⃣ Send "gemini" + question for text-only queries.
 
 Examples:
-- gemini what is AI?
-- [After sending an image:] gemini what do u see in picture.
-- [Replying to an image with:] gemini describe this.` 
+- gemini describe this
+- [Reply to image:] gemini what's shown here.` 
       }, pageAccessToken);
     }
 
-    sendMessage(senderId, { text: "Please wait... 🔎" }, pageAccessToken);
+    // Choose a stylish response based on whether the query is for an image or text
+    if (imageUrl || (event.message?.attachments && event.message.attachments[0]?.type === 'image')) {
+      sendMessage(senderId, { text: "🔍 Recognizing the image... Please wait." }, pageAccessToken);
+    } else {
+      sendMessage(senderId, { text: "💬 Answering your question... One moment please." }, pageAccessToken);
+    }
 
     try {
       if (!imageUrl) {
-      
         if (event.message.reply_to && event.message.reply_to.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
         } else if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
@@ -45,7 +47,7 @@ Examples:
 
     } catch (error) {
       console.error("Error in Gemini command:", error);
-      sendMessage(senderId, { text: `Error: ${error.message || "Something went wrong."}` }, pageAccessToken);
+      sendMessage(senderId, { text: `⚠️ Error: ${error.message || "Something went wrong."}` }, pageAccessToken);
     }
   }
 };
