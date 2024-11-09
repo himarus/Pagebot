@@ -4,7 +4,7 @@ const api = require('../handles/api');
 
 module.exports = {
   name: "flux",
-  description: "Generate an image based on a prompt using the Flux API.",
+  description: "Generate an image based on a prompt using the Flux API and upload to Imgur.",
   author: "chilli",
 
   async execute(chilli, args, kalamansi) {
@@ -19,29 +19,35 @@ module.exports = {
     await sendMessage(chilli, { text: `🎨 Generating your image of "${prompt}"...` }, kalamansi);
 
     try {
-      const response = await axios.get(`${api.jonelApi}/api/flux`, {
+      // Step 1: Generate the image with the Flux API
+      const fluxResponse = await axios.get(`${api.jonelApi}/api/flux`, {
         params: { prompt: prompt },
         responseType: 'arraybuffer' // to handle image binary data
       });
 
-      
-      const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+      // Convert the binary data to base64
+      const imageBase64 = Buffer.from(fluxResponse.data, 'binary').toString('base64');
       const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
 
-      
+      // Step 2: Upload the image to Imgur
+      await sendMessage(chilli, { text: "Uploading the image to Imgur, please wait..." }, kalamansi);
+
+      const imgurResponse = await axios.get(`https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(imageUrl)}`);
+      const imgurLink = imgurResponse?.data?.uploaded?.image;
+
+      if (!imgurLink) {
+        throw new Error('Imgur link not found in the response');
+      }
+
+      // Step 3: Send the Imgur link to the user
       await sendMessage(chilli, {
-        attachment: {
-          type: 'image',
-          payload: {
-            url: imageUrl
-          }
-        }
+        text: `Here is the Imgur link for your generated image:\n\n${imgurLink}`
       }, kalamansi);
 
     } catch (error) {
-      console.error("Error in Flux command:", error);
+      console.error("Error in Flux command:", error.response?.data || error.message);
       sendMessage(chilli, { 
-        text: "⚠️ Error while generating the image. Please try again or contact support." 
+        text: "⚠️ An error occurred while generating or uploading the image. Please try again later or contact support." 
       }, kalamansi);
     }
   }
