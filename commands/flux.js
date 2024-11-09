@@ -10,7 +10,10 @@ module.exports = {
   async execute(chilli, args, kalamansi) {
     const prompt = args.join(" ");
     if (!prompt) {
-      return sendMessage(chilli, { text: `⚠️ 𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘱𝘳𝘰𝘮𝘱𝘵 𝘧𝘰𝘳 𝘪𝘮𝘢𝘨𝘦 𝘨𝘦𝘯𝘦𝘳𝘢𝘵𝘪𝘰𝘯.\n\nExample: 𝘧𝘭𝘶𝘹 𝘤𝘢𝘵` }, kalamansi);
+      return sendMessage(chilli, { 
+        text: `⚠️ 𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘱𝘳𝘰𝘮𝘱𝘵 𝘧𝘰𝘳 𝘪𝘮𝘢𝘨𝘦 𝘨𝘦𝘯𝘦𝘳𝘢𝘵𝘪𝘰𝘯.\n\nExample: 𝘧𝘭𝘶𝘹 𝘤𝘢𝘵` 
+      }, kalamansi);
+      return;
     }
 
     await sendMessage(chilli, { text: `🎨 Generating your image of "${prompt}"...` }, kalamansi);
@@ -21,19 +24,25 @@ module.exports = {
         responseType: 'arraybuffer' // to handle image binary data
       });
 
-      const imageBuffer = Buffer.from(response.data, 'binary'); // Convert binary data to buffer
+      
+      const imageBase64 = Buffer.from(response.data, 'binary').toString('base64');
+      const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
 
+      
       await sendMessage(chilli, {
         attachment: {
           type: 'image',
           payload: {
-            buffer: imageBuffer
+            url: imageUrl
           }
         }
       }, kalamansi);
 
     } catch (error) {
-      sendMessage(chilli, { text: "⚠️ Error while generating the image. Please try again or contact support." }, kalamansi);
+      console.error("Error in Flux command:", error);
+      sendMessage(chilli, { 
+        text: "⚠️ Error while generating the image. Please try again or contact support." 
+      }, kalamansi);
     }
   }
 };
