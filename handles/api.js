@@ -6,5 +6,6 @@ module.exports = {
   nethApi: "https://nethwieginedev.vercel.app",
   jonelApi: "https://ccprojectapis.ddns.net",
   canvasApi: "https://api-canvass.vercel.app",
+  mark2: "https://apis-markdevs69v2.onrender.com",
   markApi: "https://markdevs-last-api-vtjp.onrender.com",
 };
