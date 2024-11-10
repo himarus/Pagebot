@@ -5,14 +5,15 @@ const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
 const { handleFacebookReelsVideo } = require('./handleFb');
 const { handleInstagramVideo } = require('./handleInstadl');
-const { handleCommand } = require('./handleCommand');
+
 const commands = new Map();
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
+
 for (const file of commandFiles) {
-  const command = require(path.join(__dirname, '../commands', file));
+  const command = require(`../commands/${file}`);
   if (command.name && typeof command.name === 'string') {
     commands.set(command.name.toLowerCase(), command);
   }
@@ -37,21 +38,6 @@ async function handleMessage(event, pageAccessToken) {
     if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
     if (await handleTikTokVideo(event, pageAccessToken)) return;
     if (await handleInstagramVideo(event, pageAccessToken)) return;
-
-    if (messageText === 'remini') {
-      const lastImage = lastImageByUser.get(senderId);
-      if (lastImage) {
-        try {
-          await commands.get('remini').execute(senderId, [], pageAccessToken, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: 'Please send an image first, then type "remini" to enhance it.' }, pageAccessToken);
-      }
-      return;
-    }
 
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
@@ -131,7 +117,16 @@ async function handleMessage(event, pageAccessToken) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
       }
     } else {
-      await handleCommand(senderId, commandName, args, pageAccessToken);
+      sendMessage(senderId, {
+        text: `Unknown command: "${commandName}". Type "help" for a list of available commands.`,
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "Help",
+            payload: "HELP_PAYLOAD"
+          }
+        ]
+      }, pageAccessToken);
     }
   }
 }
