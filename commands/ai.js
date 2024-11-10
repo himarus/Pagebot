@@ -15,9 +15,6 @@ module.exports = {
       }, kalamansi);
     }
 
-    
-    await sendMessage(chilli, { text: `💬 Thinking about your question...` }, kalamansi);
-
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
         params: { prompt: prompt }
@@ -25,7 +22,6 @@ module.exports = {
 
       const result = response.data.response;
 
-      // Detecting image generation request
       if (result.includes('TOOL_CALL: generateImage')) {
         await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
 
@@ -46,15 +42,14 @@ module.exports = {
           await sendConcatenatedMessage(chilli, result, kalamansi);
         }
         
-      // Detecting web browsing request
       } else if (result.includes('TOOL_CALL: browseWeb')) {
         await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
         
         const browseData = result.replace('TOOL_CALL: browseWeb', '').trim();
         await sendConcatenatedMessage(chilli, browseData, kalamansi);
 
-      
       } else {
+        await sendMessage(chilli, { text: `💬 Thinking about your question...` }, kalamansi);
         await sendConcatenatedMessage(chilli, result, kalamansi);
       }
 
@@ -71,7 +66,7 @@ async function sendConcatenatedMessage(chilli, text, kalamansi) {
     const messages = splitMessageIntoChunks(text, maxMessageLength);
 
     for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300));  // Delay between chunks
+      await new Promise(resolve => setTimeout(resolve, 300));
       await sendMessage(chilli, { text: message }, kalamansi);
     }
   } else {
