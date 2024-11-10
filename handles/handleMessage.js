@@ -10,10 +10,10 @@ const commands = new Map();
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
-// Load commands from commands directory
+// Dynamically load commands from the commands directory
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
-  const command = require(`../commands/${file}`);
+  const command = require(path.join(__dirname, '../commands', file));
   if (command.name && typeof command.name === 'string') {
     commands.set(command.name.toLowerCase(), command);
   }
