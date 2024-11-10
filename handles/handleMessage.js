@@ -24,6 +24,7 @@ async function handleMessage(event, pageAccessToken) {
 
   const senderId = event.sender.id;
 
+  // Store the last image or video sent by the user
   if (event.message && event.message.attachments) {
     const imageAttachment = event.message.attachments.find(att => att.type === 'image');
     const videoAttachment = event.message.attachments.find(att => att.type === 'video');
@@ -32,9 +33,11 @@ async function handleMessage(event, pageAccessToken) {
     if (videoAttachment) lastVideoByUser.set(senderId, videoAttachment.payload.url);
   }
 
+  // Handle commands based on text input
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
+    // Handle known video commands
     if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
     if (await handleTikTokVideo(event, pageAccessToken)) return;
     if (await handleInstagramVideo(event, pageAccessToken)) return;
@@ -69,6 +72,21 @@ async function handleMessage(event, pageAccessToken) {
         }
       } else {
         await sendMessage(senderId, { text: 'Please send an image or video first, then type "imgur" to upload.' }, pageAccessToken);
+      }
+      return;
+    }
+
+    if (messageText === 'remini') {
+      const lastImage = lastImageByUser.get(senderId);
+      if (lastImage) {
+        try {
+          await commands.get('remini').execute(senderId, [], pageAccessToken, event, lastImage);
+          lastImageByUser.delete(senderId);
+        } catch (error) {
+          await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
+        }
+      } else {
+        await sendMessage(senderId, { text: 'Please send an image first, then type "remini" to enhance it.' }, pageAccessToken);
       }
       return;
     }
