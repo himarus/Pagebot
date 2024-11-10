@@ -6,14 +6,12 @@ const { handleTikTokVideo } = require('./handleTikTok');
 const { handleFacebookReelsVideo } = require('./handleFb');
 const { handleInstagramVideo } = require('./handleInstadl');
 const { handleCommand } = require('./handleCommand'); // Import handleCommand
-
 const commands = new Map();
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
-// Load all command files in the commands directory
+// Load commands from commands directory
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
-
 for (const file of commandFiles) {
   const command = require(`../commands/${file}`);
   if (command.name && typeof command.name === 'string') {
@@ -37,12 +35,10 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-    // Video handling commands
     if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
     if (await handleTikTokVideo(event, pageAccessToken)) return;
     if (await handleInstagramVideo(event, pageAccessToken)) return;
 
-    // Remove background command
     if (messageText === 'removebg') {
       const lastImage = lastImageByUser.get(senderId);
       if (lastImage) {
@@ -58,7 +54,6 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    // Imgur upload command
     if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
       const lastVideo = lastVideoByUser.get(senderId);
@@ -78,7 +73,6 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    // Gemini command
     if (messageText.startsWith('gemini')) {
       const lastImage = lastImageByUser.get(senderId);
       const args = messageText.split(/\s+/).slice(1);
@@ -92,7 +86,6 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    // Command parsing
     let commandName, args;
     if (messageText.startsWith('-')) {
       const argsArray = messageText.slice(1).trim().split(/\s+/);
@@ -104,7 +97,6 @@ async function handleMessage(event, pageAccessToken) {
       args = words;
     }
 
-    // Execute command if found
     if (commands.has(commandName)) {
       const command = commands.get(commandName);
       try {
