@@ -24,15 +24,11 @@ module.exports = {
     sendMessage(senderId, { text: `Sending ${total} messages to ${username}...` }, pageAccessToken);
 
     try {
-      // Encode message to handle spaces and special characters
-      const apiUrl = `${api.mark2}/api/other/nglspam?username=&message=${encodeURIComponent(username)}&message=${encodeURIComponent(message)}&total=${total}`;
-
-      // Perform the API request
+      const apiUrl = `${api.mark2}/api/other/nglspam?username=${encodeURIComponent(username)}&message=${encodeURIComponent(message)}&total=${total}`;
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.status === true) {
-        const result = response.data.result;
-        sendMessage(senderId, { text: result }, pageAccessToken);
+        sendMessage(senderId, { text: response.data.result }, pageAccessToken);
       } else {
         sendMessage(senderId, { text: "Failed to send messages. Please check the details and try again." }, pageAccessToken);
       }
