@@ -1,5 +1,5 @@
 const { sendMessage } = require('./sendMessage');
-const commands = require('./commands'); // Commands map must be passed or shared
+const commands = require('../commands'); // Corrected path to load commands
 
 async function handleCommand(senderId, commandName, args, pageAccessToken) {
   // Auto-execute `ai` command if it exists in commands map
