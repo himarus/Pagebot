@@ -39,45 +39,22 @@ module.exports = {
             }
           }, kalamansi);
         } else {
-          await sendConcatenatedMessage(chilli, result, kalamansi);
+          await sendMessage(chilli, { text: result }, kalamansi);
         }
         
       } else if (result.includes('TOOL_CALL: browseWeb')) {
         await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
         
         const browseData = result.replace('TOOL_CALL: browseWeb', '').trim();
-        await sendConcatenatedMessage(chilli, browseData, kalamansi);
+        await sendMessage(chilli, { text: browseData }, kalamansi);
 
       } else {
         await sendMessage(chilli, { text: `💬 Thinking about your question...` }, kalamansi);
-        await sendConcatenatedMessage(chilli, result, kalamansi);
+        await sendMessage(chilli, { text: result }, kalamansi);
       }
 
     } catch (error) {
-      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again or use gpt4o" }, kalamansi);
+      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again or use ai2 or gpt4o" }, kalamansi);
     }
   }
 };
-
-async function sendConcatenatedMessage(chilli, text, kalamansi) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      await sendMessage(chilli, { text: message }, kalamansi);
-    }
-  } else {
-    await sendMessage(chilli, { text }, kalamansi);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
