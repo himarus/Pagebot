@@ -1,4 +1,3 @@
-const colors = require('colors'); // Para sa colored console logging
 const { sendMessage } = require('./sendMessage');
 const commands = require('./commands'); // Your existing commands map
 
@@ -8,7 +7,7 @@ async function handleCommand(senderId, commandName, args, pageAccessToken) {
     try {
       await commands.get('ai').execute(senderId, [commandName, ...args], pageAccessToken, sendMessage);
     } catch (error) {
-      console.error(`${colors.red}Error executing default universal command:${colors.reset}`, error);
+      console.error('Error executing default universal command:', error);
       sendMessage(senderId, { text: 'There was an error processing your request.' }, pageAccessToken);
     }
   } else {
