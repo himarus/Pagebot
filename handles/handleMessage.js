@@ -5,7 +5,7 @@ const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
 const { handleFacebookReelsVideo } = require('./handleFb');
 const { handleInstagramVideo } = require('./handleInstadl');
-
+const { handleCommand } = require('./handleCommand'); // Import handleCommand
 const commands = new Map();
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
@@ -117,16 +117,7 @@ async function handleMessage(event, pageAccessToken) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
       }
     } else {
-      sendMessage(senderId, {
-        text: `Unknown command: "${commandName}". Type "help" for a list of available commands.`,
-        quick_replies: [
-          {
-            content_type: "text",
-            title: "Help",
-            payload: "HELP_PAYLOAD"
-          }
-        ]
-      }, pageAccessToken);
+      await handleCommand(senderId, commandName, args, pageAccessToken); // Use handleCommand for auto commands
     }
   }
 }
