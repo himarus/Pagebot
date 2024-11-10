@@ -23,6 +23,19 @@ async function typingIndicator(senderId, pageAccessToken) {
   }
 }
 
+async function markSeen(senderId, pageAccessToken) {
+  try {
+    await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
+      recipient: { id: senderId },
+      sender_action: "mark_seen"
+    }, {
+      params: { access_token: pageAccessToken },
+    });
+  } catch (error) {
+    console.error('Error sending mark_seen action:', error.message);
+  }
+}
+
 function splitMessageIntoChunks(message, chunkSize = 2000) {
   const chunks = [];
   for (let i = 0; i < message.length; i += chunkSize) {
@@ -31,7 +44,9 @@ function splitMessageIntoChunks(message, chunkSize = 2000) {
   return chunks;
 }
 
-function sendMessage(senderId, message, pageAccessToken) {
+async function sendMessage(senderId, message, pageAccessToken) {
+  await markSeen(senderId, pageAccessToken);  // Auto-seen action
+
   if (!message || (!message.text && !message.attachment)) {
     console.error('Error: Message must provide valid text or attachment.');
     return;
@@ -94,4 +109,4 @@ function sendMessage(senderId, message, pageAccessToken) {
   }
 }
 
-module.exports = { sendMessage, typingIndicator };
+module.exports = { sendMessage, typingIndicator, markSeen };
