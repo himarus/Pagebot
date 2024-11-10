@@ -1,5 +1,16 @@
+const fs = require('fs');
+const path = require('path');
 const { sendMessage } = require('./sendMessage');
-const commands = require('../commands'); // Corrected path to load commands
+
+const commands = new Map();
+const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+  const command = require(path.join(__dirname, '../commands', file));
+  if (command.name && typeof command.name === 'string') {
+    commands.set(command.name.toLowerCase(), command);
+  }
+}
 
 async function handleCommand(senderId, commandName, args, pageAccessToken) {
   // Auto-execute `ai` command if it exists in commands map
