@@ -10,8 +10,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
-    // Add delay here if needed to simulate typing
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
       recipient: { id: senderId },
@@ -22,6 +21,14 @@ async function typingIndicator(senderId, pageAccessToken) {
   } catch (error) {
     console.error('Error sending typing indicator:', error.message);
   }
+}
+
+function splitMessageIntoChunks(message, chunkSize = 2000) {
+  const chunks = [];
+  for (let i = 0; i < message.length; i += chunkSize) {
+    chunks.push(message.slice(i, i + chunkSize));
+  }
+  return chunks;
 }
 
 function sendMessage(senderId, message, pageAccessToken) {
@@ -36,33 +43,55 @@ function sendMessage(senderId, message, pageAccessToken) {
   };
 
   if (message.text) {
-    payload.message.text = message.text;
+    const textChunks = splitMessageIntoChunks(message.text);
+
+    textChunks.forEach((chunk, index) => {
+      const chunkPayload = {
+        ...payload,
+        message: { text: chunk }
+      };
+
+      setTimeout(() => {
+        typingIndicator(senderId, pageAccessToken);
+
+        request({
+          url: 'https://graph.facebook.com/v13.0/me/messages',
+          qs: { access_token: pageAccessToken },
+          method: 'POST',
+          json: chunkPayload,
+        }, (error, response, body) => {
+          if (error) {
+            console.error('Error sending message:', error);
+          } else if (response.body.error) {
+            console.error('Error response:', response.body.error);
+          } else {
+            console.log(`Message chunk ${index + 1} sent successfully:`, body);
+          }
+        });
+      }, index * 500);
+    });
   }
 
   if (message.attachment) {
     payload.message.attachment = message.attachment;
+
+    typingIndicator(senderId, pageAccessToken);
+
+    request({
+      url: 'https://graph.facebook.com/v13.0/me/messages',
+      qs: { access_token: pageAccessToken },
+      method: 'POST',
+      json: payload,
+    }, (error, response, body) => {
+      if (error) {
+        console.error('Error sending message:', error);
+      } else if (response.body.error) {
+        console.error('Error response:', response.body.error);
+      } else {
+        console.log('Attachment message sent successfully:', body);
+      }
+    });
   }
-
-  if (message.quick_replies) {
-    payload.message.quick_replies = message.quick_replies;
-  }
-
-  typingIndicator(senderId, pageAccessToken);
-
-  request({
-    url: 'https://graph.facebook.com/v13.0/me/messages',
-    qs: { access_token: pageAccessToken },
-    method: 'POST',
-    json: payload,
-  }, (error, response, body) => {
-    if (error) {
-      console.error('Error sending message:', error);
-    } else if (response.body.error) {
-      console.error('Error response:', response.body.error);
-    } else {
-      console.log('Message sent successfully:', body);
-    }
-  });
 }
 
 module.exports = { sendMessage, typingIndicator };
