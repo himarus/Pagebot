@@ -23,7 +23,7 @@ module.exports = {
       const result = response.data.response;
 
       if (result.includes('TOOL_CALL: generateImage')) {
-        await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
+        await sendConcatenatedMessage(chilli, `🎨 Generating image... Please wait.`, kalamansi);
 
         const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
         
@@ -39,22 +39,45 @@ module.exports = {
             }
           }, kalamansi);
         } else {
-          await sendMessage(chilli, { text: result }, kalamansi);
+          await sendConcatenatedMessage(chilli, result, kalamansi);
         }
         
       } else if (result.includes('TOOL_CALL: browseWeb')) {
-        await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
+        await sendConcatenatedMessage(chilli, `🌐 Browsing the web... Hold tight!`, kalamansi);
         
         const browseData = result.replace('TOOL_CALL: browseWeb', '').trim();
-        await sendMessage(chilli, { text: browseData }, kalamansi);
+        await sendConcatenatedMessage(chilli, browseData, kalamansi);
 
       } else {
-        await sendMessage(chilli, { text: `💬 Thinking about your question...` }, kalamansi);
-        await sendMessage(chilli, { text: result }, kalamansi);
+        await sendConcatenatedMessage(chilli, `💬 Thinking about your question...`, kalamansi);
+        await sendConcatenatedMessage(chilli, result, kalamansi);
       }
 
     } catch (error) {
-      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again or use ai2 or gpt4o" }, kalamansi);
+      sendConcatenatedMessage(chilli, "⚠️ Error while processing your request. Please try again or use ai2 or gpt4o", kalamansi);
     }
   }
 };
+
+async function sendConcatenatedMessage(kupal, text, sili) {
+  const maxMessageLength = 2000;
+
+  if (text.length > maxMessageLength) {
+    const messages = splitMessageIntoChunks(text, maxMessageLength);
+
+    for (const message of messages) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await sendMessage(kupal, { text: message }, sili);
+    }
+  } else {
+    await sendMessage(kupal, { text }, sili);
+  }
+}
+
+function splitMessageIntoChunks(mensahe, laki) {
+  const chunks = [];
+  for (let i = 0; i < mensahe.length; i += laki) {
+    chunks.push(mensahe.slice(i, i + laki));
+  }
+  return chunks;
+}
