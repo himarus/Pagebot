@@ -10,7 +10,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
       recipient: { id: senderId },
@@ -46,11 +46,7 @@ function splitMessageIntoChunks(message, chunkSize = 2000) {
 
 async function sendMessage(senderId, message, pageAccessToken) {
   await markSeen(senderId, pageAccessToken);  // Auto-seen action
-
-  if (!message || (!message.text && !message.attachment)) {
-    console.error('Error: Message must provide valid text or attachment.');
-    return;
-  }
+  await typingIndicator(senderId, pageAccessToken); // Typing indicator
 
   const payload = {
     recipient: { id: senderId },
@@ -62,13 +58,15 @@ async function sendMessage(senderId, message, pageAccessToken) {
 
     textChunks.forEach((chunk, index) => {
       const chunkPayload = {
-        ...payload,
+        recipient: { id: senderId },
         message: { text: chunk }
       };
 
-      setTimeout(() => {
-        typingIndicator(senderId, pageAccessToken);
+      if (index === textChunks.length - 1 && message.quick_replies) {
+        chunkPayload.message.quick_replies = message.quick_replies; // Add quick replies only to the last chunk
+      }
 
+      setTimeout(() => {
         request({
           url: 'https://graph.facebook.com/v13.0/me/messages',
           qs: { access_token: pageAccessToken },
@@ -83,14 +81,12 @@ async function sendMessage(senderId, message, pageAccessToken) {
             console.log(`Message chunk ${index + 1} sent successfully:`, body);
           }
         });
-      }, index * 500);
+      }, index * 500); // 500 ms delay between chunks
     });
   }
 
   if (message.attachment) {
     payload.message.attachment = message.attachment;
-
-    typingIndicator(senderId, pageAccessToken);
 
     request({
       url: 'https://graph.facebook.com/v13.0/me/messages',
@@ -99,11 +95,30 @@ async function sendMessage(senderId, message, pageAccessToken) {
       json: payload,
     }, (error, response, body) => {
       if (error) {
-        console.error('Error sending message:', error);
+        console.error('Error sending attachment:', error);
       } else if (response.body.error) {
         console.error('Error response:', response.body.error);
       } else {
         console.log('Attachment message sent successfully:', body);
+      }
+    });
+  }
+
+  if (message.quick_replies && !message.text) {  // Case if quick replies are sent without text
+    payload.message.quick_replies = message.quick_replies;
+
+    request({
+      url: 'https://graph.facebook.com/v13.0/me/messages',
+      qs: { access_token: pageAccessToken },
+      method: 'POST',
+      json: payload,
+    }, (error, response, body) => {
+      if (error) {
+        console.error('Error sending quick replies:', error);
+      } else if (response.body.error) {
+        console.error('Error response:', response.body.error);
+      } else {
+        console.log('Quick replies sent successfully:', body);
       }
     });
   }
