@@ -49,7 +49,6 @@ module.exports = {
         await sendConcatenatedMessage(chilli, browseData, kalamansi);
 
       } else {
-        await sendConcatenatedMessage(chilli, `💬 Thinking about your question...`, kalamansi);
         await sendConcatenatedMessage(chilli, result, kalamansi);
       }
 
