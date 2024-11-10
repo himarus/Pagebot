@@ -10,6 +10,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
+    // Add delay here if needed to simulate typing
     await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
@@ -23,16 +24,11 @@ async function typingIndicator(senderId, pageAccessToken) {
   }
 }
 
-function splitMessageIntoChunks(message, chunkSize = 2000) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
+function sendMessage(senderId, message, pageAccessToken) {
+  if (!message || (!message.text && !message.attachment)) {
+    console.error('Error: Message must provide valid text or attachment.');
+    return;
   }
-  return chunks;
-}
-
-async function sendMessage(senderId, message, pageAccessToken) {
-  await typingIndicator(senderId, pageAccessToken); // Typing indicator
 
   const payload = {
     recipient: { id: senderId },
@@ -40,74 +36,33 @@ async function sendMessage(senderId, message, pageAccessToken) {
   };
 
   if (message.text) {
-    const textChunks = splitMessageIntoChunks(message.text);
-
-    textChunks.forEach((chunk, index) => {
-      const chunkPayload = {
-        recipient: { id: senderId },
-        message: { text: chunk }
-      };
-
-      if (index === textChunks.length - 1 && message.quick_replies) {
-        chunkPayload.message.quick_replies = message.quick_replies; // Add quick replies only to the last chunk
-      }
-
-      setTimeout(() => {
-        request({
-          url: 'https://graph.facebook.com/v13.0/me/messages',
-          qs: { access_token: pageAccessToken },
-          method: 'POST',
-          json: chunkPayload,
-        }, (error, response, body) => {
-          if (error) {
-            console.error('Error sending message:', error);
-          } else if (response.body.error) {
-            console.error('Error response:', response.body.error);
-          } else {
-            console.log(`Message chunk ${index + 1} sent successfully:`, body);
-          }
-        });
-      }, index * 500); // 500 ms delay between chunks
-    });
+    payload.message.text = message.text;
   }
 
   if (message.attachment) {
     payload.message.attachment = message.attachment;
-
-    request({
-      url: 'https://graph.facebook.com/v13.0/me/messages',
-      qs: { access_token: pageAccessToken },
-      method: 'POST',
-      json: payload,
-    }, (error, response, body) => {
-      if (error) {
-        console.error('Error sending attachment:', error);
-      } else if (response.body.error) {
-        console.error('Error response:', response.body.error);
-      } else {
-        console.log('Attachment message sent successfully:', body);
-      }
-    });
   }
 
-  if (message.quick_replies && !message.text) {  // Case if quick replies are sent without text
+  if (message.quick_replies) {
     payload.message.quick_replies = message.quick_replies;
-
-    request({
-      url: 'https://graph.facebook.com/v13.0/me/messages',
-      qs: { access_token: pageAccessToken },
-      method: 'POST',
-      json: payload,
-    }, (error, response, body) => {
-      if (error) {
-        console.error('Error sending quick replies:', error);
-      } else if (response.body.error) {
-        console.error('Error response:', response.body.error);
-      } else {
-        console.log('Quick replies sent successfully:', body);
-      }
-    });
   }
+
+  typingIndicator(senderId, pageAccessToken);
+
+  request({
+    url: 'https://graph.facebook.com/v13.0/me/messages',
+    qs: { access_token: pageAccessToken },
+    method: 'POST',
+    json: payload,
+  }, (error, response, body) => {
+    if (error) {
+      console.error('Error sending message:', error);
+    } else if (response.body.error) {
+      console.error('Error response:', response.body.error);
+    } else {
+      console.log('Message sent successfully:', body);
+    }
+  });
 }
 
 module.exports = { sendMessage, typingIndicator };
