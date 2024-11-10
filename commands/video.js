@@ -9,7 +9,7 @@ module.exports = {
   async execute(kupal, pogi, pageAccessToken) {
     if (!pogi || pogi.length === 0) {
       await sendMessage(kupal, {
-        text: 'Please provide a keyword to search for a video.\n\nExample: video apt'
+        text: '❗ Please provide a keyword to search for a video.\n\nExample: video apt'
       }, pageAccessToken);
       return;
     }
@@ -17,7 +17,7 @@ module.exports = {
     const chilli = pogi.join(' ');
     const apiUrl = `https://betadash-search-download.vercel.app/videov2?search=${encodeURIComponent(chilli)}`;
 
-    await sendMessage(kupal, { text: `Searching for video: "${chilli}"... Please wait.` }, pageAccessToken);
+    await sendMessage(kupal, { text: `🔍 Searching for video: "${chilli}"... Please wait.` }, pageAccessToken);
 
     try {
       const response = await axios.get(apiUrl);
@@ -25,12 +25,12 @@ module.exports = {
 
       if (!downloadUrl) {
         await sendMessage(kupal, {
-          text: `No video found for the keyword "${chilli}". Please try another keyword.`
+          text: `🚫 No video found for the keyword "${chilli}". Please try another keyword.`
         }, pageAccessToken);
         return;
       }
 
-      const videoDetails = `**Video Found!**\n\nTitle: ${title}\nChannel: ${channelName}\nViews: ${views}\nDuration: ${time}`;
+      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}\n\n\n📤 Video is sending... Please wait.`;
 
       await sendMessage(kupal, {
         attachment: {
@@ -42,7 +42,7 @@ module.exports = {
               {
                 type: 'web_url',
                 url: downloadUrl,
-                title: 'Download Video'
+                title: '⬇️ Download Video'
               }
             ]
           }
@@ -63,13 +63,13 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(kupal, {
-          text: `The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${downloadUrl}`
+          text: `⚠️ The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${downloadUrl}`
         }, pageAccessToken);
       }
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: 'An error because of many user, just try again.'
+        text: '🚧 An error occurred due to high traffic. Please try again later.'
       }, pageAccessToken);
     }
   }
