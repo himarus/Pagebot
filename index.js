@@ -5,8 +5,17 @@ const { handleMessage } = require('./handles/handleMessage');
 const { handlePostback } = require('./handles/handlePostback');
 
 const commandsPath = './commands';
+const eventsPath = './events';
+
+let loadedCommands = [];
+let loadedEvents = [];
+
+// Load Commands and Events
 fs.readdirSync(commandsPath).forEach(file => {
-  console.log(`Loaded command: ${file}`);
+  loadedCommands.push(file.replace('.js', ''));
+});
+fs.readdirSync(eventsPath).forEach(file => {
+  loadedEvents.push(file.replace('.js', ''));
 });
 
 const app = express();
@@ -53,7 +62,25 @@ app.post('/webhook', (req, res) => {
   }
 });
 
+
+console.clear();
+console.log(`\n\x1b[34m██████╗  █████╗  ██████╗ ███████╗██████╗  ██████╗ ████████╗\n██╔══██╗██╔══██╗██╔════╝ ██╔════╝██╔══██╗██╔═══██╗╚══██╔══╝\n██████╔╝███████║██║  ███╗█████╗  ██████╔╝██║   ██║   ██║   \n██╔═══╝ ██╔══██║██║   ██║██╔══╝  ██╔═══╝ ██║   ██║   ██║   \n██║     ██║  ██║╚██████╔╝███████╗██║     ╚██████╔╝   ██║   \n╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝      ╚═════╝    ╚═╝   \x1b[0m`);
+console.log(`\n \x1b[36m> Creator: Churchill Abing\x1b[0m\n`);
+console.log(`\x1b[32mLoading ${loadedCommands.length} command(s) and ${loadedEvents.length} event(s)...\x1b[0m`);
+
+loadedCommands.forEach(cmd => {
+  console.log(`\x1b[32m✔ Command Loaded: ${cmd}\x1b[0m`);
+});
+loadedEvents.forEach(evt => {
+  console.log(`\x1b[32m✔ Event Loaded: ${evt}\x1b[0m`);
+});
+
+console.log(`\n\x1b[32mTotal Commands Loaded: ${loadedCommands.length}/${loadedCommands.length}\x1b[0m`);
+console.log(`\x1b[32mTotal Events Loaded: ${loadedEvents.length}/${loadedEvents.length}\x1b[0m\n`);
+console.log(`\x1b[36mLoading Complete: |██████████████████████████| 100.00%\x1b[0m`);
+console.log(`\nCHAT LOG:\n`);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`\x1b[36mServer is running on port ${PORT}\x1b[0m`);
 });
