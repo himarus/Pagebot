@@ -5,7 +5,7 @@ module.exports = {
   name: 'binggen',
   description: 'Generate and send images directly from Bing based on your prompt.',
   author: 'Jerome',
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  async execute(senderId, args, pageAccessToken) {
     if (args.length === 0) {
       return sendMessage(senderId, { text: 'Please provide a prompt.\n\nExample: binggen dog' }, pageAccessToken);
     }
@@ -32,11 +32,11 @@ module.exports = {
           await sendMessage(senderId, imageMessage, pageAccessToken);
         }
       } else {
-        sendMessage(senderId, { text: `Sorry, no images were found for "${prompt}".` }, pageAccessToken);
+        await sendMessage(senderId, { text: `Sorry, no images were found for "${prompt}".` }, pageAccessToken);
       }
     } catch (error) {
       console.error('Error fetching Bing images:', error);
-      sendMessage(senderId, { text: 'Sorry, there was an error processing your request.' }, pageAccessToken);
+      await sendMessage(senderId, { text: 'There was an error executing the command "binggen". Please try again later.' }, pageAccessToken);
     }
   }
 };
