@@ -23,7 +23,10 @@ Examples:
       }, pageAccessToken);
     }
 
-    // Choose a stylish response based on whether the query is for an image or text
+    if (imageUrl && !userPrompt) {
+      return sendMessage(senderId, { text: "🖼️ Please provide a question about the image, e.g., 'gemini what's in this image?'" }, pageAccessToken);
+    }
+
     if (imageUrl || (event.message?.attachments && event.message.attachments[0]?.type === 'image')) {
       sendMessage(senderId, { text: "🔍 Recognizing the image... Please wait." }, pageAccessToken);
     } else {
