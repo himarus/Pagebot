@@ -72,21 +72,19 @@ async function handleMessage(event, pageAccessToken) {
       }
       return;
     }
-
-    if (messageText === 'remini') {
-      const lastImage = lastImageByUser.get(senderId);
-      if (lastImage) {
-        try {
-          await commands.get('remini').execute(senderId, [], pageAccessToken, event, lastImage);
-          lastImageByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: 'Please send an image first, then type "remini" to enhance it.' }, pageAccessToken);
-      }
-      return;
+if (messageText === 'remini') {
+  const lastImage = lastImageByUser.get(senderId);
+  if (lastImage) {
+    try {
+      await commands.get('remini').execute(senderId, [], pageAccessToken, event, lastImage);
+      lastImageByUser.delete(senderId);
+    } catch (error) {
+      await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
     }
+  }
+  return;
+}
+
 
     if (messageText.startsWith('gemini')) {
       const lastImage = lastImageByUser.get(senderId);
