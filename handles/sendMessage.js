@@ -24,7 +24,7 @@ async function typingIndicator(senderId, pageAccessToken) {
   }
 }
 
-function sendMessage(senderId, message, pageAccessToken) {
+async function sendMessage(senderId, message, pageAccessToken) {
   if (!message || (!message.text && !message.attachment)) {
     console.error('Error: Message must provide valid text or attachment.');
     return;
@@ -56,37 +56,43 @@ function sendMessage(senderId, message, pageAccessToken) {
   const messageChunks = message.text ? splitMessage(message.text) : [message.text];
 
   // Send each message chunk sequentially
-  messageChunks.forEach((chunk, index) => {
+  for (const chunk of messageChunks) {
     const payload = {
       recipient: { id: senderId },
       message: { text: chunk },
     };
 
-    if (message.attachment && index === messageChunks.length - 1) {
+    if (message.attachment && chunk === messageChunks[messageChunks.length - 1]) {
       payload.message.attachment = message.attachment;
     }
 
-    if (message.quick_replies && index === messageChunks.length - 1) {
+    if (message.quick_replies && chunk === messageChunks[messageChunks.length - 1]) {
       payload.message.quick_replies = message.quick_replies;
     }
 
-    typingIndicator(senderId, pageAccessToken);
+    await typingIndicator(senderId, pageAccessToken);
 
-    request({
-      url: 'https://graph.facebook.com/v13.0/me/messages',
-      qs: { access_token: pageAccessToken },
-      method: 'POST',
-      json: payload,
-    }, (error, response, body) => {
-      if (error) {
-        console.error('Error sending message:', error);
-      } else if (response.body.error) {
-        console.error('Error response:', response.body.error);
-      } else {
-        console.log('Message sent successfully:', body);
-      }
+    await new Promise((resolve) => {
+      request({
+        url: 'https://graph.facebook.com/v13.0/me/messages',
+        qs: { access_token: pageAccessToken },
+        method: 'POST',
+        json: payload,
+      }, (error, response, body) => {
+        if (error) {
+          console.error('Error sending message:', error);
+        } else if (response.body.error) {
+          console.error('Error response:', response.body.error);
+        } else {
+          console.log('Message sent successfully:', body);
+        }
+        resolve();
+      });
     });
-  });
+
+    // Optional delay between message chunks
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
 }
 
 module.exports = { sendMessage, typingIndicator };
