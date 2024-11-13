@@ -24,13 +24,11 @@ module.exports = {
         throw new Error("No results found");
       }
 
-      const { name: trackName, download, image, track } = res.data[0];
+      const { name: trackName, download, track } = res.data[0];
 
+      // Send text and audio together in a single message if supported
       await sendMessage(senderId, {
-        text: `🎶 Now playing: ${trackName}\n\n🔗 Spotify Link: ${track}`
-      }, pageAccessToken);
-
-      await sendMessage(senderId, {
+        text: `🎶 Now playing: ${trackName}\n\n🔗 Spotify Link: ${track}`,
         attachment: {
           type: "audio",
           payload: {
