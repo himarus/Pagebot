@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage, sendButton } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'video',
@@ -30,24 +30,16 @@ module.exports = {
         return;
       }
 
-      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}\n\n\n📤 Video is sending... Please wait.`;
+      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}`;
 
-      await sendMessage(kupal, {
-        attachment: {
-          type: 'template',
-          payload: {
-            template_type: 'button',
-            text: videoDetails,
-            buttons: [
-              {
-                type: 'web_url',
-                url: downloadUrl,
-                title: '⬇️ Download Video'
-              }
-            ]
-          }
+      // Use sendButton to send video details with a download button
+      await sendButton(videoDetails, [
+        {
+          type: 'web_url',
+          url: downloadUrl,
+          title: '⬇️ Download Video'
         }
-      }, pageAccessToken);
+      ], kupal, pageAccessToken);
 
       const videoResponse = await axios.head(downloadUrl);
       const fileSize = parseInt(videoResponse.headers['content-length'], 10);
@@ -69,7 +61,7 @@ module.exports = {
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: '🚧 An error occurred due to high traffic. Please try again later.'
+        text: '🚧 An error occurred due to many user. Please try again later.'
       }, pageAccessToken);
     }
   }
