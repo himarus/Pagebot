@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage, getRepliedImage } = require('../handles/sendMessage');
 
 module.exports = {
   name: "remini",
@@ -16,35 +16,29 @@ module.exports = {
     }
 
     if (!imageUrl) {
-      return sendMessage(senderId, { text: "Please provide an image or reply to an image with 'remini' to enhance it." }, pageAccessToken);
+      return sendMessage(
+        senderId, 
+        { text: "🚫 Please send an image first, then type *remini* to enhance it, or reply to an image with *remini* for enhancement!" }, 
+        pageAccessToken
+      );
     }
 
-    sendMessage(senderId, { text: "Enhancing image... 🔄" }, pageAccessToken);
+    sendMessage(senderId, { text: "🔄 Enhancing image... Please wait!" }, pageAccessToken);
 
     try {
       const apiUrl = `https://xnilnew404.onrender.com/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}`;
-      await sendMessage(senderId, { 
-        attachment: { 
-          type: 'image', 
-          payload: { url: apiUrl } 
-        } 
-      }, pageAccessToken);
-      
+      await sendMessage(
+        senderId, 
+        { attachment: { type: 'image', payload: { url: apiUrl } } }, 
+        pageAccessToken
+      );
     } catch (error) {
       console.error("Error in Remini command:", error);
-      sendMessage(senderId, { text: `Error: ${error.message || "Something went wrong."}` }, pageAccessToken);
+      sendMessage(
+        senderId, 
+        { text: `❗ Error: ${error.message || "Something went wrong. Please try again later."}` }, 
+        pageAccessToken
+      );
     }
   }
 };
-
-async function getRepliedImage(mid, pageAccessToken) {
-  const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-    params: { access_token: pageAccessToken }
-  });
-
-  if (data && data.data.length > 0 && data.data[0].image_data) {
-    return data.data[0].image_data.url;
-  } else {
-    return "";
-  }
-}
