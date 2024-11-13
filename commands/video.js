@@ -30,7 +30,7 @@ module.exports = {
         return;
       }
 
-      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}`;
+      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}\n\n\n📤 Video is sending... Please wait.`;
 
       // Use sendButton to send video details with a download button
       await sendButton(videoDetails, [
