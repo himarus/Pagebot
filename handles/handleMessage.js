@@ -45,10 +45,7 @@ async function handleMessage(event, pageAccessToken) {
         try {
           await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
           lastImageByUser.delete(senderId);
-        } catch (error) {
-          return;
-        }
-      }
+        } catch (error) { 
       return;
     }
 
@@ -62,7 +59,7 @@ async function handleMessage(event, pageAccessToken) {
         lastImageByUser.delete(senderId);
         lastVideoByUser.delete(senderId);
       } catch (error) {
-        return;
+        await sendMessage(senderId, { text: 'An error occurred while uploading to Imgur.' }, pageAccessToken);
       }
       return;
     }
@@ -73,7 +70,7 @@ async function handleMessage(event, pageAccessToken) {
         await commands.get('remini').execute(senderId, [], pageAccessToken, event, lastImage);
         lastImageByUser.delete(senderId);
       } catch (error) {
-        return;
+        await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
       }
       return;
     }
@@ -86,7 +83,7 @@ async function handleMessage(event, pageAccessToken) {
         await commands.get('gemini').execute(senderId, args, pageAccessToken, event, lastImage);
         lastImageByUser.delete(senderId);
       } catch (error) {
-        return;
+        await sendMessage(senderId, { text: 'An error occurred while processing the Gemini command.' }, pageAccessToken);
       }
       return;
     }
@@ -122,7 +119,7 @@ async function handleMessage(event, pageAccessToken) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
       }
     } else {
-      await sendMessage(senderId, {
+      sendMessage(senderId, {
         text: `Unknown command: "${commandName}". Type "help" for a list of available commands.`,
         quick_replies: [
           {
