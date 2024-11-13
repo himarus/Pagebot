@@ -10,7 +10,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
       recipient: { id: senderId },
@@ -25,7 +25,7 @@ async function typingIndicator(senderId, pageAccessToken) {
 
 async function sendButton(text, buttons, senderID, pageAccessToken) {
   const payload = buttons.map(button => ({
-    type: button.type || 'postback', // 'postback' or 'web_url'
+    type: button.type || 'postback',
     title: button.title,
     payload: button.payload || null,
     url: button.url || null,
@@ -57,10 +57,35 @@ async function sendButton(text, buttons, senderID, pageAccessToken) {
   }
 }
 
-async function sendMessage(senderId, message, pageAccessToken) {
+async function sendMessage(senderId, message, pageAccessToken, mid = null) {
   if (!message || (!message.text && !message.attachment)) {
     console.error('Error: Message must provide valid text or attachment.');
     return;
+  }
+
+  async function getRepliedImage(mid) {
+    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+      params: { access_token: pageAccessToken }
+    });
+
+    if (data && data.data.length > 0 && data.data[0].image_data) {
+      return data.data[0].image_data.url;
+    } else {
+      return "";
+    }
+  }
+
+  if (mid) {
+    const imageUrl = await getRepliedImage(mid);
+    if (imageUrl) {
+      message.attachment = {
+        type: 'image',
+        payload: {
+          url: imageUrl,
+          is_reusable: true
+        }
+      };
+    }
   }
 
   function splitMessage(text) {
