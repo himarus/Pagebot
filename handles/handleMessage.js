@@ -45,7 +45,12 @@ async function handleMessage(event, pageAccessToken) {
         try {
           await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
           lastImageByUser.delete(senderId);
-        } catch (error) { 
+        } catch (error) {
+          await sendMessage(senderId, { text: 'An error occurred while removing the background.' }, pageAccessToken);
+        }
+      } else {
+        await sendMessage(senderId, { text: 'Please send an image first, then type "removebg" or reply to an image to remove its background.' }, pageAccessToken);
+      }
       return;
     }
 
