@@ -10,7 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: `Please send an image first, then type "removebg" to remove its background.`
+        text: `Please send an image first, then type "removebg" or reply to an image usig messenger to remove its background.`
       }, pageAccessToken);
     }
 
