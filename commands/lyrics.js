@@ -28,7 +28,7 @@ module.exports = {
       const { title, artist, lyrics, image } = res.data.result;
       const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
 
-      await sendConcatenatedMessage(kupal, lyricsMessage, sili);
+      await sendMessage(kupal, { text: lyricsMessage }, sili);
 
       if (image) {
         setTimeout(async () => {
@@ -51,26 +51,3 @@ module.exports = {
     }
   }
 };
-
-async function sendConcatenatedMessage(kupal, text, sili) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      await sendMessage(kupal, { text: message }, sili);
-    }
-  } else {
-    await sendMessage(kupal, { text }, sili);
-  }
-}
-
-function splitMessageIntoChunks(mensahe, laki) {
-  const chunks = [];
-  for (let i = 0; i < mensahe.length; i += laki) {
-    chunks.push(mensahe.slice(i, i + laki));
-  }
-  return chunks;
-}
