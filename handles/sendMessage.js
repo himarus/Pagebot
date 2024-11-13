@@ -10,7 +10,6 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
 
-    // Add delay here if needed to simulate typing
     await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as necessary
 
     await axios.post(`https://graph.facebook.com/v13.0/me/messages`, {
@@ -24,13 +23,46 @@ async function typingIndicator(senderId, pageAccessToken) {
   }
 }
 
+async function sendButton(text, buttons, senderID, pageAccessToken) {
+  const payload = buttons.map(button => ({
+    type: button.type || 'postback', // 'postback' or 'web_url'
+    title: button.title,
+    payload: button.payload || null,
+    url: button.url || null,
+  }));
+
+  const form = {
+    recipient: { id: senderID },
+    message: {
+      attachment: {
+        type: 'template',
+        payload: {
+          template_type: 'button',
+          text: text,
+          buttons: payload,
+        },
+      },
+    },
+    messaging_type: "RESPONSE",
+  };
+
+  try {
+    const response = await axios.post(
+      `https://graph.facebook.com/v13.0/me/messages?access_token=${pageAccessToken}`,
+      form
+    );
+    return response.data;
+  } catch (err) {
+    console.error('Error sending button message:', err.response ? err.response.data : err.message);
+  }
+}
+
 async function sendMessage(senderId, message, pageAccessToken) {
   if (!message || (!message.text && !message.attachment)) {
     console.error('Error: Message must provide valid text or attachment.');
     return;
   }
 
-  // Function to split the message into chunks of max 2000 characters
   function splitMessage(text) {
     const maxLength = 2000;
     const messages = [];
@@ -52,10 +84,8 @@ async function sendMessage(senderId, message, pageAccessToken) {
     return messages;
   }
 
-  // Split text if it's too long
   const messageChunks = message.text ? splitMessage(message.text) : [message.text];
 
-  // Send each message chunk sequentially
   for (const chunk of messageChunks) {
     const payload = {
       recipient: { id: senderId },
@@ -90,9 +120,8 @@ async function sendMessage(senderId, message, pageAccessToken) {
       });
     });
 
-    // Optional delay between message chunks
     await new Promise(resolve => setTimeout(resolve, 500));
   }
 }
 
-module.exports = { sendMessage, typingIndicator };
+module.exports = { sendMessage, sendButton, typingIndicator };
