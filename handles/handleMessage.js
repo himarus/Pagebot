@@ -83,7 +83,7 @@ async function handleMessage(event, pageAccessToken) {
           await sendMessage(senderId, { text: 'An error occurred while enhancing the image.' }, pageAccessToken);
         }
       } else {
-        return;
+        await sendMessage(senderId, { text: 'Please send an image first, then type "remini" to enhance it.' }, pageAccessToken);
       }
       return;
     }
