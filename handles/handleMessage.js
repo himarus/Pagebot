@@ -46,7 +46,7 @@ async function handleMessage(event, pageAccessToken) {
           await commands.get('removebg').execute(senderId, [], pageAccessToken, lastImage);
           lastImageByUser.delete(senderId);
         } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while processing the image.' }, pageAccessToken);
+          await sendMessage(senderId, { text: 'An error occurred while removing the background.' }, pageAccessToken);
         }
       } else {
         await sendMessage(senderId, { text: 'Please send an image first, then type "removebg" to remove its background.' }, pageAccessToken);
@@ -59,16 +59,12 @@ async function handleMessage(event, pageAccessToken) {
       const lastVideo = lastVideoByUser.get(senderId);
       const mediaToUpload = lastImage || lastVideo;
 
-      if (mediaToUpload) {
-        try {
-          await commands.get('imgur').execute(senderId, [], pageAccessToken, mediaToUpload);
-          lastImageByUser.delete(senderId);
-          lastVideoByUser.delete(senderId);
-        } catch (error) {
-          await sendMessage(senderId, { text: 'An error occurred while uploading the media to Imgur.' }, pageAccessToken);
-        }
-      } else {
-        await sendMessage(senderId, { text: 'Please send an image or video first, then type "imgur" to upload.' }, pageAccessToken);
+      try {
+        await commands.get('imgur').execute(senderId, [], pageAccessToken, mediaToUpload);
+        lastImageByUser.delete(senderId);
+        lastVideoByUser.delete(senderId);
+      } catch (error) {
+        await sendMessage(senderId, { text: 'An error occurred while uploading to Imgur.' }, pageAccessToken);
       }
       return;
     }
