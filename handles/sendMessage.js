@@ -30,38 +30,62 @@ function sendMessage(senderId, message, pageAccessToken) {
     return;
   }
 
-  const payload = {
-    recipient: { id: senderId },
-    message: {}
-  };
+  // Function to split the message into chunks of max 2000 characters
+  function splitMessage(text) {
+    const maxLength = 2000;
+    const messages = [];
+    let remainingText = text;
 
-  if (message.text) {
-    payload.message.text = message.text;
-  }
+    while (remainingText.length > maxLength) {
+      let splitIndex = remainingText.lastIndexOf("\n", maxLength);
+      if (splitIndex === -1) {
+        splitIndex = maxLength;
+      } else {
+        splitIndex += 1;
+      }
 
-  if (message.attachment) {
-    payload.message.attachment = message.attachment;
-  }
-
-  if (message.quick_replies) {
-    payload.message.quick_replies = message.quick_replies;
-  }
-
-  typingIndicator(senderId, pageAccessToken);
-
-  request({
-    url: 'https://graph.facebook.com/v13.0/me/messages',
-    qs: { access_token: pageAccessToken },
-    method: 'POST',
-    json: payload,
-  }, (error, response, body) => {
-    if (error) {
-      console.error('Error sending message:', error);
-    } else if (response.body.error) {
-      console.error('Error response:', response.body.error);
-    } else {
-      console.log('Message sent successfully:', body);
+      messages.push(remainingText.slice(0, splitIndex).trim());
+      remainingText = remainingText.slice(splitIndex).trim();
     }
+
+    messages.push(remainingText);
+    return messages;
+  }
+
+  // Split text if it's too long
+  const messageChunks = message.text ? splitMessage(message.text) : [message.text];
+
+  // Send each message chunk sequentially
+  messageChunks.forEach((chunk, index) => {
+    const payload = {
+      recipient: { id: senderId },
+      message: { text: chunk },
+    };
+
+    if (message.attachment && index === messageChunks.length - 1) {
+      payload.message.attachment = message.attachment;
+    }
+
+    if (message.quick_replies && index === messageChunks.length - 1) {
+      payload.message.quick_replies = message.quick_replies;
+    }
+
+    typingIndicator(senderId, pageAccessToken);
+
+    request({
+      url: 'https://graph.facebook.com/v13.0/me/messages',
+      qs: { access_token: pageAccessToken },
+      method: 'POST',
+      json: payload,
+    }, (error, response, body) => {
+      if (error) {
+        console.error('Error sending message:', error);
+      } else if (response.body.error) {
+        console.error('Error response:', response.body.error);
+      } else {
+        console.log('Message sent successfully:', body);
+      }
+    });
   });
 }
 
