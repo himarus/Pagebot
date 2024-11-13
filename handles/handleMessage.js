@@ -49,7 +49,7 @@ async function handleMessage(event, pageAccessToken) {
           await sendMessage(senderId, { text: 'An error occurred while removing the background.' }, pageAccessToken);
         }
       } else {
-        await sendMessage(senderId, { text: 'Please send an image first, then type "removebg" or reply to an image to remove its background.' }, pageAccessToken);
+        await sendMessage(senderId, { text: 'Please send an image first, then type "removebg" to remove its background.' }, pageAccessToken);
       }
       return;
     }
