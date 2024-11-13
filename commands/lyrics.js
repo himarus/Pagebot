@@ -28,20 +28,18 @@ module.exports = {
       const { title, artist, lyrics, image } = res.data.result;
       const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
 
-      await sendMessage(kupal, { text: lyricsMessage }, sili);
-
       if (image) {
-        setTimeout(async () => {
-          await sendMessage(kupal, {
-            attachment: {
-              type: "image",
-              payload: {
-                url: image
-              }
+        await sendMessage(kupal, {
+          attachment: {
+            type: "image",
+            payload: {
+              url: image
             }
-          }, sili);
-        }, 1000);
+          }
+        }, sili);
       }
+
+      await sendMessage(kupal, { text: lyricsMessage }, sili);
 
     } catch (error) {
       console.error("Error retrieving lyrics:", error);
