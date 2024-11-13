@@ -63,13 +63,20 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(kupal, {
-          text: `⚠️ The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:\n${downloadUrl}`
+          text: `⚠️ The video is too large to send directly (size: ${(fileSize / (1024 * 1024)).toFixed(2)} MB).\n\nYou can download it here:`,
+          quick_replies: [
+            {
+              content_type: 'text',
+              title: '⬇️ Download Video',
+              payload: downloadUrl
+            }
+          ]
         }, pageAccessToken);
       }
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: '🚧 An error occurred due to high traffic. Please try again later.'
+        text: '🚧 An error occurred due to many user. Please try again later.'
       }, pageAccessToken);
     }
   }
