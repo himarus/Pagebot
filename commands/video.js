@@ -61,7 +61,7 @@ module.exports = {
 
     } catch (error) {
       await sendMessage(kupal, {
-        text: '🚧 An error occurred due to many user. Please try again later.'
+        text: '🚧 An error occurred due to many user. Please try again later or use ytsearch command.'
       }, pageAccessToken);
     }
   }
