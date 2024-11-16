@@ -25,7 +25,7 @@ module.exports = {
       const { message, error } = response.data;
 
       if (error === "No") {
-        await sendConcatenatedMessage(chilli, message, kupal);
+        await sendMessage(chilli, { text: message }, kupal);
       } else {
         await sendMessage(chilli, { text: 'An error occurred while processing your request. Please try again later.' }, kupal);
       }
@@ -36,26 +36,3 @@ module.exports = {
     }
   }
 };
-
-async function sendConcatenatedMessage(chilli, text, kalamansi) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await sendMessage(chilli, { text: message }, kalamansi);
-    }
-  } else {
-    await sendMessage(chilli, { text }, kalamansi);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
