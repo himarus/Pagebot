@@ -36,7 +36,7 @@ module.exports = {
       const { url, title, views, duration, imgSrc } = firstResult;
       const conversionApiUrl = `${api.kenlie}/video?url=${encodeURIComponent(url)}`;
 
-      const videoDetailsMessage = `📹 **Video Found**:\n\n📌 **Title**: ${title}\n⏰ **Duration**: ${duration}\n👁️ **Views**: ${views}\n\nTap the button below to download the video or wait for the video to send.`;
+      const videoDetailsMessage = `📹 **Video Found**:\n\n📌 **Title**: ${title}\n⏰ **Duration**: ${duration}\n👁️ **Views**: ${views}\n\n𝘛𝘩𝘦 𝘷𝘪𝘥𝘦𝘰 𝘪𝘴 𝘴𝘦𝘯𝘥𝘪𝘯𝘨 𝘱𝘭𝘴𝘴 𝘸𝘢𝘪𝘵 𝘢 𝘮𝘰𝘮𝘦𝘯𝘵....`;
 
       await sendButton(videoDetailsMessage, [
         {
