@@ -19,7 +19,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
   } catch (error) {
-    console.error('Error sending typing indicator:', error.message);
+    // Handle error silently
   }
 }
 
@@ -53,13 +53,12 @@ async function sendButton(text, buttons, senderID, pageAccessToken) {
     );
     return response.data;
   } catch (err) {
-    console.error('Error sending button message:', err.response ? err.response.data : err.message);
+    // Handle error silently
   }
 }
 
 async function sendMessage(senderId, message, pageAccessToken, mid = null) {
   if (!message || (!message.text && !message.attachment)) {
-    console.error('Error: Message must provide valid text or attachment.');
     return;
   }
 
@@ -74,6 +73,12 @@ async function sendMessage(senderId, message, pageAccessToken, mid = null) {
       return "";
     }
   }
+
+  // Add mark_seen action here
+  await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${pageAccessToken}`, {
+    recipient: { id: senderId },
+    sender_action: "mark_seen"
+  });
 
   if (mid) {
     const imageUrl = await getRepliedImage(mid);
@@ -134,13 +139,6 @@ async function sendMessage(senderId, message, pageAccessToken, mid = null) {
         method: 'POST',
         json: payload,
       }, (error, response, body) => {
-        if (error) {
-          console.error('Error sending message:', error);
-        } else if (response.body.error) {
-          console.error('Error response:', response.body.error);
-        } else {
-          console.log('Message sent successfully:', body);
-        }
         resolve();
       });
     });
