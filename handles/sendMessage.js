@@ -1,5 +1,5 @@
-const request = require('request');
 const axios = require('axios');
+const request = require('request');
 
 async function typingIndicator(senderId, pageAccessToken) {
   try {
@@ -19,7 +19,7 @@ async function typingIndicator(senderId, pageAccessToken) {
       params: { access_token: pageAccessToken },
     });
   } catch (error) {
-    // Handle error silently
+    console.error("Error in typing indicator:", error);
   }
 }
 
@@ -53,7 +53,7 @@ async function sendButton(text, buttons, senderID, pageAccessToken) {
     );
     return response.data;
   } catch (err) {
-    // Handle error silently
+    console.error("Error sending button message:", err);
   }
 }
 
@@ -63,22 +63,31 @@ async function sendMessage(senderId, message, pageAccessToken, mid = null) {
   }
 
   async function getRepliedImage(mid) {
-    const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
-      params: { access_token: pageAccessToken }
-    });
+    try {
+      const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
+        params: { access_token: pageAccessToken }
+      });
 
-    if (data && data.data.length > 0 && data.data[0].image_data) {
-      return data.data[0].image_data.url;
-    } else {
+      if (data?.data?.length > 0 && data.data[0]?.payload?.url) {
+        return data.data[0].payload.url;
+      } else {
+        throw new Error("No image found in the replied message.");
+      }
+    } catch (error) {
+      console.error("Error fetching replied image:", error.message);
       return "";
     }
   }
 
-  // Add mark_seen action here
-  await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${pageAccessToken}`, {
-    recipient: { id: senderId },
-    sender_action: "mark_seen"
-  });
+  // Mark the message as seen
+  try {
+    await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${pageAccessToken}`, {
+      recipient: { id: senderId },
+      sender_action: "mark_seen"
+    });
+  } catch (error) {
+    console.error("Error marking message as seen:", error.message);
+  }
 
   if (mid) {
     const imageUrl = await getRepliedImage(mid);
@@ -93,6 +102,7 @@ async function sendMessage(senderId, message, pageAccessToken, mid = null) {
     }
   }
 
+  // Split long messages into chunks
   function splitMessage(text) {
     const maxLength = 2000;
     const messages = [];
@@ -139,6 +149,9 @@ async function sendMessage(senderId, message, pageAccessToken, mid = null) {
         method: 'POST',
         json: payload,
       }, (error, response, body) => {
+        if (error) {
+          console.error("Error sending message:", error);
+        }
         resolve();
       });
     });
