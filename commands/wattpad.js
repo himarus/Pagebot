@@ -15,9 +15,9 @@ module.exports = {
     if (!command || !query) {
       return sendMessage(senderId, {
         text: `✨ Wattpad Commands:
-- 🔍 Search: wattpad search [query]
-- 📑 List Parts: wattpad parts [story URL]
-- 📖 Read Chapter: wattpad read [chapter URL]`,
+- 🔍 **Search**: Use \`wattpad search Hell University\` to find stories by title.
+- 📑 **List Parts**: Use \`wattpad parts https://www.wattpad.com/story/346558088-hell-university\` to view all parts of a story.
+- 📖 **Read Chapter**: Use \`wattpad read https://www.wattpad.com/1362020763-hell-university-chapter-01\` to read a specific chapter.`,
       }, pageAccessToken);
     }
 
