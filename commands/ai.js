@@ -4,7 +4,7 @@ const api = require('../handles/api');
 
 module.exports = {
   name: "ai",
-  description: "Interact with GPT-4 using a custom API and receive responses, including images and browsing capabilities.",
+  description: "Interact with GPT-4 for image analysis, text-based queries, image generation, and web browsing.",
   author: "chilli",
 
   async execute(chilli, args, kalamansi, event) {
@@ -13,62 +13,62 @@ module.exports = {
 
     if (!prompt) {
       return sendMessage(chilli, {
-        text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\n𝘌𝘹𝘢𝘮𝘱𝘭𝘦: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪`
+        text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\n𝘌𝘹𝘢𝘮𝘱𝘭𝘦: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪?`
       }, kalamansi);
     }
 
-    // Get image from replied message
     if (event.message?.reply_to && event.message.reply_to.mid) {
-      imageUrl = await getRepliedImage(event.message.reply_to.mid, kalamansi);
+      try {
+        imageUrl = await getRepliedImage(event.message.reply_to.mid, kalamansi);
+      } catch (error) {
+        return sendMessage(chilli, {
+          text: "⚠️ Unable to fetch the replied image. Please try again."
+        }, kalamansi);
+      }
     }
+
+    const fullPrompt = imageUrl ? `${prompt} ${imageUrl}` : prompt;
 
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
-        params: {
-          prompt: prompt,
-          imageUrl: imageUrl || ""
-        }
+        params: { prompt: fullPrompt }
       });
 
       const result = response.data.response;
 
-      // Handle image generation
-      if (result.includes("TOOL_CALL: generateImage")) {
+      if (result.includes("TOOL_CALL: analyzeImage")) {
+        const analysis = result.replace("TOOL_CALL: analyzeImage", "").trim();
+        await sendMessage(chilli, {
+          text: `📊 **Image Analysis Complete**:\n\n${analysis}`
+        }, kalamansi);
+
+      } else if (result.includes("TOOL_CALL: generateImage")) {
         await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
-
         const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-
         if (imageUrlMatch && imageUrlMatch[1]) {
           const generatedImageUrl = imageUrlMatch[1];
-
           await sendMessage(chilli, {
             attachment: {
               type: "image",
-              payload: {
-                url: generatedImageUrl
-              }
+              payload: { url: generatedImageUrl }
             }
           }, kalamansi);
         } else {
           await sendMessage(chilli, { text: result }, kalamansi);
         }
 
-      // Handle browsing request
       } else if (result.includes("TOOL_CALL: browseWeb")) {
         await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
-
         const browseData = result.replace("TOOL_CALL: browseWeb", "").trim();
         await sendMessage(chilli, { text: browseData }, kalamansi);
 
-      // Handle text response
       } else {
         await sendMessage(chilli, { text: result }, kalamansi);
       }
 
     } catch (error) {
-      console.error("Error in AI command:", error);
       sendMessage(chilli, {
-        text: "⚠️ Error while processing your request. Please try again or use ai2 or gpt4o"
+        text: "⚠️ Error while processing your request. Please try again later."
       }, kalamansi);
     }
   }
