@@ -17,9 +17,8 @@ module.exports = {
       }, kalamansi);
     }
 
-    if (event.message?.attachments && event.message.attachments[0]?.type === "image") {
-      imageUrl = event.message.attachments[0].payload.url;
-    } else if (event.message.reply_to && event.message.reply_to.mid) {
+    // Get image from replied message
+    if (event.message?.reply_to && event.message.reply_to.mid) {
       imageUrl = await getRepliedImage(event.message.reply_to.mid, kalamansi);
     }
 
@@ -33,6 +32,7 @@ module.exports = {
 
       const result = response.data.response;
 
+      // Handle image generation
       if (result.includes("TOOL_CALL: generateImage")) {
         await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
 
@@ -53,17 +53,20 @@ module.exports = {
           await sendMessage(chilli, { text: result }, kalamansi);
         }
 
+      // Handle browsing request
       } else if (result.includes("TOOL_CALL: browseWeb")) {
         await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
 
         const browseData = result.replace("TOOL_CALL: browseWeb", "").trim();
         await sendMessage(chilli, { text: browseData }, kalamansi);
 
+      // Handle text response
       } else {
         await sendMessage(chilli, { text: result }, kalamansi);
       }
 
     } catch (error) {
+      console.error("Error in AI command:", error);
       sendMessage(chilli, {
         text: "⚠️ Error while processing your request. Please try again or use ai2 or gpt4o"
       }, kalamansi);
