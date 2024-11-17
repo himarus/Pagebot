@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage, getRepliedImage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
@@ -7,45 +7,56 @@ module.exports = {
   description: "Interact with GPT-4 using a custom API and receive responses, including images and browsing capabilities.",
   author: "chilli",
 
-  async execute(chilli, args, kalamansi) {
+  async execute(chilli, args, kalamansi, event) {
     const prompt = args.join(" ");
+    let imageUrl = null;
+
     if (!prompt) {
-      return sendMessage(chilli, { 
-        text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\n𝘌𝘹𝘢𝘮𝘱𝘭𝘦: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪` 
+      return sendMessage(chilli, {
+        text: `𝘗𝘭𝘦𝘢𝘴𝘦 𝘱𝘳𝘰𝘷𝘪𝘥𝘦 𝘢 𝘲𝘶𝘦𝘴𝘵𝘪𝘰𝘯.\n\n𝘌𝘹𝘢𝘮𝘱𝘭𝘦: 𝘈𝘪 𝘸𝘩𝘢𝘵 𝘪𝘴 𝘤𝘩𝘪𝘭𝘭𝘪`
       }, kalamansi);
+    }
+
+    if (event.message?.attachments && event.message.attachments[0]?.type === "image") {
+      imageUrl = event.message.attachments[0].payload.url;
+    } else if (event.message.reply_to && event.message.reply_to.mid) {
+      imageUrl = await getRepliedImage(event.message.reply_to.mid, kalamansi);
     }
 
     try {
       const response = await axios.get(`${api.jonelApi}/api/gpt4o-v2`, {
-        params: { prompt: prompt }
+        params: {
+          prompt: prompt,
+          imageUrl: imageUrl || ""
+        }
       });
 
       const result = response.data.response;
 
-      if (result.includes('TOOL_CALL: generateImage')) {
+      if (result.includes("TOOL_CALL: generateImage")) {
         await sendMessage(chilli, { text: `🎨 Generating image... Please wait.` }, kalamansi);
 
         const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
-        
+
         if (imageUrlMatch && imageUrlMatch[1]) {
-          const imageUrl = imageUrlMatch[1];
+          const generatedImageUrl = imageUrlMatch[1];
 
           await sendMessage(chilli, {
             attachment: {
-              type: 'image',
+              type: "image",
               payload: {
-                url: imageUrl
+                url: generatedImageUrl
               }
             }
           }, kalamansi);
         } else {
           await sendMessage(chilli, { text: result }, kalamansi);
         }
-        
-      } else if (result.includes('TOOL_CALL: browseWeb')) {
+
+      } else if (result.includes("TOOL_CALL: browseWeb")) {
         await sendMessage(chilli, { text: `🌐 Browsing the web... Hold tight!` }, kalamansi);
-        
-        const browseData = result.replace('TOOL_CALL: browseWeb', '').trim();
+
+        const browseData = result.replace("TOOL_CALL: browseWeb", "").trim();
         await sendMessage(chilli, { text: browseData }, kalamansi);
 
       } else {
