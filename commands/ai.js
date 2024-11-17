@@ -30,7 +30,10 @@ module.exports = {
       const response = await axios.get(apiUrl, { params });
       const result = response.data.response;
 
-      if (result.includes("TOOL_CALL: generateImage")) {
+      if (result.startsWith("TOOL_CALL: analyzeImage")) {
+        const analysis = result.replace("TOOL_CALL: analyzeImage", "").trim();
+        await sendMessage(senderId, { text: `📊 **Image Analysis Result:**\n\n${analysis}` }, pageAccessToken);
+      } else if (result.includes("TOOL_CALL: generateImage")) {
         await sendMessage(senderId, { text: `🎨 Generating image... Please wait.` }, pageAccessToken);
 
         const imageUrlMatch = result.match(/\!\[.*?\]\((https:\/\/.*?)\)/);
