@@ -14,10 +14,18 @@ module.exports = {
 
     if (!command || !query) {
       return sendMessage(senderId, {
-        text: `✨ Wattpad Commands:
-- 🔍 **Search**: Use \`wattpad search Hell University\` to find stories by title.
-- 📑 **List Parts**: Use \`wattpad parts https://www.wattpad.com/story/346558088-hell-university\` to view all parts of a story.
-- 📖 **Read Chapter**: Use \`wattpad read https://www.wattpad.com/1362020763-hell-university-chapter-01\` to read a specific chapter.`,
+        text: `✨ **Wattpad Commands**:
+- 🔍 **Search**: 
+   Use \`wattpad search Hell University\` 
+   to find stories by title.
+
+- 📑 **List Parts**: 
+   Use \`wattpad parts https://www.wattpad.com/story/346558088-hell-university\` 
+   to view all parts of a story.
+
+- 📖 **Read Chapter**: 
+   Use \`wattpad read https://www.wattpad.com/1362020763-hell-university-chapter-01\` 
+   to read a specific chapter.`
       }, pageAccessToken);
     }
 
@@ -53,7 +61,7 @@ async function searchStories(senderId, query, pageAccessToken) {
       `${index + 1}. ${story.title} by ${story.author}\n   Reads: ${story.reads} | Votes: ${story.votes}\n   Link: ${story.link}`
     )).join("\n\n");
 
-    sendMessage(senderId, { text: `🔍 Search Results for "${query}":\n\n${resultText}` }, pageAccessToken);
+    sendMessage(senderId, { text: `🔍 **Search Results** for "${query}":\n\n${resultText}` }, pageAccessToken);
   } catch (error) {
     throw new Error("Failed to search Wattpad stories.");
   }
@@ -70,7 +78,7 @@ async function listStoryParts(senderId, storyUrl, pageAccessToken) {
       `${index + 1}. ${part.title}\n   Link: ${part.link}`
     )).join("\n\n");
 
-    sendMessage(senderId, { text: `📑 Story Parts:\n\n${partsText}` }, pageAccessToken);
+    sendMessage(senderId, { text: `📑 **Story Parts**:\n\n${partsText}` }, pageAccessToken);
   } catch (error) {
     throw new Error("Failed to fetch story parts.");
   }
@@ -84,7 +92,7 @@ async function readChapter(senderId, chapterUrl, pageAccessToken) {
     }
 
     const contentText = pages.map((page) => `Page ${page.pageNumber}:\n${page.content}`).join("\n\n");
-    sendMessage(senderId, { text: `📖 Chapter Content:\n\n${contentText}` }, pageAccessToken);
+    sendMessage(senderId, { text: `📖 **Chapter Content**:\n\n${contentText}` }, pageAccessToken);
   } catch (error) {
     throw new Error("Failed to read the chapter.");
   }
