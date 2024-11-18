@@ -24,24 +24,24 @@ module.exports = {
         text: `🎙️ Generating voice for: "${text}"... Please wait.`
       }, pageAccessToken);
 
-      // Fetch the voice audio
+      // Fetch the voice audio from the API
       const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
 
-      // Convert the response to a base64-encoded string for voice attachment
-      const audioData = Buffer.from(response.data, 'binary').toString('base64');
+      // Save the audio file temporarily to a public server (or use the API's URL directly)
+      const audioFileUrl = apiUrl; // Use the existing API URL as the audio file location.
 
-      // Send the voice clip
+      // Send the voice clip to the user
       await sendMessage(senderId, {
         attachment: {
           type: 'audio',
           payload: {
-            url: `data:audio/mp3;base64,${audioData}`,
+            url: audioFileUrl,
             is_reusable: true
           }
         }
       }, pageAccessToken);
     } catch (error) {
-      console.error('Error in voice command:', error);
+      console.error('Error in voice command:', error.message || error);
       await sendMessage(senderId, {
         text: '⚠️ An error occurred while generating the voice clip. Please try again later.'
       }, pageAccessToken);
