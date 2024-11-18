@@ -12,7 +12,7 @@ module.exports = {
     const text = input[0]?.trim();
     let id = input[1] ? parseInt(input[1].trim(), 10) : 8;
 
-    const maxLength = 200; // Define a maximum character limit for the text
+    const maxLength = 350; // Define a maximum character limit for the text
 
     if (!text || text === '') {
       await sendMessage(senderId, {
