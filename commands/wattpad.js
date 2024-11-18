@@ -9,39 +9,32 @@ module.exports = {
   author: "Churchill",
 
   async execute(senderId, args, pageAccessToken) {
-    const command = args[0]?.toLowerCase();
-    const query = args.slice(1).join(" ");
+    const mainArg = args[0]?.toLowerCase();
+    const query = args.join(" ");
 
-    if (!command || !query) {
+    if (!mainArg) {
       return sendMessage(senderId, {
         text: `✨ 𝘞𝘢𝘵𝘵𝘱𝘢𝘥 𝘊𝘰𝘮𝘮𝘢𝘯𝘥𝘴:
-- 🔍 𝘚𝘦𝘢𝘳𝘤𝘩: 
-   𝘌𝘹: \`wattpad search Hell University\` 
-   𝘵𝘰 𝘧𝘪𝘯𝘥 𝘴𝘵𝘰𝘳𝘪𝘦𝘴 𝘣𝘺 𝘵𝘪𝘵𝘭𝘦.
+- 📚 𝘚𝘦𝘢𝘳𝘤𝘩 (𝘋𝘦𝘧𝘢𝘶𝘭𝘵): 
+   𝘛𝘺𝘱𝘦 \`wattpad [title]\` 𝘵𝘰 𝘧𝘪𝘯𝘥 𝘴𝘵𝘰𝘳𝘪𝘦𝘴.
 
 - 📑 𝘓𝘪𝘴𝘵 𝘗𝘢𝘳𝘵𝘴: 
-   𝘌𝘹: \`wattpad parts https://www.wattpad.com/story/346558088-hell-university\` 
+   𝘌𝘹: \`wattpad parts [story link]\` 
    𝘵𝘰 𝘷𝘪𝘦𝘸 𝘢𝘭𝘭 𝘱𝘢𝘳𝘵𝘴 𝘰𝘧 𝘢 𝘴𝘵𝘰𝘳𝘺.
 
 - 📖 𝘙𝘦𝘢𝘥 𝘊𝘩𝘢𝘱𝘵𝘦𝘳: 
-   𝘌𝘹: \`wattpad read https://www.wattpad.com/1362020763-hell-university-chapter-01\` 
+   𝘌𝘹: \`wattpad read [chapter link]\` 
    𝘵𝘰 𝘳𝘦𝘢𝘥 𝘢 𝘴𝘱𝘦𝘤𝘪𝘧𝘪𝘤 𝘤𝘩𝘢𝘱𝘵𝘦𝘳.`
       }, pageAccessToken);
     }
 
     try {
-      switch (command) {
-        case "search":
-          await searchStories(senderId, query, pageAccessToken);
-          break;
-        case "parts":
-          await listStoryParts(senderId, query, pageAccessToken);
-          break;
-        case "read":
-          await readChapter(senderId, query, pageAccessToken);
-          break;
-        default:
-          sendMessage(senderId, { text: "❓ 𝘜𝘯𝘬𝘯𝘰𝘸𝘯 𝘤𝘰𝘮𝘮𝘢𝘯𝘥. 𝘜𝘴𝘦 'wattpad' 𝘧𝘰𝘳 𝘩𝘦𝘭𝘱." }, pageAccessToken);
+      if (mainArg === "parts") {
+        await listStoryParts(senderId, args.slice(1).join(" "), pageAccessToken);
+      } else if (mainArg === "read") {
+        await readChapter(senderId, args.slice(1).join(" "), pageAccessToken);
+      } else {
+        await searchStories(senderId, query, pageAccessToken);
       }
     } catch (error) {
       console.error("Error in Wattpad command:", error);
@@ -61,7 +54,9 @@ async function searchStories(senderId, query, pageAccessToken) {
       `${index + 1}. 𝘛𝘪𝘵𝘭𝘦: ${story.title}\n   𝘈𝘶𝘵𝘩𝘰𝘳: ${story.author}\n   𝘙𝘦𝘢𝘥𝘴: ${story.reads} | 𝘝𝘰𝘵𝘦𝘴: ${story.votes}\n   𝘓𝘪𝘯𝘬: ${story.link}`
     )).join("\n\n");
 
-    sendMessage(senderId, { text: `🔍 𝘚𝘦𝘢𝘳𝘤𝘩 𝘙𝘦𝘴𝘶𝘭𝘵𝘴 𝘧𝘰𝘳 "${query}":\n\n${resultText}` }, pageAccessToken);
+    sendMessage(senderId, {
+      text: `🔍 𝘚𝘦𝘢𝘳𝘤𝘩 𝘙𝘦𝘴𝘶𝘭𝘵𝘴 𝘧𝘰𝘳 "${query}":\n\n${resultText}\n\n📑 𝘜𝘴𝘦: \`wattpad parts [story link]\` 𝘵𝘰 𝘷𝘪𝘦𝘸 𝘱𝘢𝘳𝘵𝘴.`,
+    }, pageAccessToken);
   } catch (error) {
     throw new Error("Failed to search Wattpad stories.");
   }
@@ -78,7 +73,9 @@ async function listStoryParts(senderId, storyUrl, pageAccessToken) {
       `${index + 1}. 𝘗𝘢𝘳𝘵: ${part.title}\n   𝘓𝘪𝘯𝘬: ${part.link}`
     )).join("\n\n");
 
-    sendMessage(senderId, { text: `📑 𝘚𝘵𝘰𝘳𝘺 𝘗𝘢𝘳𝘵𝘴:\n\n${partsText}` }, pageAccessToken);
+    sendMessage(senderId, {
+      text: `📑 𝘚𝘵𝘰𝘳𝘺 𝘗𝘢𝘳𝘵𝘴:\n\n${partsText}\n\n📖 𝘜𝘴𝘦: \`wattpad read [part link]\` 𝘵𝘰 𝘳𝘦𝘢𝘥 𝘢 𝘤𝘩𝘢𝘱𝘵𝘦𝘳.`,
+    }, pageAccessToken);
   } catch (error) {
     throw new Error("Failed to fetch story parts.");
   }
