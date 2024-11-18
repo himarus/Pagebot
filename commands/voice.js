@@ -26,7 +26,7 @@ module.exports = {
       id = 8;
     }
 
-    const apiUrl = `${api.joshWebApi}/aivoice?q=${encodeURIComponent(text)}&id=${id}`;
+    const apiUrl = `${api.joshWebApi}/api/aivoice?q=${encodeURIComponent(text)}&id=${id}`;
 
     try {
       await sendMessage(senderId, {
