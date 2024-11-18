@@ -2,25 +2,41 @@ const WattpadScraper = require('wattpad-scraper');
 const { sendMessage } = require('../handles/sendMessage');
 
 const scraper = new WattpadScraper();
-let userStoryCache = {}; // Cache per user for story parts and details
+const storyCache = {};
+const storyPartsCache = {};
 
 module.exports = {
   name: "wattpad",
-  description: "Directly search Wattpad stories and read chapters.",
+  description: "Interact with Wattpad stories (search, read chapters, list parts).",
   author: "Churchill",
 
   async execute(senderId, args, pageAccessToken) {
-    const query = args.join(" "); // User's input is the story title
+    const command = args[0]?.toLowerCase();
+    const query = args.join(" ");
 
-    if (!query) {
+    if (!command) {
       return sendMessage(senderId, {
-        text: `❓ Please specify a story title. Example: \`wattpad hell university\`.`
+        text: `✨ Wattpad Commands:
+
+- 📚 **Search**: 
+  \`wattpad [title]\` to search for stories.
+
+- 📑 **List Parts**: 
+  \`wattpad parts [story number]\` to view story parts.
+
+- 📖 **Read Chapter**: 
+  \`wattpad read [story number] [part number]\` to read a specific chapter.`,
       }, pageAccessToken);
     }
 
     try {
-      // Fetch story and parts directly
-      await fetchStoryAndParts(senderId, query, pageAccessToken);
+      if (command === "parts") {
+        await listStoryParts(senderId, args[1], pageAccessToken);
+      } else if (command === "read") {
+        await readChapter(senderId, args[1], args[2], pageAccessToken);
+      } else {
+        await searchStories(senderId, query, pageAccessToken);
+      }
     } catch (error) {
       console.error("Error in Wattpad command:", error);
       sendMessage(senderId, { text: `⚠️ Error: ${error.message}` }, pageAccessToken);
@@ -28,51 +44,76 @@ module.exports = {
   },
 };
 
-async function fetchStoryAndParts(senderId, title, pageAccessToken) {
+async function searchStories(senderId, query, pageAccessToken) {
   try {
-    const stories = await scraper.search(title);
+    const stories = await scraper.search(query);
     if (!stories.length) {
-      return sendMessage(senderId, { text: "🔍 No stories found. Try another title." }, pageAccessToken);
+      return sendMessage(senderId, { text: `🔍 No stories found for "${query}".` }, pageAccessToken);
     }
 
-    const story = stories[0]; // Automatically pick the first result
-    const parts = await scraper.getStoryParts(story.url);
+    const uniqueId = Date.now();
+    storyCache[uniqueId] = stories;
 
-    // Cache the parts for this user
-    userStoryCache[senderId] = { story, parts };
+    const resultText = stories.slice(0, 5).map((story, index) => (
+      `${index + 1}. Title: ${story.title}\n   Author: ${story.author}\n   Reads: ${story.reads} | Votes: ${story.votes}`
+    )).join("\n\n");
 
-    let partsText = `📑 **Story Parts: ${story.title}**:\n`;
-    parts.forEach((part, index) => {
-      partsText += `\n${index + 1}. ${part.title}`;
-    });
-
-    partsText += `\n\n📖 Use: \`read [part number]\` to read a chapter.`;
-    sendMessage(senderId, { text: partsText }, pageAccessToken);
+    sendMessage(senderId, {
+      text: `🔍 Search Results for "${query}":\n\n${resultText}\n\n📑 Use: \`wattpad parts [story number]\` to view parts.`,
+    }, pageAccessToken);
   } catch (error) {
-    throw new Error("Failed to fetch story and parts.");
+    throw new Error("Failed to search Wattpad stories.");
   }
 }
 
-async function readChapterByNumber(senderId, partNumber, pageAccessToken) {
-  const userCache = userStoryCache[senderId];
-  if (!userCache || !userCache.parts) {
-    return sendMessage(senderId, { text: "❌ No story parts found. Search for a story first." }, pageAccessToken);
-  }
-
-  const partIndex = parseInt(partNumber) - 1;
-  if (isNaN(partIndex) || partIndex < 0 || partIndex >= userCache.parts.length) {
-    return sendMessage(senderId, { text: "❌ Invalid part number. Try again." }, pageAccessToken);
-  }
-
+async function listStoryParts(senderId, storyNumber, pageAccessToken) {
   try {
-    const part = userCache.parts[partIndex];
-    const content = await scraper.getStoryPartContent(part.url);
+    const uniqueId = Object.keys(storyCache).pop();
+    const stories = storyCache[uniqueId];
+
+    if (!stories || !stories[storyNumber - 1]) {
+      return sendMessage(senderId, { text: `⚠️ Invalid story number.` }, pageAccessToken);
+    }
+
+    const selectedStory = stories[storyNumber - 1];
+    const parts = await scraper.getParts(selectedStory.link);
+
+    if (!parts.length) {
+      return sendMessage(senderId, { text: `📑 No parts found for this story.` }, pageAccessToken);
+    }
+
+    storyPartsCache[storyNumber] = parts;
+
+    const partsText = parts.map((part, index) => (
+      `${index + 1}. Part: ${part.title}`
+    )).join("\n\n");
 
     sendMessage(senderId, {
-      text: `📖 **${part.title}**\n\n${content.slice(0, 1000)}...`, // Limit content length
-      quick_replies: [{ title: "Read More", payload: `read ${partIndex + 1}` }],
+      text: `📑 Parts for "${selectedStory.title}":\n\n${partsText}\n\n📖 Use: \`wattpad read [story number] [part number]\` to read a specific part.`,
     }, pageAccessToken);
   } catch (error) {
-    throw new Error("Failed to fetch chapter content.");
+    throw new Error("Failed to fetch story parts.");
+  }
+}
+
+async function readChapter(senderId, storyNumber, partNumber, pageAccessToken) {
+  try {
+    const parts = storyPartsCache[storyNumber];
+
+    if (!parts || !parts[partNumber - 1]) {
+      return sendMessage(senderId, { text: `⚠️ Invalid part number or story number.` }, pageAccessToken);
+    }
+
+    const selectedPart = parts[partNumber - 1];
+    const pages = await scraper.read(selectedPart.link);
+
+    if (!pages.length) {
+      return sendMessage(senderId, { text: `📖 No content found for this chapter.` }, pageAccessToken);
+    }
+
+    const contentText = pages.map((page) => `Page ${page.pageNumber}:\n${page.content}`).join("\n\n");
+    sendMessage(senderId, { text: `📖 Chapter Content:\n\n${contentText}` }, pageAccessToken);
+  } catch (error) {
+    throw new Error("Failed to read the chapter.");
   }
 }
