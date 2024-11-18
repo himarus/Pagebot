@@ -12,9 +12,18 @@ module.exports = {
     const text = input[0]?.trim();
     let id = input[1] ? parseInt(input[1].trim(), 10) : 8;
 
+    const maxLength = 200; // Define a maximum character limit for the text
+
     if (!text || text === '') {
       await sendMessage(senderId, {
         text: '❗ Please provide text to generate a voice clip.\n\nExample: voice Hello, how are you? | 3\nYou can choose Id from: 1 to 8'
+      }, pageAccessToken);
+      return;
+    }
+
+    if (text.length > maxLength) {
+      await sendMessage(senderId, {
+        text: `❗ The text is too long! Please limit your message to ${maxLength} characters.\n\nYour text is ${text.length} characters long.`
       }, pageAccessToken);
       return;
     }
