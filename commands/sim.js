@@ -9,7 +9,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       await sendMessage(senderId, {
-        text: "❗ Please provide a message to send to SimSimi.\n\nExample: sim Hello, how are you?"
+        text: "Please provide a message.\n\nExample: sim kupal kaba?"
       }, pageAccessToken);
       return;
     }
