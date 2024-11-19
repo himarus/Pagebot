@@ -17,6 +17,7 @@ module.exports = {
 
     const content = encodeURIComponent(args.join(" "));
     const simApiUrl = `https://hiroshi-api.onrender.com/other/sim?ask=${content}`;
+    const voiceId = Math.floor(Math.random() * 8) + 1;
 
     try {
       const res = await axios.get(simApiUrl);
@@ -30,17 +31,13 @@ module.exports = {
       }
 
       if (typeof respond === "string") {
-      
         await sendMessage(senderId, {
           text: respond
         }, pageAccessToken);
 
-        
-        const voiceId = 8; // Default voice ID
         const voiceApiUrl = `${api.joshWebApi}/api/aivoice?q=${encodeURIComponent(respond)}&id=${voiceId}`;
 
         try {
-          
           await axios.get(voiceApiUrl, { responseType: 'arraybuffer' });
 
           await sendMessage(senderId, {
