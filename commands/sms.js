@@ -10,7 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (args.length < 2) {
       await sendMessage(senderId, {
-        text: `❗ Please provide a valid phone number and message.\n\nExample: sms 09123456789 Hello, this is a test!`
+        text: `❗ Please provide a valid phone number and message.\n\nExample: sms 09123456789 Hello palku`
       }, pageAccessToken);
       return;
     }
@@ -38,7 +38,16 @@ module.exports = {
       const { status, response: apiResponse, sim_network, message_parts, message_remaining } = response.data;
 
       if (status) {
-        const successMessage = `✅ **SMS Sent Successfully!**\n\n📍 **Recipient**: ${number}\n📤 **Message**: ${message}\n📡 **Network**: ${sim_network}\n📝 **Message Parts**: ${message_parts}\n📊 **Messages Remaining**: ${message_remaining.toFixed(2)}`;
+        const successMessage = `✅ **SMS Sent Successfully!**
+
+📍 **Recipient**: ${number}  
+📤 **Message**: ${message}  
+📡 **Network**: ${sim_network}  
+📝 **Message Parts**: ${message_parts}  
+📊 **Messages Remaining**: ${message_remaining.toFixed(2)}
+
+📌 **You can test this command using your own number to verify if it works.  
+Your phone number is safe and secure—it’s only used for the API request to send the SMS.**`;
         await sendMessage(senderId, { text: successMessage }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
