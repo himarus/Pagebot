@@ -4,24 +4,35 @@ const { sendMessage } = require('../handles/sendMessage');
 module.exports = {
   name: 'sms',
   description: 'Send an SMS using the LBC SMS API.',
-  usage: 'sms <number> <message>\nExample: sms 09123456789 Hello, this is a test!',
+  usage: 'sms <number> | <message>\nExample: sms 09123456789 | Hello, this is a test!',
   author: 'chilli',
   async execute(senderId, args, pageAccessToken) {
-    if (args.length < 2) {
+    const input = args.join(' ').trim();
+
+    
+    if (!input.includes('|')) {
       await sendMessage(senderId, {
-        text: `❗ Please provide a valid phone number and message.\n\nExample: sms 09123456789 Hello, kupal`
+        text: `❗ Invalid format. Please use the correct format:\n\n📌 **Example**: sms 09123456789 | Hello, kupal`
       }, pageAccessToken);
       return;
     }
 
-    const number = args[0].trim();
-    const message = args.slice(1).join(' ').trim();
+  
+    const [number, ...messageParts] = input.split('|').map(part => part.trim());
+    const message = messageParts.join(' ');
 
-    // Validate PH mobile number format
+
     const phNumberRegex = /^09\d{9}$/;
     if (!phNumberRegex.test(number)) {
       await sendMessage(senderId, {
-        text: '❗ Invalid phone number format. Please provide a valid PH number starting with 09.\n\nExample: 09123456789'
+        text: `❗ Invalid phone number format. Please provide a valid PH number starting with 09.\n\n📌 **Example**: 09123456789`
+      }, pageAccessToken);
+      return;
+    }
+
+    if (!message) {
+      await sendMessage(senderId, {
+        text: `❗ Message cannot be empty. Please provide a valid message.\n\n📌 **Example**: sms 09123456789 | Hello, kupal`
       }, pageAccessToken);
       return;
     }
@@ -37,7 +48,13 @@ module.exports = {
       const { status, response: apiResponse, sim_network, message_parts, message_remaining } = response.data;
 
       if (status) {
-        const successMessage = `✅ **SMS Sent Successfully!**\n\n📍 **Recipient**: ${number}\n📤 **Message**: ${message}\n📡 **Network**: ${sim_network}\n📝 **Message Parts**: ${message_parts}\n📊 **Messages Remaining**: ${message_remaining.toFixed(2)}`;
+        const successMessage = 
+          `✅ **SMS Sent Successfully!**\n\n` +
+          `📍 **Recipient**: ${number}\n` +
+          `📤 **Message**: ${message}\n` +
+          `📡 **Network**: ${sim_network}\n` +
+          `📝 **Message Parts**: ${message_parts}\n` +
+          `📊 **Messages Remaining**: ${message_remaining.toFixed(2)}`;
         await sendMessage(senderId, { text: successMessage }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
@@ -47,7 +64,7 @@ module.exports = {
     } catch (error) {
       console.error('Error in SMS command:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while sending the SMS. Please try again later.'
+        text: `⚠️ An error occurred while sending the SMS. Please try again later.`
       }, pageAccessToken);
     }
   }
