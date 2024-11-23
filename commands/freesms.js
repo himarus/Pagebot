@@ -14,13 +14,13 @@ module.exports = {
 
     if (!number || !message) {
       return await sendMessage(senderId, {
-        text: `❗ **Incorrect Format**\n\nUse this format:\n\`\`\`freesms <number> | <message>\`\`\`\n\n📌 Example:\n\`freesms 09123456789 | Hello, how are you?\`\n\n👉 *Make sure to test with your own number to verify if it works.*`
+        text: `❗ **Incorrect Format**\n\nUse this format:\n\`\`\`freesms number | message\`\`\`\n\n📌 Example:\n\`freesms 09123456789 | Hello, how are you?\`\n\n👉 *Make sure to test with your own number to verify if it works.*`
       }, pageAccessToken);
     }
 
     if (!/^(09|\+639)\d{9}$/.test(number)) {
       return await sendMessage(senderId, {
-        text: `⚠️ Invalid phone number format.\nUse a valid PH number starting with 09 or +639.\n\nExample:\n\`freesms 09123456789 | Hi there!\``
+        text: `⚠️ Invalid phone number format.\nUse a valid PH number starting with 09 or +639.\n\nExample:\n\`freesms 09123456789 | Hi kupal\``
       }, pageAccessToken);
     }
 
@@ -36,12 +36,14 @@ module.exports = {
 
       if (status) {
         const details = `✅ **SMS Sent Successfully!**\n\n📞 **To**: ${number}\n📡 **Network**: ${sim_network}\n🧩 **Message Parts**: ${message_parts}\n📊 **Remaining Messages**: ${Math.floor(message_remaining).toLocaleString()}\n\n💌 **Response**: "${apiResponse}"`;
-
         await sendMessage(senderId, { text: details }, pageAccessToken);
       } else {
-        throw new Error(apiResponse || 'Failed to send SMS.');
+        await sendMessage(senderId, {
+          text: `❌ **Error:** Failed to send SMS.\n\n💌 **Response:** ${apiResponse || 'No additional details provided.'}`
+        }, pageAccessToken);
       }
     } catch (error) {
+      console.error('Error in freesms command:', error.message || error);
       await sendMessage(senderId, {
         text: `❌ **Error:** Unable to send SMS. Please try again later.\n\n**Details:** ${error.message || 'Unknown error.'}`
       }, pageAccessToken);
