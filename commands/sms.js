@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'sms',
@@ -26,7 +27,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `https://api.kenliejugarap.com/freesmslbc/?number=${number}&message=${encodeURIComponent(message)}`;
+    const apiUrl = `${api.kenlie}/freesmslbc/?number=${number}&message=${encodeURIComponent(message)}`;
 
     try {
       await sendMessage(senderId, {
