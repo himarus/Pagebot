@@ -7,13 +7,15 @@ module.exports = {
   author: "YourName",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
+    // Check for image input
     if (!imageUrl && !(event.message?.attachments && event.message.attachments[0]?.type === 'image')) {
       return sendMessage(senderId, {
-        text: `📸 How to Use Remini:\n\n1️⃣ Reply to an image with 'remini'.\n2️⃣ Send an image first then type 'remini'.`
+        text: `📸 **How to Use Remini**:\n\n1️⃣ Reply to an image with 'remini'.\n2️⃣ Send an image with 'remini'.`
       }, pageAccessToken);
     }
 
     try {
+      // Get the image URL if not passed explicitly
       if (!imageUrl) {
         if (event.message.reply_to && event.message.reply_to.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
@@ -22,28 +24,40 @@ module.exports = {
         }
       }
 
+      if (!imageUrl) {
+        return sendMessage(senderId, { text: "❗ Unable to retrieve the image URL. Please try again." }, pageAccessToken);
+      }
+
+      // Inform the user that the image is being processed
       await sendMessage(senderId, {
-        text: "🔄 Processing the image with Remini... Please wait."
+        text: "🔄 Processing your image with Remini... Please wait!"
       }, pageAccessToken);
 
+      // Prepare API request
       const apiUrl = `https://jonellccapisbkup.gotdns.ch/api/upscale?url=${encodeURIComponent(imageUrl)}`;
-      const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+      const response = await axios.get(apiUrl, { responseType: 'json' });
 
-      const imageBuffer = Buffer.from(response.data, 'binary');
-      const base64Image = `data:image/jpeg;base64,${imageBuffer.toString('base64')}`;
+      // Check API response
+      if (response.status === 200 && response.data?.output) {
+        const processedImageUrl = response.data.output; // Extract the upscaled image URL
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: "image",
-          payload: {
-            url: base64Image,
-            is_reusable: true
+        // Send the processed image back to the user
+        await sendMessage(senderId, {
+          attachment: {
+            type: "image",
+            payload: {
+              url: processedImageUrl,
+              is_reusable: true
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } else {
+        throw new Error("The API did not return a valid output. Please try again.");
+      }
     } catch (error) {
+      console.error("Error in Remini Command:", error.message || error);
       await sendMessage(senderId, {
-        text: "⚠️ An error occurred while processing the image. Please try again later."
+        text: `⚠️ An error occurred while processing the image.\n\n**Error:** ${error.message || "Unknown error"}`
       }, pageAccessToken);
     }
   }
