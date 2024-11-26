@@ -1,6 +1,7 @@
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const FormData = require('form-data');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
@@ -28,19 +29,23 @@ module.exports = {
       const tempFilePath = path.join(__dirname, '../temp', `${Date.now()}-enhanced.jpg`);
       fs.writeFileSync(tempFilePath, response.data);
 
-      // Send the enhanced image as an attachment
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: {}
-        },
-        filedata: fs.createReadStream(tempFilePath)
-      }, pageAccessToken);
+      // Prepare the file for uploading to Facebook
+      const formData = new FormData();
+      formData.append('recipient', JSON.stringify({ id: senderId }));
+      formData.append('message', JSON.stringify({ attachment: { type: 'image', payload: {} } }));
+      formData.append('filedata', fs.createReadStream(tempFilePath));
+
+      // Send the enhanced image using Facebook's Send API
+      const facebookResponse = await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${pageAccessToken}`, formData, {
+        headers: formData.getHeaders()
+      });
+
+      console.log('Facebook response:', facebookResponse.data);
 
       // Delete the temporary file after sending
       fs.unlinkSync(tempFilePath);
     } catch (error) {
-      console.error('Error enhancing image:', error.message || error);
+      console.error('Error enhancing image:', error.message || error.response?.data);
 
       await sendMessage(senderId, {
         text: '🚧 An error occurred while enhancing your image. Please try again later.'
