@@ -1,46 +1,49 @@
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'remini',
-  description: 'Enhance or upscale an image attachment.',
+  description: 'Enhance or upscale an image using the Kenlie API.',
   author: 'chilli',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '❗ No attachment detected. Please send an image first, then type "remini" or reply to an image using "remini".'
+        text: '❗ No attachment detected. Please send an image or reply to an image attachment with the command "remini".'
       }, pageAccessToken);
     }
 
+    await sendMessage(senderId, {
+      text: '✨ Enhancing your image, please wait...'
+    }, pageAccessToken);
+
     try {
-      // Call the API with the provided image URL
-      const apiUrl = `https://api.kenliejugarap.com/imgrestore/?imgurl=${encodeURIComponent(imageUrl)}`;
-      const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+      const response = await axios.get(`https://api.kenliejugarap.com/imgrestore/?imgurl=${encodeURIComponent(imageUrl)}`, {
+        responseType: 'arraybuffer'
+      });
 
-      // Ensure the response contains image data
-      if (!response.data || !response.headers['content-type'].startsWith('image/')) {
-        throw new Error('API did not return a valid image.');
-      }
+      // Save the enhanced image to a temporary file
+      const tempFilePath = path.join(__dirname, '../temp', `${Date.now()}-enhanced.jpg`);
+      fs.writeFileSync(tempFilePath, response.data);
 
-      // Convert the image buffer to base64 and send it
-      const enhancedImageBuffer = Buffer.from(response.data, 'binary');
-      const contentType = response.headers['content-type'];
-      const enhancedImageBase64 = `data:${contentType};base64,${enhancedImageBuffer.toString('base64')}`;
-
+      // Send the enhanced image as an attachment
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
-          payload: {
-            url: enhancedImageBase64,
-            is_reusable: true
-          }
-        }
+          payload: {}
+        },
+        filedata: fs.createReadStream(tempFilePath)
       }, pageAccessToken);
+
+      // Delete the temporary file after sending
+      fs.unlinkSync(tempFilePath);
     } catch (error) {
       console.error('Error enhancing image:', error.message || error);
+
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while enhancing the image. Please try again later.'
+        text: '🚧 An error occurred while enhancing your image. Please try again later.'
       }, pageAccessToken);
     }
   }
