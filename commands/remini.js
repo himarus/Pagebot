@@ -3,42 +3,43 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'remini',
-  description: 'Enhance an image using the provided Remini-like API.',
-  author: 'chilli',
+  description: 'Upscale or enhance an image using the provided Remini-like API.',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '❗ No image detected. Please send an image attachment first, then type "remini" or reply to an image using the "remini" command.'
+        text: `Please send an image first, then type "remini" to upscale or enhance the image.`
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: '✨ Enhancing the image, please wait...' }, pageAccessToken);
+    await sendMessage(senderId, { 
+      text: 'Enhancing your image, please wait... ✨' 
+    }, pageAccessToken);
 
     try {
       const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
+      
       const response = await axios.get(apiUrl);
+      const { ImageUrl } = response.data;
 
-      const enhancedImageUrl = response?.data?.ImageUrl;
-
-      if (!enhancedImageUrl) {
-        throw new Error('Enhanced image URL not found in the response');
+      if (!ImageUrl) {
+        throw new Error('No enhanced image returned by the API.');
       }
 
       await sendMessage(senderId, {
-        text: `✅ Your image has been enhanced! You can view/download it here:\n\n${enhancedImageUrl}`,
         attachment: {
           type: 'image',
           payload: {
-            url: enhancedImageUrl,
-            is_reusable: true
+            url: ImageUrl
           }
         }
       }, pageAccessToken);
+
     } catch (error) {
-      console.error('Error enhancing image:', error.message || error.response?.data);
+      console.error('Error enhancing image:', error);
       await sendMessage(senderId, {
-        text: '🚧 An error occurred while enhancing the image. Please try again later.'
+        text: 'An error occurred while enhancing the image. Please try again later.'
       }, pageAccessToken);
     }
   }
