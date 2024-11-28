@@ -23,16 +23,6 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    if (imageUrl && !userPrompt) {
-      return sendMessage(senderId, { text: "🖼️ **Please provide a question about the image, e.g.,** 'gemini what's in this image?'" }, pageAccessToken);
-    }
-
-    if (imageUrl || (event.message?.attachments && event.message.attachments[0]?.type === 'image')) {
-      sendMessage(senderId, { text: "🔍 **Analyzing the image... Please wait.**" }, pageAccessToken);
-    } else {
-      sendMessage(senderId, { text: "💬 **Answering your question... One moment, please.**" }, pageAccessToken);
-    }
-
     try {
       if (!imageUrl) {
         if (event.message.reply_to && event.message.reply_to.mid) {
@@ -42,24 +32,29 @@ module.exports = {
         }
       }
 
+      if (!imageUrl) {
+        throw new Error("No image URL provided.");
+      }
+
       const apiUrl = `${api.kenlie}/pixtral-paid/`;
+      const encodedImageUrl = encodeURIComponent(`${imageUrl}|${imageUrl}`);
       const response = await axios.get(apiUrl, {
         params: {
           question: userPrompt,
-          image_url: `${imageUrl}|${imageUrl}`
+          image_url: encodedImageUrl
         }
       });
 
-      const result = response.data.response;
-
-      if (result) {
-        const formattedResponse = `🧩 **Gemini AI**\n━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━`;
+      if (response.data && response.data.status) {
+        const result = response.data.response;
+        const formattedResponse = `🧩 **Gemini AI**\n━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━`;
         await sendMessage(senderId, { text: formattedResponse }, pageAccessToken);
       } else {
-        throw new Error("No response from API.");
+        throw new Error("API returned an invalid response.");
       }
 
     } catch (error) {
+      console.error("Error in Gemini command:", error.response?.data || error.message);
       await sendMessage(senderId, {
         text: "⚠️ **An error occurred while processing your request. Please try again or use `ai2`.**"
       }, pageAccessToken);
