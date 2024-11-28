@@ -10,6 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
     const userPrompt = args.join(" ");
 
+    // If no input is provided
     if (!userPrompt && !imageUrl) {
       return sendMessage(senderId, { 
         text: `✨ **How to Use:**
@@ -24,30 +25,28 @@ module.exports = {
     }
 
     try {
+      // If no imageUrl is provided, try to get it from the user's message
       if (!imageUrl) {
-        if (event.message.reply_to && event.message.reply_to.mid) {
+        if (event.message?.reply_to?.mid) {
           imageUrl = await getRepliedImage(event.message.reply_to.mid, pageAccessToken);
         } else if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
           imageUrl = event.message.attachments[0].payload.url;
+        } else {
+          imageUrl = ""; // No image was provided
         }
       }
 
-      if (!imageUrl) {
-        throw new Error("No image URL provided.");
-      }
-
       const apiUrl = `${api.kenlie}/pixtral-paid/`;
-      const encodedImageUrl = encodeURIComponent(`${imageUrl}|${imageUrl}`);
       const response = await axios.get(apiUrl, {
         params: {
           question: userPrompt,
-          image_url: encodedImageUrl
+          image_url: imageUrl
         }
       });
 
       if (response.data && response.data.status) {
         const result = response.data.response;
-        const formattedResponse = `🧩 **Gemini AI**\n━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━`;
+        const formattedResponse = `🧩 **Gemini AI**\n━━━━━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━━━━━━`;
         await sendMessage(senderId, { text: formattedResponse }, pageAccessToken);
       } else {
         throw new Error("API returned an invalid response.");
@@ -62,6 +61,7 @@ module.exports = {
   }
 };
 
+// Function to get the image URL if the user replies to a message with an image
 async function getRepliedImage(mid, pageAccessToken) {
   const { data } = await axios.get(`https://graph.facebook.com/v21.0/${mid}/attachments`, {
     params: { access_token: pageAccessToken }
@@ -70,6 +70,6 @@ async function getRepliedImage(mid, pageAccessToken) {
   if (data && data.data.length > 0 && data.data[0].image_data) {
     return data.data[0].image_data.url;
   } else {
-    return "";
+    return ""; // Return an empty string if no image data is found
   }
 }
