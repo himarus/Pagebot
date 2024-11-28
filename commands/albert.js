@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const inputText = args.join(' ');
-    const apiUrl = `${api.kenlie}/albert?text=${encodeURIComponent(inputText)}`;
+    const apiUrl = `${api.kenlie2}/albert?text=${encodeURIComponent(inputText)}`;
 
     try {
       await sendMessage(senderId, {
