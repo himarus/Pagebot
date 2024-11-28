@@ -1,5 +1,5 @@
 const axios = require('axios');
-const FormData = require('form-data'); // Ensure you have installed this: npm install form-data
+const FormData = require('form-data');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
@@ -87,7 +87,6 @@ async function uploadAttachment(imageBuffer, pageAccessToken) {
     const formData = new FormData();
     formData.append('filedata', imageBuffer, { filename: 'reimagined_image.jpg', contentType: 'image/jpeg' });
     formData.append('access_token', pageAccessToken);
-    formData.append('message', 'Reimagined image upload'); // Required parameter
 
     const { data } = await axios.post(
       'https://graph.facebook.com/v21.0/me/message_attachments',
