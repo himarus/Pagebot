@@ -87,7 +87,7 @@ async function uploadAttachment(imageBuffer, pageAccessToken) {
     const formData = new FormData();
     formData.append('filedata', imageBuffer, { filename: 'reimagined_image.jpg', contentType: 'image/jpeg' });
     formData.append('access_token', pageAccessToken);
-    formData.append('message', 'Reimagined image upload'); // Add the required 'message' parameter
+    formData.append('message', 'Reimagined image upload'); // Required parameter
 
     const { data } = await axios.post(
       'https://graph.facebook.com/v21.0/me/message_attachments',
@@ -95,6 +95,7 @@ async function uploadAttachment(imageBuffer, pageAccessToken) {
       { headers: formData.getHeaders() }
     );
 
+    console.log('Facebook upload response:', data); // Log the response for debugging
     return data;
   } catch (error) {
     console.error('Error uploading attachment:', error.response?.data || error.message || error);
