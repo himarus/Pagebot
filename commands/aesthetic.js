@@ -18,7 +18,7 @@ module.exports = {
       return sendMessage(senderId, { text: `❌ The text must be 5 letters or fewer. Example: "vibes"` }, pageAccessToken);
     }
 
-    const apiUrl = `${api.kenlie}/aesthetic?text=${encodeURIComponent(inputText)}`;
+    const apiUrl = `${api.kenlie2}/aesthetic?text=${encodeURIComponent(inputText)}`;
 
     // Send the generated image as an attachment
     axios.get(apiUrl)
