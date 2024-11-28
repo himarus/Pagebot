@@ -18,7 +18,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `${api.kenlie}/blackbox-gpt4o/`;
+      const apiUrl = `${api.kenlie2}/blackbox-gpt4o/`;
       const { data } = await axios.get(apiUrl, {
         params: { text: userInput }
       });
