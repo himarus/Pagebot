@@ -1,5 +1,6 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "gemini",
@@ -10,70 +11,48 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
     const userPrompt = args.join(" ").trim();
 
-    // Display instructions if no prompt and no image are provided
     if (!userPrompt && !imageUrl && !getAttachmentUrl(event)) {
       return sendMessage(senderId, {
-        text: `✨ How to Use:
-1️⃣ Send an image with "gemini" + your question.
-2️⃣ Reply to an image with "gemini" + your question.
-3️⃣ Send "gemini" + your question for text-only queries.
-
-Examples:
-- gemini describe this
-- [Reply to image:] gemini what's shown here.`
+        text: "❗ Usage: Send 'gemini <question>' with image or without an image."
       }, pageAccessToken);
     }
 
-    // Notify the user
-    if (imageUrl || getAttachmentUrl(event)) {
-      await sendMessage(senderId, { text: "🔍 Recognizing the image... Please wait." }, pageAccessToken);
-    } else {
-      await sendMessage(senderId, { text: "💬 Processing your question... One moment please." }, pageAccessToken);
-    }
-
-    // Handle image from reply or direct attachment
     if (!imageUrl) {
       imageUrl = getAttachmentUrl(event) || (await getRepliedImage(event, pageAccessToken));
     }
 
     try {
-      // Build API request URL
-      const apiUrl = `https://api.kenliejugarap.com/pixtral-paid/`;
-      const apiParams = {
-        question: userPrompt || "What is this image?",
-        image_url: imageUrl || ""
-      };
-
-      // Make the API request
-      const { data } = await axios.get(apiUrl, { params: apiParams });
+      const apiUrl = `${api.kenlie}/pixtral-paid/`;
+      const { data } = await axios.get(apiUrl, {
+        params: {
+          question: userPrompt || "Answer all question that need to answer?",
+          image_url: imageUrl || ""
+        }
+      });
 
       if (!data || !data.response) {
         return sendMessage(senderId, {
-          text: "🚫 Unable to process your request. Please try again."
+          text: "⚠️ Unable to process your request. Try again."
         }, pageAccessToken);
       }
 
-      // Send the result
-      await sendMessage(senderId, {
-        text: `🎉 **Gemini Result:**\n\n${data.response}`
-      }, pageAccessToken);
+      await sendMessage(senderId, { text: data.response }, pageAccessToken);
 
     } catch (error) {
       console.error("Error in Gemini command:", error.message || error);
       await sendMessage(senderId, {
-        text: `⚠️ An error occurred: ${error.message || "Something went wrong. Please try again later."}`
+        text: "⚠️ An error occurred. Please try again later."
       }, pageAccessToken);
     }
   }
 };
 
-// Helper: Get attachment URL from the event
+
 function getAttachmentUrl(event) {
   const attachment = event.message?.attachments?.[0];
   return attachment?.type === "image" ? attachment.payload.url : null;
 }
 
-// Helper: Get image URL from a replied message
 async function getRepliedImage(event, pageAccessToken) {
   if (event.message?.reply_to?.mid) {
     try {
