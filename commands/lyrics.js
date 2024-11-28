@@ -12,28 +12,28 @@ module.exports = {
 
     if (!kanta) {
       return sendMessage(kupal, {
-        text: `Usage: lyrics [song title]`
+        text: `❗ Usage: lyrics [song title]\n\nExample: lyrics muli ace`
       }, sili);
     }
 
     try {
-      const res = await axios.get(`${api.joshWebApi}/search/lyrics`, {
-        params: { q: kanta }
-      });
+    
+      const apiUrl = `${api.mark2}/lyrics/song?title=${encodeURIComponent(kanta)}`;
+      const res = await axios.get(apiUrl);
 
-      if (!res.data || !res.data.result) {
+      if (!res.data || !res.data.content) {
         throw new Error("No lyrics found for this song.");
       }
 
-      const { title, artist, lyrics, image } = res.data.result;
-      const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}`;
+      const { title, artist, lyrics, song_thumbnail, url } = res.data.content;
+      const lyricsMessage = `🎵 *${title}* by *${artist}*\n\n${lyrics}\n\n🔗 [View on Genius](${url})`;
 
-      if (image) {
+      if (song_thumbnail) {
         await sendMessage(kupal, {
           attachment: {
             type: "image",
             payload: {
-              url: image
+              url: song_thumbnail
             }
           }
         }, sili);
@@ -42,9 +42,9 @@ module.exports = {
       await sendMessage(kupal, { text: lyricsMessage }, sili);
 
     } catch (error) {
-      console.error("Error retrieving lyrics:", error);
+      console.error("Error retrieving lyrics:", error.message || error);
       sendMessage(kupal, {
-        text: `Error retrieving lyrics. Please try again or check your input.`
+        text: `⚠️ Error retrieving lyrics. Please try again or check your input.`
       }, sili);
     }
   }
