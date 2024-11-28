@@ -1,4 +1,5 @@
 const axios = require('axios');
+const FormData = require('form-data'); // Ensure you have installed this: npm install form-data
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
@@ -14,7 +15,7 @@ module.exports = {
 
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '❗ Please attach an image or reply to an image with the command "reimage".'
+        text: '❗ Please attach an image or reply to an image with the command "reimage".',
       }, pageAccessToken);
     }
 
@@ -25,7 +26,7 @@ module.exports = {
       const reimagineUrl = `https://kaiz-apis.gleeze.com/api/reimagine?url=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(reimagineUrl, { responseType: 'arraybuffer' });
 
-      // Save the image as a buffer to handle upload delays
+      // Save the image as a buffer
       const imageBuffer = Buffer.from(response.data, 'binary');
 
       // Upload the image to Facebook
@@ -40,18 +41,18 @@ module.exports = {
         attachment: {
           type: 'image',
           payload: {
-            attachment_id: uploadResult.attachment_id
-          }
-        }
+            attachment_id: uploadResult.attachment_id,
+          },
+        },
       }, pageAccessToken);
 
     } catch (error) {
       console.error('Error transforming image:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while processing the image. Please try again later.'
+        text: '⚠️ An error occurred while processing the image. Please try again later.',
       }, pageAccessToken);
     }
-  }
+  },
 };
 
 // Function to get the URL of an image from an attachment
@@ -65,7 +66,7 @@ async function getRepliedImage(event, pageAccessToken) {
   if (event.message?.reply_to?.mid) {
     try {
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
-        params: { access_token: pageAccessToken }
+        params: { access_token: pageAccessToken },
       });
       const imageData = data?.data?.[0]?.image_data;
       return imageData ? imageData.url : null;
@@ -81,12 +82,16 @@ async function getRepliedImage(event, pageAccessToken) {
 async function uploadAttachment(imageBuffer, pageAccessToken) {
   try {
     const formData = new FormData();
-    formData.append('filedata', imageBuffer, { filename: 'reimagined_image.jpg' });
+    formData.append('filedata', imageBuffer, 'reimagined_image.jpg'); // Properly handles Buffer
     formData.append('access_token', pageAccessToken);
 
-    const { data } = await axios.post('https://graph.facebook.com/v21.0/me/message_attachments', formData, {
-      headers: formData.getHeaders()
-    });
+    const { data } = await axios.post(
+      'https://graph.facebook.com/v21.0/me/message_attachments',
+      formData,
+      {
+        headers: formData.getHeaders(), // Use FormData headers
+      }
+    );
 
     return data;
   } catch (error) {
