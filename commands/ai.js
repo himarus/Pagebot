@@ -29,7 +29,7 @@ module.exports = {
       const result = response.data.response;
 
       if (result) {
-        const formattedResponse = `✨ **Chilli AI**\n━━━━━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━━━━━━`;
+        const formattedResponse = `✨ **Chilli AI**\n━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━`;
         await sendMessage(chilli, { text: formattedResponse }, kalamansi);
       } else {
         throw new Error("Empty response from API.");
