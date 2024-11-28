@@ -11,14 +11,13 @@ module.exports = {
     const prompt = args.join(" ");
     if (!prompt) {
       return sendMessage(chilli, {
-        text: `❓ **Please provide a question.**\n\n**Example:**\n\`ai what is chilli?\``
+        text: "❓ Please provide a question."
       }, kalamansi);
     }
 
     const apiUrl = `${api.kaizen}/api/gpt-4o`;
 
     try {
-      // Directly fetch the response without showing a "Processing" message.
       const response = await axios.get(apiUrl, {
         params: {
           q: prompt,
@@ -29,16 +28,16 @@ module.exports = {
       const result = response.data.response;
 
       if (result) {
-        const formattedResponse = `✨| Chilli AI\n━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━`;
-        await sendMessage(chilli, { text: formattedResponse }, kalamansi);
+        await sendMessage(chilli, { text: result }, kalamansi);
       } else {
         throw new Error("Empty response from API.");
       }
 
     } catch (error) {
-      console.error("Error in AI command:", error.response?.data || error.message || error);
+      const errorMessage = error.response?.data || error.message || "An unknown error occurred.";
+      console.error("Error in AI command:", errorMessage);
       await sendMessage(chilli, {
-        text: "⚠️ **An error occurred while processing your request. Please try again or use blackbox"
+        text: `⚠️ **API Error:**\n${JSON.stringify(errorMessage, null, 2)}`
       }, kalamansi);
     }
   }
