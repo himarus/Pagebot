@@ -38,7 +38,7 @@ module.exports = {
     } catch (error) {
       console.error("Error in AI command:", error.response?.data || error.message || error);
       await sendMessage(chilli, {
-        text: "⚠️ **An error occurred while processing your request. Please try again or use `ai2`.**"
+        text: "⚠️ **An error occurred while processing your request. Please try again or use blackbox"
       }, kalamansi);
     }
   }
