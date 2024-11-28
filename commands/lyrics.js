@@ -18,7 +18,7 @@ module.exports = {
 
     try {
     
-      const apiUrl = `${api.mark2}/lyrics/song?title=${encodeURIComponent(kanta)}`;
+      const apiUrl = `${api.mark2}/api/lyrics/song?title=${encodeURIComponent(kanta)}`;
       const res = await axios.get(apiUrl);
 
       if (!res.data || !res.data.content) {
