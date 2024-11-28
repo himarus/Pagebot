@@ -27,7 +27,7 @@ module.exports = {
       const result = response.data.response;
 
       if (result) {
-        const formattedResponse = `🧩 | Chilli Gpt\n━━━━━━━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━━━━━━━`;
+        const formattedResponse = `🧩 | Chilli Gpt\n━━━━━━━━━━━━\n${result}\n━━━━━━━━━━━━`;
         await sendMessage(kupal, { text: formattedResponse }, pageAccessToken);
       } else {
         await sendMessage(kupal, {
