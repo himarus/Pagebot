@@ -16,7 +16,7 @@ module.exports = {
     }
 
     const inputText = args.join(' ');
-    const apiUrl = `${api.kenlie}/zuck?text=${encodeURIComponent(inputText)}`;
+    const apiUrl = `${api.kenlie2}/zuck?text=${encodeURIComponent(inputText)}`;
 
     try {
       await sendMessage(senderId, {
