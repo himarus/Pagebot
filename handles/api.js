@@ -1,6 +1,7 @@
 module.exports = {
   joshWebApi: "https://joshweb.click",
   kaizen: "https://kaiz-apis.gleeze.com",
+  kenlie2: "https://api.kenliejugarap.com",
   jerome: "https://jerome-web.gleeze.com",
   kenlie: "https://apiv2.kenliejugarap.com",
   nethApi: "https://nethwieginedev.vercel.app",
