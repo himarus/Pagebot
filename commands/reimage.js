@@ -29,11 +29,15 @@ module.exports = {
       // Save the image as a buffer
       const imageBuffer = Buffer.from(response.data, 'binary');
 
+      if (!imageBuffer || imageBuffer.length === 0) {
+        throw new Error('Image buffer is empty or invalid.');
+      }
+
       // Upload the image to Facebook
       const uploadResult = await uploadAttachment(imageBuffer, pageAccessToken);
 
-      if (uploadResult.error) {
-        throw new Error('Attachment upload failed');
+      if (uploadResult.error || !uploadResult.attachment_id) {
+        throw new Error('Attachment upload failed.');
       }
 
       // Send the uploaded image to the user
@@ -45,9 +49,8 @@ module.exports = {
           },
         },
       }, pageAccessToken);
-
     } catch (error) {
-      console.error('Error transforming image:', error.message || error);
+      console.error('Error transforming image:', error.response?.data || error.message || error);
       await sendMessage(senderId, {
         text: '⚠️ An error occurred while processing the image. Please try again later.',
       }, pageAccessToken);
@@ -71,7 +74,7 @@ async function getRepliedImage(event, pageAccessToken) {
       const imageData = data?.data?.[0]?.image_data;
       return imageData ? imageData.url : null;
     } catch (error) {
-      console.error('Error fetching replied image:', error.message || error);
+      console.error('Error fetching replied image:', error.response?.data || error.message || error);
       return null;
     }
   }
@@ -82,20 +85,18 @@ async function getRepliedImage(event, pageAccessToken) {
 async function uploadAttachment(imageBuffer, pageAccessToken) {
   try {
     const formData = new FormData();
-    formData.append('filedata', imageBuffer, 'reimagined_image.jpg'); // Properly handles Buffer
+    formData.append('filedata', imageBuffer, { filename: 'reimagined_image.jpg', contentType: 'image/jpeg' });
     formData.append('access_token', pageAccessToken);
 
     const { data } = await axios.post(
       'https://graph.facebook.com/v21.0/me/message_attachments',
       formData,
-      {
-        headers: formData.getHeaders(), // Use FormData headers
-      }
+      { headers: formData.getHeaders() }
     );
 
     return data;
   } catch (error) {
-    console.error('Error uploading attachment:', error.message || error);
+    console.error('Error uploading attachment:', error.response?.data || error.message || error);
     return { error: true };
   }
 }
