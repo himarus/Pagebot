@@ -22,7 +22,7 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `${api.kenlie}/pixtral-paid/`;
+      const apiUrl = `${api.kenlie2}/pixtral-paid/`;
       const { data } = await axios.get(apiUrl, {
         params: {
           question: userPrompt || "Answer all question that need to answer?",
