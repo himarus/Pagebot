@@ -1,53 +1,43 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
+const { sendMessage } = require("../handles/sendMessage");
+const api = require("../handles/api");
 
 module.exports = {
   name: "blackbox",
-  description: "Fetches essay-style responses from Blackbox API",
+  description: "Interact with the Blackbox GPT-4 API.",
+  usage: "blackbox <your message>",
   author: "chilli",
 
-  async execute(chilli, args, kalamansi) {
-    const query = args.join(" ");
-    if (!query) {
-      return sendMessage(chilli, { text: `Please provide a questio..\n\nExample: blackbox write an essay about love` }, kalamansi);
+  async execute(chilli, args, pageAccessToken) {
+    const userInput = args.join(" ").trim();
+
+    if (!userInput) {
+      return sendMessage(chilli, {
+        text: "❗ Usage: blackbox <your message>\nExample: blackbox How can I improve my coding skills?"
+      }, pageAccessToken);
     }
 
-    await sendMessage(chilli, { text: `✍️ 𝘞𝘳𝘪𝘵𝘪𝘯𝘨 𝘺𝘰𝘶𝘳 𝘢𝘯𝘴𝘸𝘦𝘳...` }, kalamansi);
-    await new Promise(resolve => setTimeout(resolve, 500));  // Delay for user feedback
-
     try {
-      const response = await axios.get("https://kaiz-apis.gleeze.com/api/blackbox", {
-        params: { q: query, uid: 199 }
+      const apiUrl = `${api.kenlie}/blackbox-gpt4o/`;
+      const { data } = await axios.get(apiUrl, {
+        params: { text: userInput }
       });
 
-      const result = response.data.response;
-      await sendConcatenatedMessage(chilli, result, kalamansi);
+      if (!data || !data.response) {
+        return sendMessage(chilli, {
+          text: "⚠️ Unable to process your request. Please try again."
+        }, pageAccessToken);
+      }
+
+      const formattedResponse = `🔮| 𝘉𝘓𝘈𝘊𝘒𝘉𝘖𝘟\n━━━━━━━━━━━━\n${data.response}\n━━━━━━━━━━━━`;
+
+      await sendMessage(chilli, { text: formattedResponse }, pageAccessToken);
 
     } catch (error) {
-      sendMessage(chilli, { text: "⚠️ Error while processing your request. Please try again." }, kalamansi);
+      console.error("Error in Blackbox command:", error.message || error);
+      await sendMessage(chilli, {
+        text: "⚠️ An error occurred. Please try again later."
+      }, pageAccessToken);
     }
   }
 };
-
-async function sendConcatenatedMessage(chilli, text, kalamansi) {
-  const maxMessageLength = 2000;
-
-  if (text.length > maxMessageLength) {
-    const messages = splitMessageIntoChunks(text, maxMessageLength);
-
-    for (const message of messages) {
-      await new Promise(resolve => setTimeout(resolve, 300));  // Delay between chunks
-      await sendMessage(chilli, { text: message }, kalamansi);
-    }
-  } else {
-    await sendMessage(chilli, { text }, kalamansi);
-  }
-}
-
-function splitMessageIntoChunks(message, chunkSize) {
-  const chunks = [];
-  for (let i = 0; i < message.length; i += chunkSize) {
-    chunks.push(message.slice(i, i + chunkSize));
-  }
-  return chunks;
-}
