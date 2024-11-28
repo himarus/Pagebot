@@ -21,13 +21,26 @@ module.exports = {
     await sendMessage(senderId, { text: '🔄 Reimagining the image, please wait... 🖼️' }, pageAccessToken);
 
     try {
+      // Fetch the reimagined image from the API
       const reimagineUrl = `https://kaiz-apis.gleeze.com/api/reimagine?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(reimagineUrl, { responseType: 'arraybuffer' });
 
+      // Save the image as a buffer to handle upload delays
+      const imageBuffer = Buffer.from(response.data, 'binary');
+
+      // Upload the image to Facebook
+      const uploadResult = await uploadAttachment(imageBuffer, pageAccessToken);
+
+      if (uploadResult.error) {
+        throw new Error('Attachment upload failed');
+      }
+
+      // Send the uploaded image to the user
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: reimagineUrl
+            attachment_id: uploadResult.attachment_id
           }
         }
       }, pageAccessToken);
@@ -62,4 +75,22 @@ async function getRepliedImage(event, pageAccessToken) {
     }
   }
   return null;
+}
+
+// Function to upload the image buffer as an attachment to Facebook
+async function uploadAttachment(imageBuffer, pageAccessToken) {
+  try {
+    const formData = new FormData();
+    formData.append('filedata', imageBuffer, { filename: 'reimagined_image.jpg' });
+    formData.append('access_token', pageAccessToken);
+
+    const { data } = await axios.post('https://graph.facebook.com/v21.0/me/message_attachments', formData, {
+      headers: formData.getHeaders()
+    });
+
+    return data;
+  } catch (error) {
+    console.error('Error uploading attachment:', error.message || error);
+    return { error: true };
+  }
 }
