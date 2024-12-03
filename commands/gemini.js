@@ -22,17 +22,18 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `${api.kenlie2}/pixtral-paid/`;
-      const { data } = await axios.get(apiUrl, {
-        params: {
-          question: userPrompt || "Answer all question that need to answer?",
-          image_url: imageUrl || ""
-        }
-      });
+      const apiUrl = `${api.kaizen}/api/gemini-vision`;
+      const query = {
+        q: userPrompt || "Answer all questions that need to answer?",
+        uid: senderId,
+        imageUrl: imageUrl || ""
+      };
+
+      const { data } = await axios.get(apiUrl, { params: query });
 
       if (!data || !data.response) {
         return sendMessage(senderId, {
-          text: "⚠️ Unable to process your request. Try again."
+          text: "⚠️ Unable to process your request. Please try again."
         }, pageAccessToken);
       }
 
@@ -46,7 +47,6 @@ module.exports = {
     }
   }
 };
-
 
 function getAttachmentUrl(event) {
   const attachment = event.message?.attachments?.[0];
