@@ -1,47 +1,41 @@
-const axios = require('axios');
-const { sendMessage } = require('../handles/sendMessage');
+const axios = require("axios");
+const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
-  name: 'remini',
-  description: 'Upscale or enhance an image using the provided Remini-like API.',
-  author: 'chilli',
+  name: "remini",
+  description: "enhance image quality",
+  author: "Dale Mekumi",
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+  async execute(senderId, args, pageAccessToken, imageUrl) {
+    // Check if an image URL is provided
+    if (!imageUrl) {
+      return sendMessage(senderId, {
+        text: `❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗶𝗻𝗶" 𝘁𝗼 𝗲𝗻𝗵𝗮𝗻𝗰𝗲 𝗶𝘁.`
+      }, pageAccessToken);
+    }
+
+    // Notify the user that enhancement is in progress
+    sendMessage(senderId, { text: "⌛ 𝗘𝗻𝗵𝗮𝗻𝗰𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...." }, pageAccessToken);
+
     try {
-      if (!imageUrl) {
-        if (event.message?.attachments && event.message.attachments[0]?.type === 'image') {
-          imageUrl = event.message.attachments[0].payload.url;
-        } else {
-          return sendMessage(senderId, {
-            text: `❗ Please send an image or reply to an image with "remini" to upscale it.`
-          }, pageAccessToken);
-        }
-      }
+      // Fetch the enhanced image from the API
+      const response = await axios.get(`https://hiroshi-api.onrender.com/image/upscale?url=${encodeURIComponent(imageUrl)}`);
+      const processedImageURL = response.data;
 
-      await sendMessage(senderId, { text: '✨ Enhancing your image, please wait...' }, pageAccessToken);
-
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
-      const response = await axios.get(apiUrl);
-
-      if (response.data && response.data.ImageUrl) {
-        const enhancedImageUrl = response.data.ImageUrl;
-
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: enhancedImageUrl,
-              is_reusable: true
-            }
-          }
-        }, pageAccessToken);
-      } else {
-        throw new Error('The API did not return an enhanced image URL.');
-      }
-    } catch (error) {
-      console.error('Error in Remini command:', error.response?.data || error.message || error);
+      // Send the enhanced image URL back to the user
       await sendMessage(senderId, {
-        text: `⚠️ Error: ${error.response?.data?.error || "Something went wrong while enhancing the image."}`
+        attachment: {
+          type: "image",
+          payload: {
+            url: processedImageURL
+          }
+        }
+      }, pageAccessToken);
+
+    } catch (error) {
+      console.error("❌ Error processing image:", error);
+      await sendMessage(senderId, {
+        text: `❌ An error occurred while processing the image. Please try again later.`
       }, pageAccessToken);
     }
   }
