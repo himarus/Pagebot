@@ -4,35 +4,38 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'ai2',
-  description: 'Get an AI-generated response to a query using GPT-4.',
+  description: 'Get an AI response using a different API.',
+  usage: 'ai2 <query>\nExample: ai2 Tell me a joke.',
   author: 'chilli',
 
-  async execute(kupal, args, pageAccessToken) {
-    if (args.length === 0) {
-      await sendMessage(kupal, {
-        text: '❗ Please provide a question.'
+  async execute(senderId, args, pageAccessToken) {
+    const query = args.join(' ');
+
+    if (!query || query.trim() === '') {
+      await sendMessage(senderId, {
+        text: '❗ Please provide a query to ask the AI.\n\nExample: ai2 Tell me a joke.'
       }, pageAccessToken);
       return;
     }
 
-    const query = args.join(' ');
-    const apiUrl = `${api.jonelApi}/api/gpt4o?ask=${encodeURIComponent(query)}&id=1`;
+    const apiUrl = `${api.mark2}/new/gpt4?query=${encodeURIComponent(query)}`;
 
     try {
-      const response = await axios.get(apiUrl);
-      const result = response.data.response;
+      await sendMessage(senderId, { text: `🤔 Thinking about: "${query}"... Please wait.` }, pageAccessToken);
 
-      if (result) {
-        await sendMessage(kupal, { text: result }, pageAccessToken);
+      const response = await axios.get(apiUrl);
+
+      if (response.data && response.data.respond) {
+        const aiResponse = response.data.respond; // Get the AI response
+        await sendMessage(senderId, { text: `🤖 AI2 Response:\n\n${aiResponse}` }, pageAccessToken);
       } else {
-        throw new Error("Empty response from API.");
+        throw new Error('Invalid API response.');
       }
 
     } catch (error) {
-      const errorMessage = error.response?.data || error.message || "An unknown error occurred.";
-      console.error('Error generating response:', errorMessage);
-      await sendMessage(kupal, {
-        text: `⚠️ **API Error:** try to use blackbox\n${JSON.stringify(errorMessage, null, 2)}`
+      console.error('Error in AI2 command:', error.message || error);
+      await sendMessage(senderId, {
+        text: '⚠️ API error occurred. Please try again later or use "ai2".'
       }, pageAccessToken);
     }
   }
