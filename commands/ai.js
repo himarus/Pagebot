@@ -13,21 +13,19 @@ module.exports = {
 
     if (!question || question.trim() === '') {
       await sendMessage(senderId, {
-        text: 'Please provide a question.'
+        text: '❗ Please provide a question to ask the AI.\n\nExample: ai What is the capital of France?'
       }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `${api.kenlie}/mistral-large/?question=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.kenlie2}/mistral-large/?question=${encodeURIComponent(question)}`;
 
     try {
-      await sendMessage(senderId, { text: `🤖 Thinking about: "${question}"... Please wait.` }, pageAccessToken);
-
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.status && response.data.response) {
         const aiResponse = response.data.response; // Get the AI response
-        await sendMessage(senderId, { text: `🧠 AI Response:\n\n${aiResponse}` }, pageAccessToken);
+        await sendMessage(senderId, { text: aiResponse }, pageAccessToken);
       } else {
         throw new Error('Invalid API response.');
       }
@@ -35,7 +33,7 @@ module.exports = {
     } catch (error) {
       console.error('Error in AI command:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ API error occurred. Please try again later or use "ai".'
+        text: '⚠️ AI command is currently having issues. Please use the "ai2" command instead.'
       }, pageAccessToken);
     }
   }
