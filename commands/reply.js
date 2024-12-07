@@ -28,7 +28,7 @@ module.exports = {
 
     try {
       await sendMessage(userId, {
-        text: `📩 Admin replied to your feedback:\n\n📝 ${replyMessage}`
+        text: `📩 Admin replied to your feedback:\n\nMessage: ${replyMessage}`
       }, pageAccessToken);
 
       await sendMessage(senderId, {
