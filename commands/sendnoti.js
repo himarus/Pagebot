@@ -2,7 +2,7 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 // Configuration
-const pageId = '493920247130641'; // Your Facebook Page ID
+const pageId = '472259739299490'; // Your Facebook Page ID
 const adminId = '8731046750250922'; // Your Admin ID
 const excludedIds = []; // IDs to exclude from notifications
 
