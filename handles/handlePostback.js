@@ -1,12 +1,11 @@
 const { sendMessage } = require('./sendMessage');
 
-// Function to handle incoming messages
-const handleMessage = async (event, pageAccessToken) => {
+const handlePostback = (event, pageAccessToken) => {
   const chilli = event.sender?.id;
-  const message = event.message?.text?.toLowerCase();  // Get the text message and make it lowercase
+  const pogi = event.postback?.payload;
 
-  if (chilli && message) {
-    if (message === 'get started') {
+  if (chilli && pogi) {
+    if (pogi === 'GET_STARTED_PAYLOAD') {
       const combinedMessage = {
         attachment: {
           type: "template",
@@ -31,15 +30,14 @@ const handleMessage = async (event, pageAccessToken) => {
         ]
       };
 
-      // Send the welcome message with quick reply options
       sendMessage(chilli, combinedMessage, pageAccessToken);
+
     } else {
-      // If the user sends something else, we can respond with a generic message or handle other commands
-      sendMessage(chilli, { text: `You said: ${message}` }, pageAccessToken);
+      sendMessage(chilli, { text: `You sent a postback with payload: ${pogi}` }, pageAccessToken);
     }
   } else {
-    console.error('Invalid message event data');
+    console.error('Invalid postback event data');
   }
 };
 
-module.exports = { handleMessage };
+module.exports = { handlePostback };
