@@ -1,12 +1,10 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-// Configuration
-const pageId = '472259739299490'; // Your Facebook Page ID
-const adminId = '8731046750250922'; // Your Admin ID
-const excludedIds = []; // IDs to exclude from notifications
+const pageId = '472259739299490';
+const adminId = '8731046750250922';
+const excludedIds = [];
 
-// Function to fetch all PSIDs (users who messaged the page)
 async function getAllPSIDs(pageAccessToken) {
   try {
     let psids = [];
@@ -14,8 +12,6 @@ async function getAllPSIDs(pageAccessToken) {
 
     while (nextPage) {
       const response = await axios.get(nextPage);
-      console.log('Response Data:', response.data);
-
       if (response.data?.data) {
         response.data.data.forEach(convo => {
           convo.participants.data.forEach(participant => {
@@ -38,7 +34,6 @@ async function getAllPSIDs(pageAccessToken) {
   }
 }
 
-// Function to send notifications to all users
 async function sendNotificationToAllUsers(message, pageAccessToken) {
   const users = await getAllPSIDs(pageAccessToken);
 
@@ -52,7 +47,7 @@ async function sendNotificationToAllUsers(message, pageAccessToken) {
       await axios.post(`https://graph.facebook.com/v18.0/me/messages?access_token=${pageAccessToken}`, {
         recipient: { id: psid },
         message: {
-          text: `📢 Notification from Admin: ${message}`,
+          text: `📢 Notification from Admin:\n\n${message}`,
         },
       });
       console.log(`Notification sent to PSID: ${psid}`);
@@ -62,7 +57,6 @@ async function sendNotificationToAllUsers(message, pageAccessToken) {
   }
 }
 
-// Export command module
 module.exports = {
   name: 'sendnoti',
   description: 'Send notification to all users who have messaged the page.',
@@ -70,20 +64,17 @@ module.exports = {
   usage: 'sendnoti <message>',
   
   async execute(senderId, args, pageAccessToken) {
-    // Ensure only the admin can use this command
     if (senderId !== adminId) {
       await sendMessage(senderId, { text: '❗ This command is only for the pagebot owner.' }, pageAccessToken);
       return;
     }
 
-    // Ensure a message is provided
     const message = args.join(' ');
     if (!message) {
       await sendMessage(senderId, { text: '❗ Please provide a message to send.' }, pageAccessToken);
       return;
     }
 
-    // Start sending notifications
     try {
       await sendMessage(senderId, { text: '📤 Sending notifications...' }, pageAccessToken);
       await sendNotificationToAllUsers(message, pageAccessToken);
