@@ -11,9 +11,7 @@ module.exports = {
     const adminId = "8731046750250922";
 
     if (chilli !== adminId) {
-      await sendMessage(chilli, {
-        text: "❗ This command is only available to the admin."
-      }, cute);
+      await sendMessage(chilli, { text: "❗ This command is only available to the admin." }, cute);
       return;
     }
 
@@ -29,27 +27,25 @@ module.exports = {
 
     try {
       const response = await axios.get(`https://graph.facebook.com/v15.0/me/conversations`, {
-        params: {
-          access_token: cute
-        }
+        params: { access_token: cute }
       });
 
       if (!response.data || !response.data.data) {
-        throw new Error("Invalid API response. Check your access token or permissions.");
-      }
-
-      const conversations = response.data.data;
-
-      if (conversations.length === 0) {
         await sendMessage(chilli, {
-          text: "❗ No users found to send the notification to."
+          text: "⚠️ Unable to fetch user data. Please check API permissions."
         }, cute);
         return;
       }
 
+      const conversations = response.data.data;
       const userIds = conversations
         .map(convo => convo.participants.data.find(participant => participant.id !== "me").id)
         .filter(id => id !== adminId);
+
+      if (userIds.length === 0) {
+        await sendMessage(chilli, { text: "❗ No users found to send the notification to." }, cute);
+        return;
+      }
 
       for (const userId of userIds) {
         await sendMessage(userId, { text: formattedMessage }, cute);
@@ -59,7 +55,7 @@ module.exports = {
         text: `✅ Notification successfully sent to ${userIds.length} users.\n\n📢 **Message Sent**:\n${notificationMessage}`
       }, cute);
     } catch (error) {
-      console.error("Error in sendnoti command:", error.response?.data || error.message || error);
+      console.error("Full Error Details:", error.response?.data || error.message || error);
       await sendMessage(chilli, {
         text: "⚠️ An error occurred while sending notifications. Please try again later."
       }, cute);
