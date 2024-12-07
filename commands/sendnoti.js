@@ -1,4 +1,6 @@
 const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+
 const pageid = '493920247130641';
 const adminId = '8731046750250922';
 const kupal = [""];
