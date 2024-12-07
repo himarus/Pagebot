@@ -34,8 +34,13 @@ module.exports = {
         }
       });
 
+      if (!response.data || !response.data.data) {
+        throw new Error("Invalid API response. Check your access token or permissions.");
+      }
+
       const conversations = response.data.data;
-      if (!conversations || conversations.length === 0) {
+
+      if (conversations.length === 0) {
         await sendMessage(chilli, {
           text: "❗ No users found to send the notification to."
         }, cute);
@@ -54,7 +59,7 @@ module.exports = {
         text: `✅ Notification successfully sent to ${userIds.length} users.\n\n📢 **Message Sent**:\n${notificationMessage}`
       }, cute);
     } catch (error) {
-      console.error("Error in sendnoti command:", error.message || error);
+      console.error("Error in sendnoti command:", error.response?.data || error.message || error);
       await sendMessage(chilli, {
         text: "⚠️ An error occurred while sending notifications. Please try again later."
       }, cute);
