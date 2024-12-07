@@ -1,6 +1,5 @@
 const axios = require("axios");
 const { sendMessage } = require('../handles/sendMessage');
-const fs = require('fs');
 
 module.exports = {
   name: "sendnoti",
@@ -26,28 +25,33 @@ module.exports = {
     }
 
     const notificationMessage = pogi.join(" ");
-    let users = [];
+    const formattedMessage = `📢 **Notification from Admin**:\n\n${notificationMessage}`;
 
     try {
-      const data = fs.readFileSync('users.json', 'utf8');
-      users = JSON.parse(data);
+      const response = await axios.get(`https://graph.facebook.com/v15.0/me/conversations`, {
+        params: {
+          access_token: cute
+        }
+      });
 
-      if (users.length === 0) {
+      const conversations = response.data.data;
+      if (!conversations || conversations.length === 0) {
         await sendMessage(chilli, {
           text: "❗ No users found to send the notification to."
         }, cute);
         return;
       }
 
-      const usersWithoutAdmin = users.filter(userId => userId !== adminId);
+      const userIds = conversations
+        .map(convo => convo.participants.data.find(participant => participant.id !== "me").id)
+        .filter(id => id !== adminId);
 
-      for (const userId of usersWithoutAdmin) {
-        const formattedMessage = `📢 **Notification from Admin**:\n\n${notificationMessage}`;
+      for (const userId of userIds) {
         await sendMessage(userId, { text: formattedMessage }, cute);
       }
 
       await sendMessage(chilli, {
-        text: `✅ Notification successfully sent to ${usersWithoutAdmin.length} users.\n\n📢 **Message Sent**:\n${notificationMessage}`
+        text: `✅ Notification successfully sent to ${userIds.length} users.\n\n📢 **Message Sent**:\n${notificationMessage}`
       }, cute);
     } catch (error) {
       console.error("Error in sendnoti command:", error.message || error);
