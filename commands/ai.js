@@ -6,7 +6,7 @@ module.exports = {
   name: 'ai',
   description: 'Get an AI-powered response to your query.',
   usage: 'ai <question>\nExample: ai What is the capital of France?',
-  author: 'chilli',
+  author: 'Jay Mar',
 
   async execute(senderId, args, pageAccessToken) {
     const question = args.join(' ');
@@ -18,13 +18,13 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kenlie2}/mistral-large/?question=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.heru}/api/gpt-4o?prompt=${encodeURIComponent(question)}`;
 
     try {
       const response = await axios.get(apiUrl);
 
-      if (response.data && response.data.status && response.data.response) {
-        const aiResponse = response.data.response; // Get the AI response
+      if (response.data && response.data.content) {
+        const aiResponse = response.data.content;
         await sendMessage(senderId, { text: aiResponse }, pageAccessToken);
       } else {
         throw new Error('Invalid API response.');
@@ -33,7 +33,7 @@ module.exports = {
     } catch (error) {
       console.error('Error in AI command:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ AI command is currently having issues. Please use the "ai2" command instead.'
+        text: '⚠️ An error occurred while processing your request. Please try again later.'
       }, pageAccessToken);
     }
   }
