@@ -19,10 +19,28 @@ for (const file of commandFiles) {
   }
 }
 
+function logUser(senderId) {
+  const filePath = path.join(__dirname, '../users.json');
+  try {
+    let users = [];
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf8');
+      users = data ? JSON.parse(data) : [];
+    }
+    if (!users.includes(senderId)) {
+      users.push(senderId);
+      fs.writeFileSync(filePath, JSON.stringify(users, null, 2));
+    }
+  } catch (error) {
+    console.error("Error logging user:", error.message);
+  }
+}
+
 async function handleMessage(event, pageAccessToken) {
   if (!event || !event.sender || !event.sender.id) return;
 
   const senderId = event.sender.id;
+  logUser(senderId);
 
   if (event.message && event.message.attachments) {
     const imageAttachment = event.message.attachments.find(att => att.type === 'image');
