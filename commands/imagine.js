@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'imagine',
@@ -15,7 +16,7 @@ module.exports = {
     const prompt = args.join(' ');
 
     try {
-      const apiUrl = `https://appjonellccapis.zapto.org/api/generate-art?prompt=${encodeURIComponent(prompt)}`;
+      const apiUrl = `${api.jonelApi}/api/generate-art?prompt=${encodeURIComponent(prompt)}`;
 
       await sendMessage(senderId, { attachment: { type: 'image', payload: { url: apiUrl } } }, pageAccessToken);
 
