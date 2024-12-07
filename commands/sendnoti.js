@@ -7,7 +7,7 @@ module.exports = {
   description: "Send a notification to all users who messaged the bot",
   usage: "sendnoti <message>\nExample: sendnoti Hello users!",
   author: "chilli",
-  
+
   async execute(chilli, pogi, cute) {
     const adminId = "8731046750250922";
 
@@ -39,14 +39,15 @@ module.exports = {
         return;
       }
 
-      for (const userId of users) {
-        await sendMessage(userId, {
-          text: notificationMessage
-        }, cute);
+      const usersWithoutAdmin = users.filter(userId => userId !== adminId);
+
+      for (const userId of usersWithoutAdmin) {
+        const formattedMessage = `📢 **Notification from Admin**:\n\n${notificationMessage}`;
+        await sendMessage(userId, { text: formattedMessage }, cute);
       }
 
       await sendMessage(chilli, {
-        text: "✅ Notification successfully sent to all users."
+        text: `✅ Notification successfully sent to ${usersWithoutAdmin.length} users.\n\n📢 **Message Sent**:\n${notificationMessage}`
       }, cute);
     } catch (error) {
       console.error("Error in sendnoti command:", error.message || error);
