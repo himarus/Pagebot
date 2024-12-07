@@ -22,9 +22,9 @@ module.exports = {
     await sendMessage(senderId, { text: `🔍 Generating image for: "${prompt}"... This may take a while, please wait.` }, pageAccessToken);
 
     try {
-      // Step 1: Generate the image
-      const response = await axios.get(apiUrl);
-      const { imageUrl } = response.data;
+      // Step 1: Generate the image using imaginev2 API
+      const imagineResponse = await axios.get(apiUrl);
+      const imageUrl = imagineResponse.data?.imageUrl;
 
       if (!imageUrl) {
         await sendMessage(senderId, {
@@ -50,11 +50,10 @@ module.exports = {
           }
         }
       }, pageAccessToken);
-
     } catch (error) {
       console.error('Error generating or uploading image:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while generating the image. Please try again later.'
+        text: '⚠️ An error occurred while generating or uploading the image. Please try again later.'
       }, pageAccessToken);
     }
   }
