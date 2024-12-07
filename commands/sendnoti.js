@@ -1,81 +1,79 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-const pageid = '493920247130641';
+const pageId = '493920247130641';
 const adminId = '8731046750250922';
-const kupal = [""];
+const excludedIds = []; // List of excluded PSIDs, if any
 
+// Function to fetch all PSIDs
 async function getAllPSIDs(pageAccessToken) {
   try {
     let psids = [];
-    let previous = `https://graph.facebook.com/v21.0/${pageid}/conversations?fields=participants&access_token=${pageAccessToken}`;
+    let nextPage = `https://graph.facebook.com/v21.0/${pageId}/conversations?fields=participants&access_token=${pageAccessToken}`;
     
-    while (previous) {
-      const response = await axios.get(previous);
-      if (response && response.data && response.data.data) {
-        const conversations = response.data.data;
-        conversations.forEach(convo => {
+    while (nextPage) {
+      const response = await axios.get(nextPage);
+      if (response.data?.data) {
+        response.data.data.forEach(convo => {
           convo.participants.data.forEach(participant => {
-            if (participant.id !== pageid && !kupal.includes(participant.id)) {
+            if (participant.id !== pageId && !excludedIds.includes(participant.id)) {
               psids.push(participant.id);
             }
           });
         });
-        previous = response.data.paging && response.data.paging.next || null;
+        nextPage = response.data.paging?.next || null;
       } else {
-        console.error('Invalid response data:', response);
         break;
       }
     }
     return psids;
   } catch (error) {
-    console.error('Error fetching PSIDs:', error);
+    console.error('Error fetching PSIDs:', error.message || error);
     return [];
   }
 }
 
+// Function to send notifications to all users
 async function sendNotificationToAllUsers(message, pageAccessToken) {
   const users = await getAllPSIDs(pageAccessToken);
-
+  
   for (const psid of users) {
     try {
       await axios.post(`https://graph.facebook.com/v21.0/me/messages?access_token=${pageAccessToken}`, {
         recipient: { id: psid },
-        message: {
-          text: `📢 Notification from Admin: ${message}`,
-        },
+        message: { text: `📢 Notification from Admin: ${message}` },
       });
     } catch (error) {
-      console.error('Error sending notification to user:', psid, error);
+      console.error(`Error sending notification to user ${psid}:`, error.message || error);
     }
   }
 }
 
 module.exports = {
   name: 'sendnoti',
-  description: 'Send notification to all users who have messaged the page.',
+  description: 'Send a notification to all users who have messaged the page.',
   author: 'Cliff',
-  usage: "sendnoti <message>",
+  usage: 'sendnoti <message>',
 
-  async execute(senderId, args, pageAccessToken, sendMessage) {
+  async execute(senderId, args, pageAccessToken) {
     if (senderId !== adminId) {
-      sendMessage(senderId, { text: "This command is only for the pagebot owner." }, pageAccessToken);
+      await sendMessage(senderId, { text: "❗ This command is restricted to the page admin." }, pageAccessToken);
       return;
     }
 
-    const message = args.join(' ');
+    const message = args.join(' ').trim();
     if (!message) {
-      sendMessage(senderId, { text: 'Please provide a text message to send.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '❗ Please provide a message to send.' }, pageAccessToken);
       return;
     }
 
     try {
-      sendMessage(senderId, { text: 'Sending notifications...' }, pageAccessToken);
+      await sendMessage(senderId, { text: '📤 Sending notifications... Please wait.' }, pageAccessToken);
       await sendNotificationToAllUsers(message, pageAccessToken);
-      sendMessage(senderId, { text: 'Notifications sent successfully.' }, pageAccessToken);
+      await sendMessage(senderId, { text: '✅ Notifications sent successfully.' }, pageAccessToken);
     } catch (error) {
-      sendMessage(senderId, { text: 'An error occurred while sending notifications.' }, pageAccessToken);
-      sendMessage(senderId, { text: error.message || 'Unknown error occurred.' }, pageAccessToken);
+      console.error('Error executing sendnoti command:', error.message || error);
+      await sendMessage(senderId, { text: '❌ An error occurred while sending notifications.' }, pageAccessToken);
     }
-  }
+  },
 };
