@@ -1,41 +1,37 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
-  name: "remini",
-  description: "enhance image quality",
-  author: "Dale Mekumi",
+  name: 'remini',
+  description: 'Enhance the quality of an image using the Kaizen API.',
+  author: 'chilli',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
-    // Check if an image URL is provided
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: `❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘀𝗲𝗻𝗱 𝗮𝗻 𝗶𝗺𝗮𝗴𝗲 𝗳𝗶𝗿𝘀𝘁, 𝘁𝗵𝗲𝗻 𝘁𝘆𝗽𝗲 "𝗿𝗲𝗺𝗶𝗻𝗶" 𝘁𝗼 𝗲𝗻𝗵𝗮𝗻𝗰𝗲 𝗶𝘁.`
+        text: `❗ Please send an image first, then type "remini" to enhance its quality.`
       }, pageAccessToken);
     }
 
-    // Notify the user that enhancement is in progress
-    sendMessage(senderId, { text: "⌛ 𝗘𝗻𝗵𝗮𝗻𝗰𝗶𝗻𝗴 𝗶𝗺𝗮𝗴𝗲 𝗽𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁...." }, pageAccessToken);
+    await sendMessage(senderId, { text: '🔄 Enhancing the image quality, please wait...' }, pageAccessToken);
 
     try {
-      // Fetch the enhanced image from the API
-      const response = await axios.get(`https://hiroshi-api.onrender.com/image/upscale?url=${encodeURIComponent(imageUrl)}`);
-      const processedImageURL = response.data;
+      const reminiApiUrl = `${api.kaizen}/api/upscale?url=${encodeURIComponent(imageUrl)}`;
 
-      // Send the enhanced image URL back to the user
       await sendMessage(senderId, {
         attachment: {
-          type: "image",
+          type: 'image',
           payload: {
-            url: processedImageURL
+            url: reminiApiUrl
           }
         }
       }, pageAccessToken);
 
     } catch (error) {
-      console.error("❌ Error processing image:", error);
+      console.error('Error enhancing image:', error);
       await sendMessage(senderId, {
-        text: `❌ An error occurred while processing the image. Please try again later.`
+        text: '⚠️ An error occurred while processing the image. Please try again later.'
       }, pageAccessToken);
     }
   }
