@@ -6,19 +6,19 @@ module.exports = {
   name: 'ai',
   description: 'Get an AI-powered response to your query, including text and images.',
   usage: 'ai <question>\nExample: ai Describe a beautiful sunset.',
-  author: 'Jay Mar',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     const question = args.join(' ');
 
     if (!question || question.trim() === '') {
       await sendMessage(senderId, {
-        text: '❗ Please provide a question or description for the AI.\n\nExample: ai Describe a beautiful sunset.'
+        text: 'Please provide a question.'
       }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `${api.kaizen}/api/gpt-4o-pro?q=${encodeURIComponent(question)}&uid=${senderId}&imageUrl=true`;
+    const apiUrl = `${api.kaizen}/api/gpt-4o-pro?q=${encodeURIComponent(question)}&uid=${senderId}&imageUrl=`;
 
     try {
       const response = await axios.get(apiUrl);
