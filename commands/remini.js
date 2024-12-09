@@ -20,7 +20,7 @@ module.exports = {
       return sendMessage(
         senderId,
         {
-          text: "❗ Please reply to an image with 'remini' to enhance it, use fb messenger to see reply button",
+          text: "❗ Please reply to an image with 'remini' to enhance it.",
         },
         pageAccessToken
       );
@@ -40,7 +40,8 @@ module.exports = {
       const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
       const { data } = await axios.get(apiUrl);
 
-      if (data && data.url) {
+      // Ensure we correctly parse the API response
+      if (data && data.ImageUrl) {
         // Send back the enhanced image
         await sendMessage(
           senderId,
@@ -48,14 +49,14 @@ module.exports = {
             attachment: {
               type: "image",
               payload: {
-                url: data.url,
+                url: data.ImageUrl, // Correct field from API response
               },
             },
           },
           pageAccessToken
         );
       } else {
-        throw new Error("Invalid API response");
+        throw new Error("Invalid API response: Missing ImageUrl field.");
       }
     } catch (error) {
       console.error("Error enhancing image:", error.message || error);
