@@ -51,13 +51,14 @@ module.exports = {
 
       const imgurImageUrl = imgurResponse.data.uploaded.image;
 
+      // Ensure only one image is being sent in the response
       await sendMessage(
         chilli,
         {
           attachment: {
             type: "image",
             payload: {
-              url: imgurImageUrl,
+              url: imgurImageUrl,  // Single image URL
             },
           },
         },
