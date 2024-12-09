@@ -8,15 +8,15 @@ module.exports = {
   author: 'chilli',
 
   async execute(senderId, args, pageAccessToken, imageUrl) {
-    if (!imageUrl) {
+    if (!imageUrl || imageUrl.trim() === '') {
       return sendMessage(senderId, {
         text: `❗ Please send an image first, then type "remini" to enhance its quality.`
       }, pageAccessToken);
     }
 
-    await sendMessage(senderId, { text: '🔄 Enhancing the image quality, please wait...' }, pageAccessToken);
-
     try {
+      await sendMessage(senderId, { text: '🔄 Enhancing the image quality, please wait...' }, pageAccessToken);
+
       const reminiApiUrl = `${api.kaizen}/api/upscale?url=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(senderId, {
@@ -27,7 +27,6 @@ module.exports = {
           }
         }
       }, pageAccessToken);
-
     } catch (error) {
       console.error('Error enhancing image:', error);
       await sendMessage(senderId, {
