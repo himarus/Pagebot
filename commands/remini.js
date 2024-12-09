@@ -8,6 +8,7 @@ module.exports = {
   author: "chilli pogi",
 
   async execute(chilli, pogi, accessToken, event) {
+    // Retrieve the image URL from the message or the reply
     let imageUrl = getAttachmentUrl(event);
 
     if (!imageUrl) {
@@ -25,6 +26,7 @@ module.exports = {
     }
 
     try {
+      // Send a message to the user that the image is being enhanced
       await sendMessage(
         chilli,
         {
@@ -33,6 +35,7 @@ module.exports = {
         accessToken
       );
 
+      // Call the Kaizen API to get the enhanced image
       const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(apiUrl);
 
@@ -40,8 +43,10 @@ module.exports = {
         throw new Error("Invalid API response: Missing ImageUrl field.");
       }
 
+      // Get the enhanced image URL
       const enhancedImageUrl = response.data.ImageUrl;
 
+      // Upload the enhanced image to Imgur
       const imgurUrl = `https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(enhancedImageUrl)}`;
       const imgurResponse = await axios.get(imgurUrl);
 
@@ -49,16 +54,17 @@ module.exports = {
         throw new Error("Imgur upload failed.");
       }
 
+      // Get the final Imgur image URL
       const imgurImageUrl = imgurResponse.data.uploaded.image;
 
-      // Ensure only one image is being sent in the response
+      // Send the uploaded Imgur image as an attachment
       await sendMessage(
         chilli,
         {
           attachment: {
             type: "image",
             payload: {
-              url: imgurImageUrl,  // Single image URL
+              url: imgurImageUrl, // Only one image URL should be sent
             },
           },
         },
@@ -77,11 +83,13 @@ module.exports = {
   },
 };
 
+// Helper function to get the image URL from the message attachment
 function getAttachmentUrl(event) {
   const attachment = event.message?.attachments?.[0];
   return attachment?.type === "image" ? attachment.payload.url : null;
 }
 
+// Helper function to get the replied image (if available)
 async function getRepliedImage(event, accessToken) {
   if (event.message?.reply_to?.mid) {
     try {
