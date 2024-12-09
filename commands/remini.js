@@ -3,91 +3,94 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "remini",
-  description: "Enhance an image using the Kaiz Upscale API.",
+  description: "Enhance an image using the Kaiz Upscale API and upload to Imgur.",
   usage: "Reply to an image with 'remini' to enhance it.",
-  author: "chilli",
+  author: "chilli pogi",
 
-  async execute(senderId, args, pageAccessToken, event) {
-    let imageUrl = getAttachmentUrl(event);
+  async execute(chilli, pogi, a, b) {
+    let a = getAttachmentUrl(b);
 
-    // If no image is attached, try to get it from the replied message
-    if (!imageUrl) {
-      imageUrl = await getRepliedImage(event, pageAccessToken);
+    if (!a) {
+      a = await getRepliedImage(b, a);
     }
 
-    // If still no image, notify the user
-    if (!imageUrl) {
+    if (!a) {
       return sendMessage(
-        senderId,
+        chilli,
         {
-          text: "❗ Please reply to an image with 'remini' to enhance it.",
+          text: "❗ Please reply to an image with 'remini' to enhance it. Make sure to use Facebook Messenger for this feature.",
         },
-        pageAccessToken
+        a
       );
     }
 
     try {
-      // Notify the user that the image is being processed
       await sendMessage(
-        senderId,
+        chilli,
         {
           text: "Enhancing the image, please wait... 🖼️",
         },
-        pageAccessToken
+        a
       );
 
-      // Send the image to the Kaiz Upscale API
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
-      const { data } = await axios.get(apiUrl);
+      const pogi = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(a)}`;
+      const b = await axios.get(pogi);
 
-      // Ensure we correctly parse the API response
-      if (data && data.ImageUrl) {
-        // Send back the enhanced image
-        await sendMessage(
-          senderId,
-          {
-            attachment: {
-              type: "image",
-              payload: {
-                url: data.ImageUrl, // Correct field from API response
-              },
-            },
-          },
-          pageAccessToken
-        );
-      } else {
+      if (!b.data || !b.data.ImageUrl) {
         throw new Error("Invalid API response: Missing ImageUrl field.");
       }
-    } catch (error) {
-      console.error("Error enhancing image:", error.message || error);
+
+      const chilli = b.data.ImageUrl;
+
+      const a = `https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(chilli)}`;
+      const b = await axios.get(a);
+
+      if (!b.data || b.data.uploaded.status !== "success") {
+        throw new Error("Imgur upload failed.");
+      }
+
+      const pogi = b.data.uploaded.image;
+
       await sendMessage(
-        senderId,
+        chilli,
+        {
+          attachment: {
+            type: "image",
+            payload: {
+              url: pogi,
+            },
+          },
+        },
+        a
+      );
+    } catch (b) {
+      console.error("Error enhancing image:", b.message || b);
+      await sendMessage(
+        chilli,
         {
           text: "⚠️ An error occurred while enhancing the image. Please try again later.",
         },
-        pageAccessToken
+        a
       );
     }
   },
 };
 
-// Helper function to get the direct attachment URL
-function getAttachmentUrl(event) {
-  const attachment = event.message?.attachments?.[0];
-  return attachment?.type === "image" ? attachment.payload.url : null;
+function getAttachmentUrl(b) {
+  const pogi = b.message?.attachments?.[0];
+  return pogi?.type === "image" ? pogi.payload.url : null;
 }
 
-// Helper function to get the image URL from a replied message
-async function getRepliedImage(event, pageAccessToken) {
-  if (event.message?.reply_to?.mid) {
+async function getRepliedImage(b, a) {
+  if (b.message?.reply_to?.mid) {
     try {
-      const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
-        params: { access_token: pageAccessToken },
+      const { data: pogi } = await axios.get(`https://graph.facebook.com/v21.0/${b.message.reply_to.mid}/attachments`, {
+        params: { access_token: a },
       });
-      const imageData = data?.data?.[0]?.image_data;
-      return imageData ? imageData.url : null;
-    } catch (error) {
-      console.error("Error fetching replied image:", error.message || error);
+      const a = pogi?.data?.[0]?.image_data;
+      return a ? a.url : null;
+    } catch (chilli) {
+      console.error("Error fetching replied image:", chilli.message || chilli);
       return null;
     }
   }
