@@ -7,20 +7,20 @@ module.exports = {
   usage: "Reply to an image with 'remini' to enhance it.",
   author: "chilli pogi",
 
-  async execute(chilli, pogi, a, b) {
-    let a = getAttachmentUrl(b);
+  async execute(chilli, pogi, accessToken, event) {
+    let imageUrl = getAttachmentUrl(event);
 
-    if (!a) {
-      a = await getRepliedImage(b, a);
+    if (!imageUrl) {
+      imageUrl = await getRepliedImage(event, accessToken);
     }
 
-    if (!a) {
+    if (!imageUrl) {
       return sendMessage(
         chilli,
         {
           text: "❗ Please reply to an image with 'remini' to enhance it. Make sure to use Facebook Messenger for this feature.",
         },
-        a
+        accessToken
       );
     }
 
@@ -30,26 +30,26 @@ module.exports = {
         {
           text: "Enhancing the image, please wait... 🖼️",
         },
-        a
+        accessToken
       );
 
-      const pogi = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(a)}`;
-      const b = await axios.get(pogi);
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(apiUrl);
 
-      if (!b.data || !b.data.ImageUrl) {
+      if (!response.data || !response.data.ImageUrl) {
         throw new Error("Invalid API response: Missing ImageUrl field.");
       }
 
-      const chilli = b.data.ImageUrl;
+      const enhancedImageUrl = response.data.ImageUrl;
 
-      const a = `https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(chilli)}`;
-      const b = await axios.get(a);
+      const imgurUrl = `https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(enhancedImageUrl)}`;
+      const imgurResponse = await axios.get(imgurUrl);
 
-      if (!b.data || b.data.uploaded.status !== "success") {
+      if (!imgurResponse.data || imgurResponse.data.uploaded.status !== "success") {
         throw new Error("Imgur upload failed.");
       }
 
-      const pogi = b.data.uploaded.image;
+      const imgurImageUrl = imgurResponse.data.uploaded.image;
 
       await sendMessage(
         chilli,
@@ -57,40 +57,40 @@ module.exports = {
           attachment: {
             type: "image",
             payload: {
-              url: pogi,
+              url: imgurImageUrl,
             },
           },
         },
-        a
+        accessToken
       );
-    } catch (b) {
-      console.error("Error enhancing image:", b.message || b);
+    } catch (error) {
+      console.error("Error enhancing image:", error.message || error);
       await sendMessage(
         chilli,
         {
           text: "⚠️ An error occurred while enhancing the image. Please try again later.",
         },
-        a
+        accessToken
       );
     }
   },
 };
 
-function getAttachmentUrl(b) {
-  const pogi = b.message?.attachments?.[0];
-  return pogi?.type === "image" ? pogi.payload.url : null;
+function getAttachmentUrl(event) {
+  const attachment = event.message?.attachments?.[0];
+  return attachment?.type === "image" ? attachment.payload.url : null;
 }
 
-async function getRepliedImage(b, a) {
-  if (b.message?.reply_to?.mid) {
+async function getRepliedImage(event, accessToken) {
+  if (event.message?.reply_to?.mid) {
     try {
-      const { data: pogi } = await axios.get(`https://graph.facebook.com/v21.0/${b.message.reply_to.mid}/attachments`, {
-        params: { access_token: a },
+      const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
+        params: { access_token: accessToken },
       });
-      const a = pogi?.data?.[0]?.image_data;
-      return a ? a.url : null;
-    } catch (chilli) {
-      console.error("Error fetching replied image:", chilli.message || chilli);
+      const imageData = data?.data?.[0]?.image_data;
+      return imageData ? imageData.url : null;
+    } catch (error) {
+      console.error("Error fetching replied image:", error.message || error);
       return null;
     }
   }
