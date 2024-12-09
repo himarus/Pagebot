@@ -3,7 +3,7 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "remini",
-  description: "Enhance an image using the Kaiz Upscale API and upload to Imgur.",
+  description: "Enhance an image using the Kaizen Upscale API and upload to Imgur.",
   usage: "Reply to an image with 'remini' to enhance it.",
   author: "chilli pogi",
 
@@ -26,16 +26,16 @@ module.exports = {
     }
 
     try {
-      // Send a message to the user that the image is being enhanced
+      // Step 1: Send a message to notify the user that the image is being enhanced
       await sendMessage(
         chilli,
         {
-          text: "Enhancing the image, please wait... 🖼️",
+          text: "Enhancing the image, please wait... 🖼️", // Notify the user about the enhancement
         },
         accessToken
       );
 
-      // Call the Kaizen API to get the enhanced image
+      // Step 2: Call the Kaizen API to enhance the image
       const apiUrl = `https://kaiz-apis.gleeze.com/api/upscale-v2?url=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(apiUrl);
 
@@ -43,10 +43,10 @@ module.exports = {
         throw new Error("Invalid API response: Missing ImageUrl field.");
       }
 
-      // Get the enhanced image URL
+      // Step 3: Get the enhanced image URL
       const enhancedImageUrl = response.data.ImageUrl;
 
-      // Upload the enhanced image to Imgur
+      // Step 4: Upload the enhanced image to Imgur using the upload trick
       const imgurUrl = `https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(enhancedImageUrl)}`;
       const imgurResponse = await axios.get(imgurUrl);
 
@@ -57,14 +57,14 @@ module.exports = {
       // Get the final Imgur image URL
       const imgurImageUrl = imgurResponse.data.uploaded.image;
 
-      // Send the uploaded Imgur image as an attachment
+      // Step 5: Send the image (Only the image, no text)
       await sendMessage(
         chilli,
         {
           attachment: {
             type: "image",
             payload: {
-              url: imgurImageUrl, // Only one image URL should be sent
+              url: imgurImageUrl, // Send the Imgur image URL as the only attachment
             },
           },
         },
