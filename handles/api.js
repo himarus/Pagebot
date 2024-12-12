@@ -1,5 +1,6 @@
 module.exports = {
   joshWebApi: "https://api.joshweb.click",
+  hiro: "https://hiroshi-api.onrender.com",
   heru: "https://heru-apis.gleeze.com",
   kaizen: "https://kaiz-apis.gleeze.com",
   kenlie2: "https://api.kenliejugarap.com",
