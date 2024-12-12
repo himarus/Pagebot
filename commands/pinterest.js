@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "pinterest",
@@ -23,7 +24,7 @@ module.exports = {
         numOfImages = parseInt(lastPart);
         searchTerm = parts.slice(0, -1).join(" ");
       } else {
-        numOfImages = 5;
+        numOfImages = 5; // Default number of images
         searchTerm = argString;
       }
 
@@ -33,9 +34,9 @@ module.exports = {
         }, pageAccessToken);
       }
 
-      const response = await axios.get(`https://api.kenliejugarap.com/pinterestbymarjhun/?search=${encodeURIComponent(searchTerm)}`);
+      const response = await axios.get(`${api.hiro}/image/pinterest?search=${encodeURIComponent(searchTerm)}`);
 
-      if (!response.data.status) {
+      if (!response.data.data || response.data.data.length === 0) {
         return sendMessage(chilli, { text: `No results found for "${searchTerm}".` }, pageAccessToken);
       }
 
