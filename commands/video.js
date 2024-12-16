@@ -15,13 +15,13 @@ module.exports = {
     }
 
     const chilli = pogi.join(' ');
-    const apiUrl = `https://betadash-search-download.vercel.app/videov2?search=${encodeURIComponent(chilli)}`;
+    const apiUrl = `https://yt-video-production.up.railway.app/videov2?search=${encodeURIComponent(chilli)}`;
 
     await sendMessage(kupal, { text: `🔍 Searching for video: "${chilli}"... Please wait.` }, pageAccessToken);
 
     try {
       const response = await axios.get(apiUrl);
-      const { title, downloadUrl, time, views, channelName } = response.data;
+      const { title, downloadUrl, time, views, channelName, image } = response.data;
 
       if (!downloadUrl) {
         await sendMessage(kupal, {
@@ -30,7 +30,7 @@ module.exports = {
         return;
       }
 
-      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}\n\n\n📤 Video is sending... Please wait.`;
+      const videoDetails = `🎉 **Video Found!**\n\n📌 **Title**: ${title}\n📺 **Channel**: ${channelName}\n👁️ **Views**: ${views}\n⏰ **Duration**: ${time}\n\n📤 Video is sending... Please wait.`;
 
       // Use sendButton to send video details with a download button
       await sendButton(videoDetails, [
@@ -60,6 +60,7 @@ module.exports = {
       }
 
     } catch (error) {
+      console.error('Error fetching video:', error);
       await sendMessage(kupal, {
         text: '🚧 An error occurred due to many user. Please just try again.'
       }, pageAccessToken);
