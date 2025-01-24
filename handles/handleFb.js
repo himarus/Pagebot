@@ -1,6 +1,5 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
-const api = require('../handles/api');
 
 async function handleFacebookReelsVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
@@ -10,7 +9,7 @@ async function handleFacebookReelsVideo(chilli, kupal) {
   if (regEx_fbReels.test(messageText)) {
     await sendMessage(pogi, { text: 'Downloading your Facebook Reel, please wait...' }, kupal);
     try {
-      const apiUrl = `${api.kaizen}/api/fbdl?url=${encodeURIComponent(messageText)}`;
+      const apiUrl = `https://kaiz-apis.gleeze.com/api/fbdl?url=${encodeURIComponent(messageText)}`;
       const response = await axios.get(apiUrl);
       const data = response.data;
 
