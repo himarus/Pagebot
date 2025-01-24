@@ -6,7 +6,6 @@ async function handleFacebookReelsVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
   const messageText = chilli.message.text;
 
-  // Regex to match Facebook Reels and Share links
   const regEx_fbReels = /https:\/\/www\.facebook\.com\/(reel\/\d+\?|share\/r\/[a-zA-Z0-9]+\/\?)/;
   
   if (regEx_fbReels.test(messageText)) {
@@ -18,11 +17,11 @@ async function handleFacebookReelsVideo(chilli, kupal) {
       if (data.videoUrl) {
         const videoUrl = data.videoUrl;
 
-        // Check video size before sending
         const videoHead = await axios.head(videoUrl);
         const videoSize = parseInt(videoHead.headers['content-length'], 10);
 
-        if (videoSize && videoSize <= 25 * 1024 * 1024) { // 25 MB limit
+        if (videoSize && videoSize <= 25 * 1024 * 1024) {
+          await sendMessage(pogi, { text: 'Downloading your video, please wait...' }, kupal);
           await sendMessage(pogi, {
             attachment: {
               type: 'video',
@@ -39,7 +38,6 @@ async function handleFacebookReelsVideo(chilli, kupal) {
         await sendMessage(pogi, { text: 'Failed to retrieve the video. Please make sure the link is correct.' }, kupal);
       }
     } catch (chilliError) {
-      console.error('Error downloading Facebook Reel:', chilliError);
       await sendMessage(pogi, { text: 'An error occurred while downloading the Facebook Reel. Please try again later.' }, kupal);
     }
     return true;
