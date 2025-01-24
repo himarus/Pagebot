@@ -4,35 +4,38 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'humanize',
-  description: 'Get a human-like response from the AI.',
-  usage: 'humanize <text>\nExample: humanize Hello there!',
-  author: 'chilli',
-  async execute(chilli, pogi, kupal) {
-    if (!pogi || pogi.length === 0) {
-      await sendMessage(chilli, {
-        text: 'Please provide a text to humanize.\n\nUsage:\n humanize <text>\nExample: humanize Hello there!'
-      }, kupal);
+  description: 'Humanize your message using Kaizen API.',
+  usage: 'humanize <message>\nExample: humanize How are you?',
+  author: 'kaizen',
+
+  async execute(senderId, args, pageAccessToken) {
+    const message = args.join(' ');
+
+    if (!message || message.trim() === '') {
+      await sendMessage(senderId, {
+        text: 'Please provide a message to humanize.'
+      }, pageAccessToken);
       return;
     }
 
-    const text = pogi.join(' ');
-    const apiUrl = `${api.jonelApi}/api/aihuman?text=${encodeURIComponent(text)}`;
-
-    await sendMessage(chilli, { text: 'Humanizing your text, please wait...' }, kupal);
+    const apiUrl = `${api.kaizen}/api/humanizer?q=${encodeURIComponent(message)}`;
 
     try {
       const response = await axios.get(apiUrl);
-      const { message, error } = response.data;
 
-      if (error === "No") {
-        await sendMessage(chilli, { text: message }, kupal);
+      if (response.data && response.data.response) {
+        await sendMessage(senderId, {
+          text: response.data.response
+        }, pageAccessToken);
       } else {
-        await sendMessage(chilli, { text: 'An error occurred while processing your request. Please try again later.' }, kupal);
+        await sendMessage(senderId, {
+          text: '⚠️ Unable to humanize the message. Please try again later.'
+        }, pageAccessToken);
       }
-      
     } catch (error) {
-      console.error('Error in humanize command:', error);
-      await sendMessage(chilli, { text: 'An error occurred while connecting to the API. Please try again later.' }, kupal);
+      await sendMessage(senderId, {
+        text: `⚠️ An error occurred while processing your request. Please try again later.`
+      }, pageAccessToken);
     }
   }
 };
