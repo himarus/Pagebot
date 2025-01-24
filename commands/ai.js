@@ -6,7 +6,7 @@ module.exports = {
   name: 'ai',
   description: 'Get an AI-powered response to your query.',
   usage: 'ai <question>\nExample: ai What is the meaning of life?',
-  author: 'kaizen',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     const question = args.join(' ');
