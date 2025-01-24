@@ -31,7 +31,7 @@ module.exports = {
     } catch (error) {
       console.error('Error in AI command:', error.message || error);
       await sendMessage(senderId, {
-        text: `⚠️ An error occurred while processing your request. Please try again.`
+        text: `⚠️ An error occurred while processing your request. Please try again or use "chilli".`
       }, pageAccessToken);
     }
   }
