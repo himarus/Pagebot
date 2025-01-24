@@ -1,22 +1,24 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const api = require('../handles/api');
 
 async function handleFacebookReelsVideo(chilli, kupal) {
   const pogi = chilli.sender.id;
   const messageText = chilli.message.text;
 
+  // Regex to match Facebook Reels and Share links
   const regEx_fbReels = /https:\/\/www\.facebook\.com\/(reel\/\d+\?|share\/r\/[a-zA-Z0-9]+\/\?)/;
+  
   if (regEx_fbReels.test(messageText)) {
-    await sendMessage(pogi, { text: 'Downloading your Facebook Reel, please wait...' }, kupal);
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/fbdl?url=${encodeURIComponent(messageText)}`;
+      const apiUrl = `${api.kaizen}/api/fbdl?url=${encodeURIComponent(messageText)}`;
       const response = await axios.get(apiUrl);
       const data = response.data;
 
       if (data.videoUrl) {
         const videoUrl = data.videoUrl;
 
-        // Check video size
+        // Check video size before sending
         const videoHead = await axios.head(videoUrl);
         const videoSize = parseInt(videoHead.headers['content-length'], 10);
 
