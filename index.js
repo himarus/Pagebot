@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const path = require('path');
 const { handleMessage } = require('./handles/handleMessage');
 const { handlePostback } = require('./handles/handlePostback');
 
@@ -14,17 +13,8 @@ fs.readdirSync(commandsPath).forEach(file => {
 });
 
 const app = express();
-
-// ================== ADDED SECTION FOR STATIC FILES ==================
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-// ================== WEBSITE ROUTES ==================
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ================== MESSENGER WEBHOOK ROUTES ==================
 const VERIFY_TOKEN = 'pagebot';
 const PAGE_ACCESS_TOKEN = fs.readFileSync('token.txt', 'utf8').trim();
 
@@ -66,17 +56,7 @@ app.post('/webhook', (req, res) => {
   }
 });
 
-// ================== FILE DOWNLOAD ENDPOINT ==================
-app.get('/download/:filename', (req, res) => {
-  const filePath = path.join(__dirname, 'public', 'files', req.params.filename);
-  res.download(filePath, (err) => {
-    if (err) {
-      res.status(404).send('File not found');
-    }
-  });
-});
-
-// ================== CONSOLE DESIGN ==================
+// Display Loading Console with Design Only
 console.clear();
 console.log(`\n\x1b[34m██████╗  █████╗  ██████╗ ███████╗██████╗  ██████╗ ████████╗\n██╔══██╗██╔══██╗██╔════╝ ██╔════╝██╔══██╗██╔═══██╗╚══██╔══╝\n██████╔╝███████║██║  ███╗█████╗  ██████╔╝██║   ██║   ██║   \n██╔═══╝ ██╔══██║██║   ██║██╔══╝  ██╔═══╝ ██║   ██║   ██║   \n██║     ██║  ██║╚██████╔╝███████╗██║     ╚██████╔╝   ██║   \n╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝      ╚═════╝    ╚═╝   \x1b[0m`);
 console.log(`\n \x1b[36m> Creator : Churchill Abing\x1b[0m\n`);
@@ -90,9 +70,7 @@ console.log(`\n\x1b[32mTotal Commands Loaded: ${loadedCommands.length}/${loadedC
 console.log(`\x1b[36mLoading Complete: |██████████████████████████| 100.00%\x1b[0m`);
 console.log(`\nCHAT LOG:\n`);
 
-// ================== SERVER START ==================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\x1b[36mServer is running on port ${PORT}\x1b[0m`);
-  console.log(`\x1b[33mWebsite URL: http://localhost:${PORT}/\x1b[0m`);
 });
