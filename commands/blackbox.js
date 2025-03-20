@@ -1,42 +1,38 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
-const api = require("../handles/api");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
-  name: "blackbox",
-  description: "Interact with the Blackbox GPT-4 API.",
-  usage: "blackbox <your message>",
-  author: "chilli",
+  name: 'claude',
+  description: 'Get a response from the Claude AI via Hazeyy\'s API.',
+  usage: 'claude <message>\nExample: claude Hi',
+  author: 'chill',
 
-  async execute(chilli, args, pageAccessToken) {
-    const userInput = args.join(" ").trim();
+  async execute(senderId, args, pageAccessToken) {
+    const message = args.join(' ');
 
-    if (!userInput) {
-      return sendMessage(chilli, {
-        text: "❗ Usage: blackbox <your message>\nExample: blackbox How can I improve my coding skills?"
+    if (!message || message.trim() === '') {
+      await sendMessage(senderId, {
+        text: ' Please provide a message.\n\nExample: claude Hi'
       }, pageAccessToken);
+      return;
     }
 
+    const apiUrl = `${api.hazey}/api/claude?message=${encodeURIComponent(message)}`;
+
     try {
-      const apiUrl = `${api.kenlie2}/blackbox-gpt4o/`;
-      const { data } = await axios.get(apiUrl, {
-        params: { text: userInput }
-      });
+      const response = await axios.get(apiUrl);
 
-      if (!data || !data.response) {
-        return sendMessage(chilli, {
-          text: "⚠️ Unable to process your request. Please try again."
-        }, pageAccessToken);
+      if (response.data && response.data.claude) {
+        const formattedResponse = `💬 *Claude's Response:*\n\n${response.data.claude}`;
+        await sendMessage(senderId, { text: formattedResponse }, pageAccessToken);
+      } else {
+        throw new Error('Invalid API response.');
       }
-
-      const formattedResponse = `🔮| 𝘉𝘓𝘈𝘊𝘒𝘉𝘖𝘟\n━━━━━━━━━━━━\n${data.response}\n━━━━━━━━━━━━`;
-
-      await sendMessage(chilli, { text: formattedResponse }, pageAccessToken);
-
     } catch (error) {
-      console.error("Error in Blackbox command:", error.message || error);
-      await sendMessage(chilli, {
-        text: "⚠️ An error occurred. Please try again later."
+      console.error('Error in Claude command:', error.message || error);
+      await sendMessage(senderId, {
+        text: `⚠️ An error occurred while processing your request. Please try again later.`
       }, pageAccessToken);
     }
   }
