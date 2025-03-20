@@ -25,9 +25,9 @@ module.exports = {
 
       if (response.data && response.data.Response) {
         const resultMessage = 
-          `𖣘 *BLACKBOX AI Response*\n` +
+          `𖣘 BLACKBOX AI 𖣘\n` +
           `━━━━━━━━━━━━━━━━━━━━━\n` +
-          `🖤 ${response.data.Response}`;
+          ` ${response.data.Response} `;
 
         await sendMessage(senderId, { text: resultMessage }, pageAccessToken);
       } else {
