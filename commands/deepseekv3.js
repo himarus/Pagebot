@@ -18,7 +18,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kaizen}/deepseek-v3?ask=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.kaizen}/api/deepseek-v3?ask=${encodeURIComponent(question)}`;
 
     try {
       const response = await axios.get(apiUrl);
