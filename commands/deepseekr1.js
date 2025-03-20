@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'deepseek',
+  name: 'deepseekr1',
   description: 'Get a response from DeepSeek AI using Kaizen\'s API.',
   usage: 'deepseek <question>\nExample: deepseek What is AI?',
   author: 'chill',
