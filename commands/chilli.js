@@ -18,7 +18,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kaizen}/brave-ai?ask=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.kaizen}/api/brave-ai?ask=${encodeURIComponent(question)}`;
 
     try {
       const response = await axios.get(apiUrl);
