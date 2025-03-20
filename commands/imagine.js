@@ -21,7 +21,7 @@ module.exports = {
     // Send initial "Searching..." message
     await sendMessage(senderId, { text: '🔎 Searching for music on iTunes...' }, pageAccessToken);
 
-    const apiUrl = `${api.hazey}/itunes?q=${encodeURIComponent(query)}`;
+    const apiUrl = `${api.hazey}/api/itunes?q=${encodeURIComponent(query)}`;
 
     try {
       const response = await axios.get(apiUrl);
