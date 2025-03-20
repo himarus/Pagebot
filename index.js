@@ -14,6 +14,7 @@ fs.readdirSync(commandsPath).forEach(file => {
 
 const app = express();
 app.use(bodyParser.json());
+app.use(express.static('public')); // Serve static website files
 
 const VERIFY_TOKEN = 'pagebot';
 const PAGE_ACCESS_TOKEN = fs.readFileSync('token.txt', 'utf8').trim();
@@ -73,4 +74,5 @@ console.log(`\nCHAT LOG:\n`);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`\x1b[36mServer is running on port ${PORT}\x1b[0m`);
+  console.log(`\x1b[36mWebsite available at: http://localhost:${PORT}\x1b[0m`);
 });
