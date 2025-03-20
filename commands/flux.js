@@ -4,48 +4,35 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'flux',
-  description: 'Generate an image using Flux AI via Hazeyy\'s API.',
-  usage: 'flux <description>\nExample: flux A cat and a dog',
-  author: 'chill',
+  description: 'Generate an image based on the provided text using Hazey API.',
+  usage: 'flux <text>',
+  author: 'your_name',
 
   async execute(senderId, args, pageAccessToken) {
-    const text = args.join(' ');
-
-    if (!text || text.trim() === '') {
-      await sendMessage(senderId, {
-        text: 'Please provide a description for the image.\n\nExample: *flux A cat and a dog*'
-      }, pageAccessToken);
+    if (!args || !Array.isArray(args) || args.length === 0) {
+      await sendMessage(senderId, { text: 'Please provide the text for image generation. Example: flux A beautiful sunset.' }, pageAccessToken);
       return;
     }
 
-    // Send a "Generating image..." message first
-    await sendMessage(senderId, { text: '⏳ Generating image, please wait...' }, pageAccessToken);
-
+    const text = args.join(' ');
     const apiUrl = `${api.hazey}/api/fluxx?text=${encodeURIComponent(text)}`;
 
     try {
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.imageUrl) {
-        const imageUrl = response.data.imageUrl; // Get the actual image URL
-
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: imageUrl,
-              is_reusable: true
-            }
-          }
+        await sendMessage(senderId, { 
+          attachment: { 
+            type: 'image', 
+            payload: { url: response.data.imageUrl } 
+          } 
         }, pageAccessToken);
       } else {
         throw new Error('Invalid API response.');
       }
     } catch (error) {
-      console.error('Error in Flux command:', error.message || error);
-      await sendMessage(senderId, {
-        text: `⚠️ An error occurred while generating the image. Please try again later.`
-      }, pageAccessToken);
+      console.error('Error in flux command:', error.message || error);
+      await sendMessage(senderId, { text: 'Error: Could not generate image. Please try again later.' }, pageAccessToken);
     }
   }
 };
