@@ -6,7 +6,7 @@ module.exports = {
   name: 'flux',
   description: 'Generate an image based on the provided text using Hazey API.',
   usage: 'flux <text>',
-  author: 'your_name',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length === 0) {
