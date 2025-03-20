@@ -18,7 +18,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kaizen}/humanizer?q=${encodeURIComponent(text)}`;
+    const apiUrl = `${api.kaizen}/api/humanizer?q=${encodeURIComponent(text)}`;
 
     try {
       const response = await axios.get(apiUrl);
