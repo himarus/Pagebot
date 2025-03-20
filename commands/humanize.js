@@ -3,36 +3,39 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'humanize',
-  description: 'Humanize your message using Kaizen API.',
-  usage: 'humanize <message>\nExample: humanize How are you?',
-  author: 'kaizen',
+  name: 'humanizer',
+  description: 'Convert AI-generated text into human-like text using Kaizen\'s API.',
+  usage: 'humanizer <text>\nExample: humanizer This is an AI-generated sentence.',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const message = args.join(' ');
+    const text = args.join(' ');
 
-    if (!message || message.trim() === '') {
+    if (!text || text.trim() === '') {
       await sendMessage(senderId, {
-        text: 'Please provide a message to humanize.'
+        text: '📝 Please provide a text to humanize.\n\nExample: humanizer This is an AI-generated sentence.'
       }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `${api.kaizen}/api/humanizer?q=${encodeURIComponent(message)}`;
+    const apiUrl = `${api.kaizen}/humanizer?q=${encodeURIComponent(text)}`;
 
     try {
       const response = await axios.get(apiUrl);
 
       if (response.data && response.data.response) {
-        await sendMessage(senderId, {
-          text: response.data.response
-        }, pageAccessToken);
+        const resultMessage = 
+          `🔹 *AI to Human Text Conversion* 🔹\n\n` +
+          `💻 *AI Text:* ${text}\n` +
+          `📝 *Humanized Version:* ${response.data.response}\n\n` +
+          `✅ *Your text now sounds more natural!*`;
+
+        await sendMessage(senderId, { text: resultMessage }, pageAccessToken);
       } else {
-        await sendMessage(senderId, {
-          text: '⚠️ Unable to humanize the message. Please try again later.'
-        }, pageAccessToken);
+        throw new Error('Invalid API response.');
       }
     } catch (error) {
+      console.error('Error in Humanizer command:', error.message || error);
       await sendMessage(senderId, {
         text: `⚠️ An error occurred while processing your request. Please try again later.`
       }, pageAccessToken);
