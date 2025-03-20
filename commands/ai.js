@@ -4,32 +4,34 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'ai',
-  description: 'Get an AI-powered response to your query.',
-  usage: 'ai <question>\nExample: ai How are you?',
+  description: 'Interact with ChatGPT-4o mini by Hazeyy.',
+  usage: 'ai <message>\nExample: ai How do I learn JavaScript?',
   author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const question = args.join(' ');
+    const message = args.join(' ');
 
-    if (!question || question.trim() === '') {
-      await sendMessage(senderId, { text: 'Please provide a question.' }, pageAccessToken);
+    if (!message || message.trim() === '') {
+      await sendMessage(senderId, {
+        text: '✦ *GPT-4o Mini*\n\n💬 *Enter a message to chat with AI!*\n\n📌 Example: ai How do I learn JavaScript?'
+      }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `${api.kaizen}/api/gpt4o-mini?ask=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.hazey}/model1?message=${encodeURIComponent(message)}`;
 
     try {
       const response = await axios.get(apiUrl);
 
-      if (response.data && response.data.response) {
-        await sendMessage(senderId, { text: response.data.response }, pageAccessToken);
+      if (response.data && response.data.models) {
+        await sendMessage(senderId, { text: response.data.models }, pageAccessToken);
       } else {
         throw new Error('Invalid API response.');
       }
     } catch (error) {
-      console.error('Error in AI command:', error.message || error);
+      console.error('Error in AI command try to use chilli or ai2 or deepseekr1:', error.message || error);
       await sendMessage(senderId, {
-        text: `⚠️ An error occurred while processing your request. You can try using "ai2" or retry the command.`
+        text: '⚠️ An error occurred while processing your request. Please try again later.'
       }, pageAccessToken);
     }
   }
