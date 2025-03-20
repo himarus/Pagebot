@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'humanizer',
+  name: 'humanize',
   description: 'Convert AI-generated text into human-like text using Kaizen\'s API.',
   usage: 'humanizer <text>\nExample: humanizer This is an AI-generated sentence.',
   author: 'chill',
