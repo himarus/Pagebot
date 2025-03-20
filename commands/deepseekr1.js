@@ -21,7 +21,7 @@ module.exports = {
     // Indicator message before getting the response
     await sendMessage(senderId, { text: '💬 Answering your question...' }, pageAccessToken);
 
-    const apiUrl = `${api.kaizen}/deepseek-r1?ask=${encodeURIComponent(question)}`;
+    const apiUrl = `${api.kaizen}/api/deepseek-r1?ask=${encodeURIComponent(question)}`;
 
     try {
       const response = await axios.get(apiUrl);
