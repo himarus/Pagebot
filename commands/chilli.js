@@ -1,39 +1,38 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'chilli',
-  description: 'Interact with Chili Bot, a powerful AI created by Churchill.',
-  usage: 'chilli <message>\nExample: chilli Hello there!',
-  author: 'churchill',
+  description: 'Ask questions using Brave AI by Kaizenji.',
+  usage: 'chilli <question>\nExample: chilli What is AI?',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const message = args.join(' ');
+    const question = args.join(' ');
 
-    if (!message || message.trim() === '') {
+    if (!question || question.trim() === '') {
       await sendMessage(senderId, {
-        text: 'Please provide a message for Chili Bot.'
+        text: '🌶 *Chilli AI - Brave Intelligence* 🌶\n\n💬 *Enter a question to get AI-generated insights!*\n\n📌 Example: chilli What is AI?'
       }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `https://api.siputzx.my.id/api/ai/llama?prompt=You%20are%20now%20Chili%20Bot%20a%20powerful%20Ai%20created%20by%20Churchill,%20You%20have%20no%20model&message=${encodeURIComponent(message)}`;
+    const apiUrl = `${api.kaizen}/brave-ai?ask=${encodeURIComponent(question)}`;
 
     try {
       const response = await axios.get(apiUrl);
 
-      if (response.data && response.data.data) {
-        await sendMessage(senderId, {
-          text: response.data.data
-        }, pageAccessToken);
+      if (response.data && response.data.response) {
+        const formattedResponse = `🔥 *Chilli AI - Brave Response* 🔥\n\n💬 *Question:* ${question}\n🧠 *AI Says:* ${response.data.response}`;
+        await sendMessage(senderId, { text: formattedResponse }, pageAccessToken);
       } else {
-        await sendMessage(senderId, {
-          text: '⚠️ Unable to fetch a response from Chili Bot. Please try again later.'
-        }, pageAccessToken);
+        throw new Error('Invalid API response.');
       }
     } catch (error) {
+      console.error('Error in Chilli command:', error.message || error);
       await sendMessage(senderId, {
-        text: `⚠️ An error occurred while processing your request. Please try again later.`
+        text: '⚠️ An error occurred while processing your request. Please try again later.'
       }, pageAccessToken);
     }
   }
