@@ -18,7 +18,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.hazey}/model1?message=${encodeURIComponent(message)}`;
+    const apiUrl = `${api.hazey}/api/model1?message=${encodeURIComponent(message)}`;
 
     try {
       const response = await axios.get(apiUrl);
