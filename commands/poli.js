@@ -8,7 +8,7 @@ module.exports = {
   name: 'poli',
   description: 'Generate an image based on the provided prompt using Hazey API and send it via Imgbb.',
   usage: 'poli <prompt>',
-  author: 'your_name',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     if (!args || !Array.isArray(args) || args.length === 0) {
