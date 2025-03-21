@@ -3,20 +3,24 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'song',
+  name: 'soundcloud',
   description: 'Retrieve an audio track from the Yakzy API for the given search term',
-  usage: 'song <title>',
-  author: 'Pogi',
+  usage: 'soundcloud <title>',
+  author: 'chill',
 
   async execute(chilli, args, pogi) {
     const search = args.join(' ');
 
     if (!search || search.trim() === '') {
       await sendMessage(chilli, {
-        text: 'Please provide a song title. Example: song Apt'
+        text: 'Please provide a song title. Example: soundcloud Apt'
       }, pogi);
       return;
     }
+
+    await sendMessage(chilli, {
+      text: `🔍 Searching for "${search}" on SoundCloud...`
+    }, pogi);
 
     const musicUrl = `${api.yakzy}/sc?search=${encodeURIComponent(search)}`;
 
