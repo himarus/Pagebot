@@ -220,20 +220,19 @@ body.light-mode {
     background: #f0f0f0;
 }
 
-body.light-mode .container {
-    background: var(--bg-color);
-    box-shadow: 0 0 3rem rgba(0, 0, 0, 0.1);
+body.light-mode .datetime {
+    color: rgba(0, 0, 0, 0.85); /* Darker text color for light mode */
 }
 
-body.light-mode .status {
-    background: linear-gradient(145deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.03));
-    border: 1px solid rgba(0, 0, 0, 0 .1);
+body.light ```css
+-mode .status {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-body.light-mode .verse-card, 
-body.light-mode .catfact-card {
-    background: linear-gradient(145deg, rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.05));
-    border: 1px solid rgba(74, 144, 226, 0.1);
+body.light-mode .verse-card, body.light-mode .catfact-card {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 body.light-mode .facebook-link {
