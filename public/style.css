@@ -19,10 +19,11 @@ body {
     min-height: 100vh;
     display: grid;
     place-items: center;
-    color: var(-- text-color);
+    color: var(--text-color);
     background: #0a0a0a;
     line-height: 1.7;
     font-size: 1.1rem;
+    transition: background var(--transition-speed), color var(--transition-speed);
 }
 
 #particles-js {
@@ -226,7 +227,7 @@ body.light-mode .container {
 
 body.light-mode .status {
     background: linear-gradient(145deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.03));
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0 .1);
 }
 
 body.light-mode .verse-card, 
