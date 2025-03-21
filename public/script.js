@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchBibleVerse() {
         try {
-            const response = await fetch('https://api.example.com/bible-verse');
+            const response = await fetch('https://kaiz-apis.gleeze.com/api/bible');
             const data = await response.json();
-            verseTextElement.textContent = data.verse;
+            verseTextElement.textContent = data.verse[0].text;
             verseReferenceElement.textContent = data.reference;
         } catch (error) {
             verseTextElement.textContent = 'Error fetching verse.';
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchCatFact() {
         try {
-            const response = await fetch('https://api.example.com/cat-fact');
+            const response = await fetch('https://kaiz-apis.gleeze.com/api/catfact');
             const data = await response.json();
             catfactTextElement.textContent = data.fact;
         } catch (error) {
