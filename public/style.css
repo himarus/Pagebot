@@ -5,7 +5,7 @@
     --bg-color: rgba(18, 18, 18, 0.95);
     --surface-color: rgba(255, 255, 255, 0.05);
     --transition-speed: 0.3s;
-    --container-width: min(90%, 1200px);
+    --container-width: min(90%, 120 0px);
 }
 
 * {
@@ -126,7 +126,7 @@ body {
 
 .verse-reference {
     font-size: 0.9rem;
-    opacity: 0.8;
+    opacity: 0 .8;
     text-align: right;
 }
 
@@ -221,11 +221,10 @@ body.light-mode {
 }
 
 body.light-mode .datetime {
-    color: rgba(0, 0, 0, 0.85); /* Darker text color for light mode */
+    color: rgba(0, 0, 0, 0.85);
 }
 
-body.light ```css
--mode .status {
+body.light-mode .status {
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(0, 0, 0, 0.1);
 }
