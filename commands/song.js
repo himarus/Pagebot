@@ -4,63 +4,48 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'song',
-  description: 'Search for a song using the Yakzy API',
+  description: 'Retrieve an audio track from the Yakzy API for the given search term',
   usage: 'song <title>',
-  author: 'Churchill',
+  author: 'Pogi',
 
-  async execute(senderId, args, pageAccessToken) {
-    const searchQuery = args.join(' ');
+  async execute(chilli, args, pogi) {
+    const search = args.join(' ');
 
-    if (!searchQuery || searchQuery.trim() === '') {
-      await sendMessage(senderId, {
+    if (!search || search.trim() === '') {
+      await sendMessage(chilli, {
         text: 'Please provide a song title. Example: song Apt'
-      }, pageAccessToken);
+      }, pogi);
       return;
     }
 
-    const apiUrl = `${api.yakzy}/sc?search=${encodeURIComponent(searchQuery)}`;
+    const musicUrl = `${api.yakzy}/sc?search=${encodeURIComponent(search)}`;
 
     try {
-      const response = await axios.get(apiUrl);
+      const checkAudio = await axios.head(musicUrl);
+      const type = checkAudio.headers['content-type'] || '';
 
-      if (!response.data || !response.data.data || response.data.data.length === 0) {
-        throw new Error('No results found.');
-      }
+      if (type.includes('audio')) {
+        await sendMessage(chilli, {
+          text: `🎵 Now playing: ${search}`
+        }, pogi);
 
-      const { title, stream_url, thumbnail, source_url } = response.data.data[0];
-
-      await sendMessage(senderId, {
-        text: `🎵 **Now Playing:** ${title}\n🔗 [Listen Here](${source_url})`
-      }, pageAccessToken);
-
-      if (thumbnail) {
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: {
-              url: thumbnail,
-              is_reusable: true
-            }
-          }
-        }, pageAccessToken);
-      }
-
-      if (stream_url) {
-        await sendMessage(senderId, {
+        await sendMessage(chilli, {
           attachment: {
             type: 'audio',
             payload: {
-              url: stream_url
+              url: musicUrl
             }
           }
-        }, pageAccessToken);
+        }, pogi);
+      } else {
+        await sendMessage(chilli, {
+          text: `No audio results found for "${search}".`
+        }, pogi);
       }
-
     } catch (error) {
-      console.error('Error in song command:', error.message || error);
-      await sendMessage(senderId, {
-        text: '⚠️ An error occurred while searching for the song. Please try again later.'
-      }, pageAccessToken);
+      await sendMessage(chilli, {
+        text: '⚠️ An error occurred while trying to retrieve the audio.'
+      }, pogi);
     }
   }
 };
