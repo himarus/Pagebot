@@ -64,13 +64,6 @@ const updateDateTime = () => {
 setInterval(updateDateTime, 1000);
 updateDateTime(); // Initial call
 
-document.getElementById('refreshVerse').addEventListener('click', fetchBibleVerse);
-document.getElementById('refreshCatFact').addEventListener('click', fetchCatFact);
-document.addEventListener('DOMContentLoaded', () => {
-    fetchBibleVerse();
-    fetch CatFact();
-});
-
 const toggleTheme = () => {
     const body = document.body;
     body.classList.toggle('light-mode');
@@ -84,6 +77,13 @@ const toggleTheme = () => {
 };
 
 document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+document.getElementById('refreshVerse').addEventListener('click', fetchBibleVerse);
+document.getElementById('refreshCatFact').addEventListener('click', fetchCatFact);
+document.addEventListener('DOMContentLoaded', () => {
+    fetchBibleVerse();
+    fetchCatFact();
+});
 
 particlesJS('particles-js', {
     particles: {
