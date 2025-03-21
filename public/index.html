@@ -7,6 +7,7 @@
     <title>PageBot - Automated Web Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -23,6 +24,18 @@
                 <p class="status-text">System Status: <span class="highlight">Operational</span></p>
             </div>
         </div>
+
+        <!-- Bible Verse Section -->
+        <section class="verse-container" aria-label="Daily Bible Verse">
+            <div class="verse-card">
+                <i class="fas fa-bible verse-icon"></i>
+                <p class="verse-text" id="verseText">Loading inspiration...</p>
+                <div class="verse-reference" id="verseReference"></div>
+                <button class="refresh-button" id="refreshVerse" aria-label="Refresh verse">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </section>
 
         <section class="developer-info" aria-label="Developer information">
             <p>Developer: 
