@@ -4,40 +4,63 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'song',
-  description: 'Search and send an MP3 song from Yakzy API.',
-  usage: 'song <song name>',
-  author: 'your_name',
+  description: 'Search for a song using the Yakzy API',
+  usage: 'song <title>',
+  author: 'Churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    if (!args || !Array.isArray(args) || args.length === 0) {
-      await sendMessage(senderId, { text: 'Please provide a song name. Example: song Bye Bye Dead Pool.' }, pageAccessToken);
+    const searchQuery = args.join(' ');
+
+    if (!searchQuery || searchQuery.trim() === '') {
+      await sendMessage(senderId, {
+        text: 'Please provide a song title. Example: song Apt'
+      }, pageAccessToken);
       return;
     }
 
-    const searchQuery = encodeURIComponent(args.join(' '));
-    const apiUrl = `${api.yakzy}/sc?search=${searchQuery}`;
+    const apiUrl = `${api.yakzy}/sc?search=${encodeURIComponent(searchQuery)}`;
 
     try {
-      await sendMessage(senderId, { text: '🔍 Searching for your song, please wait...' }, pageAccessToken);
-
       const response = await axios.get(apiUrl);
-      console.log('API Response:', response.data); // DEBUGGING OUTPUT
 
-      // Check if response has MP3 URL
-      if (response.data && response.data.url) {
+      if (!response.data || !response.data.data || response.data.data.length === 0) {
+        throw new Error('No results found.');
+      }
+
+      const { title, stream_url, thumbnail, source_url } = response.data.data[0];
+
+      await sendMessage(senderId, {
+        text: `🎵 **Now Playing:** ${title}\n🔗 [Listen Here](${source_url})`
+      }, pageAccessToken);
+
+      if (thumbnail) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: thumbnail,
+              is_reusable: true
+            }
+          }
+        }, pageAccessToken);
+      }
+
+      if (stream_url) {
         await sendMessage(senderId, {
           attachment: {
             type: 'audio',
-            payload: { url: response.data.url }
+            payload: {
+              url: stream_url
+            }
           }
         }, pageAccessToken);
-      } else {
-        throw new Error('No MP3 file found in API response.');
       }
 
     } catch (error) {
       console.error('Error in song command:', error.message || error);
-      await sendMessage(senderId, { text: `Error: ${error.message || 'Could not retrieve the song. Please try again later.'}` }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: '⚠️ An error occurred while searching for the song. Please try again later.'
+      }, pageAccessToken);
     }
   }
 };
