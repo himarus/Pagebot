@@ -4,41 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Pagebot - Your automated solution for web management">
-    <title>PageBot</title>
+    <title>PageBot - Automated Web Assistant</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="preconnect" href="https://i.imgur.com">
 </head>
 <body>
     <div id="particles-js"></div>
-    <div class="container">
+    <main class="container">
         <header class="header">
             <h1 class="title">🤖 PageBot</h1>
-            <p id="datetime" aria-live="polite"></p>
+            <p id="datetime" class="datetime" aria-live="polite"></p>
         </header>
 
-        <div class="status" role="status" aria-live="polite">
-            <span class="dot"></span>
-            <p>Bot Status: <span class="status-text">Running</span></p>
+        <div class="status-container">
+            <div class="status" role="status" aria-live="polite">
+                <span class="status-dot"></span>
+                <p class="status-text">System Status: <span class="highlight">Operational</span></p>
+            </div>
         </div>
 
         <section class="developer-info" aria-label="Developer information">
-            <img src="https://i.imgur.com/24LCOn7.jpeg" alt="Churchill Dev's profile picture" 
-                 class="developer-img" loading="lazy">
             <p>Developer: 
                 <a href="https://www.facebook.com/Churchill.Dev4100" 
                    target="_blank" 
                    rel="noopener noreferrer"
                    class="developer-link">
-                    Churchill Dev
+                    Churchill Abing
                 </a>
             </p>
         </section>
-
-        <button id="darkModeToggle" class="theme-toggle" aria-pressed="false">
-            🌓 Toggle Theme
-        </button>
-    </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="script.js" defer></script>
