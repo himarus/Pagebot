@@ -3,24 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pagebot</title>
+    <meta name="description" content="Pagebot - Your automated solution for web management">
+    <title>PageBot</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://i.imgur.com">
 </head>
 <body>
+    <div id="particles-js"></div>
     <div class="container">
-        <h1>pagebot</h1>
-        <p id="datetime"></p>
-        <div class="status">
+        <header class="header">
+            <h1 class="title">🤖 PageBot</h1>
+            <p id="datetime" aria-live="polite"></p>
+        </header>
+
+        <div class="status" role="status" aria-live="polite">
             <span class="dot"></span>
-            <p>Bot is Running</p>
+            <p>Bot Status: <span class="status-text">Running</span></p>
         </div>
-        <div class="developer">
-            <img src="https://i.imgur.com/24LCOn7.jpeg" alt="Developer Photo">
-            <p>Developer: <a href="https://www.facebook.com/Churchill.Dev4100" target="_blank">Churchill Dev</a></p>
-        </div>
-        <button id="darkModeToggle">Toggle Dark Mode</button>
+
+        <section class="developer-info" aria-label="Developer information">
+            <img src="https://i.imgur.com/24LCOn7.jpeg" alt="Churchill Dev's profile picture" 
+                 class="developer-img" loading="lazy">
+            <p>Developer: 
+                <a href="https://www.facebook.com/Churchill.Dev4100" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="developer-link">
+                    Churchill Dev
+                </a>
+            </p>
+        </section>
+
+        <button id="darkModeToggle" class="theme-toggle" aria-pressed="false">
+            🌓 Toggle Theme
+        </button>
     </div>
 
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
