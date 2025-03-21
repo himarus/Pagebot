@@ -22,7 +22,7 @@ body {
     color: var(--text-color);
     background: #0a0a0a;
     line-height: 1.7;
-    font-size: 1.1rem;
+    font-size: 1. 1rem;
 }
 
 #particles-js {
@@ -48,17 +48,8 @@ body {
     margin-bottom: 2.5rem;
 }
 
-.title {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
-    letter-spacing: -0.05em;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
 .datetime {
- font-size: 1.2rem;
+    font-size: 1.2rem;
     opacity: 0.9;
     color: rgba(255, 255, 255, 0.85);
     letter-spacing: 0.05em;
@@ -99,11 +90,11 @@ body {
     color: var(--secondary-color);
 }
 
-.verse-container {
+.verse-container, .catfact-container {
     margin: 2rem 0;
 }
 
-.verse-card {
+.verse-card, .catfact-card {
     position: relative;
     background: linear-gradient(145deg, rgba(74, 144, 226, 0.15), rgba(74, 144, 226, 0.05));
     padding: 2rem;
@@ -114,13 +105,18 @@ body {
     min-height: 180px;
 }
 
-.verse-icon {
+.verse-card:hover, .catfact-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.verse-icon, .catfact-icon {
     font-size: 2rem;
     color: var(--primary-color);
     margin-bottom: 1rem;
 }
 
-.verse-text {
+.verse-text, .catfact-text {
     font-size: 1.1rem;
     line-height: 1.6;
     margin-bottom: 1rem;
@@ -148,5 +144,101 @@ body {
 
 .refresh-button:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: rotate(180deg);
+    transform: rotate(180deg) scale(1.1);
+}
+
+.personal-info {
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.personal-description {
+    font-weight: 500;
+    color: var(--secondary-color);
+}
+
+.social-link {
+    margin-top: 2rem;
+}
+
+.facebook-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: color var(--transition-speed) ease;
+}
+
+.facebook-link:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* Spinner styles */
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary-color);
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Theme toggle button styles */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: var(--surface-color);
+    border: none;
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background var(--transition-speed) ease;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Light mode styles */
+body.light-mode {
+    --text-color: rgba(0, 0, 0, 0.95);
+    --bg-color: rgba(255, 255, 255, 0.95);
+    --surface-color: rgba(0, 0, 0, 0.05);
+    background: #f0f0f0;
+}
+
+body.light-mode .container {
+    background: var(--bg-color);
+    box-shadow: 0 0 3rem rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .status {
+    background: linear-gradient(145deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.03));
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .verse-card, 
+body.light-mode .catfact-card {
+    background: linear-gradient(145deg, rgba(74, 144, 226, 0.1), rgba(74, 144, 226, 0.05));
+    border: 1px solid rgba(74, 144, 226, 0.1);
+}
+
+body.light-mode .facebook-link {
+    color: var(--primary-color);
+}
+
+body.light-mode .facebook-link:hover {
+    color: var(--secondary-color);
 }
