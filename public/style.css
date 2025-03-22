@@ -5,7 +5,7 @@
     --bg-color: rgba(18, 18, 18, 0.95);
     --surface-color: rgba(255, 255, 255, 0.05);
     --transition-speed: 0.3s;
-    --container-width: min(90%, 120 0px);
+    --container-width: min(90%, 1200px);
 }
 
 * {
@@ -126,7 +126,7 @@ body {
 
 .verse-reference {
     font-size: 0.9rem;
-    opacity: 0 .8;
+    opacity: 0.8;
     text-align: right;
 }
 
@@ -178,7 +178,7 @@ body {
     text-decoration: underline;
 }
 
-/* Spinner styles */
+
 .spinner {
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
@@ -194,7 +194,7 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Theme toggle button styles */
+
 .theme-toggle {
     position: fixed;
     top: 1rem;
@@ -212,7 +212,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* Light mode styles */
+
 body.light-mode {
     --text-color: rgba(0, 0, 0, 0.95);
     --bg-color: rgba(255, 255, 255, 0.95);
@@ -240,4 +240,4 @@ body.light-mode .facebook-link {
 
 body.light-mode .facebook-link:hover {
     color: var(--secondary-color);
-}
+        }
