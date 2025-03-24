@@ -19,10 +19,12 @@ module.exports = {
 
     try {
       const response = await axios.get(apiUrl);
+      console.log('API Response:', response.data); // Debugging log
 
-      if (response.data && response.data.result) {
-        const videoLink = response.data.result;
+      // Hanapin ang tamang key sa API response
+      const videoLink = response.data.video || response.data.url || response.data.result;
 
+      if (videoLink) {
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
@@ -36,7 +38,7 @@ module.exports = {
         await sendMessage(senderId, { text: 'No downloadable video found at the provided URL.' }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error in fbdl command:', error.message || error);
+      console.error('Error in fbdl command:', error.response?.data || error.message || error);
       await sendMessage(senderId, { text: 'An error occurred while processing your request. Please try again later.' }, pageAccessToken);
     }
   }
