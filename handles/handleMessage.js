@@ -3,7 +3,6 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTikTok');
-const { handleFacebookReelsVideo } = require('./handleFb');
 const { handleInstagramVideo } = require('./handleInstadl');
 
 const commands = new Map();
@@ -35,7 +34,6 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-    if (await handleFacebookReelsVideo(event, pageAccessToken)) return;
     if (await handleTikTokVideo(event, pageAccessToken)) return;
     if (await handleInstagramVideo(event, pageAccessToken)) return;
 
