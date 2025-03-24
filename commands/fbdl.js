@@ -10,8 +10,14 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     const videoUrl = args[0];
 
-    if (!videoUrl) {
-      await sendMessage(senderId, { text: 'Please provide a Facebook video URL.' }, pageAccessToken);
+    // Validate the provided Facebook video URL
+    const isValidFacebookVideoUrl = (url) => {
+      const regex = /^(https?:\/\/)?(www\.)?(facebook\.com\/.*\/videos\/\d+|facebook\.com\/.*\/posts\/\d+|facebook\.com\/.*\/videos\/)/;
+      return regex.test(url);
+    };
+
+    if (!videoUrl || !isValidFacebookVideoUrl(videoUrl)) {
+      await sendMessage(senderId, { text: '⚠️ Please provide a valid Facebook video URL.' }, pageAccessToken);
       return;
     }
 
@@ -45,7 +51,7 @@ module.exports = {
         await sendMessage(senderId, { text: '⚠️ No downloadable video found at the provided URL.' }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error in fbdl command:', error.message || error);
+      console.error('Error in fbdl command:', error.response ? error.response.data : error.message || error);
       await sendMessage(senderId, { text: '⚠️ An error occurred while processing your request. Please try again later.' }, pageAccessToken);
     }
   }
