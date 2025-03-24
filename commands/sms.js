@@ -16,17 +16,20 @@ module.exports = {
     }
 
     const input = args.join(' ');
-    const [message, number] = input.split('|').map(part => part.trim());
+    const parts = input.split('|');
 
-    // Validate the number format (Philippine mobile number)
-    const phoneNumberPattern = /^(09|\+639)\d{9}$/;
-    if (!message || !number) {
+    if (parts.length !== 2) {
       await sendMessage(senderId, {
         text: '⚠️ Invalid format. Please use like this\n\nExample: sms Hichill | 09123456789'
       }, pageAccessToken);
       return;
     }
 
+    let message = parts[0].trim();
+    const number = parts[1].trim();
+
+    // Validate the number format (Philippine mobile number)
+    const phoneNumberPattern = /^(09|\+639)\d{9}$/;
     if (!phoneNumberPattern.test(number)) {
       await sendMessage(senderId, {
         text: '⚠️ Invalid phone number. Use a valid format: 09123456789 or +639123456789.'
@@ -34,7 +37,9 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodeURIComponent(message)}&number=${encodeURIComponent(number)}`;
+    // Encode message properly to preserve capitalization
+    const encodedMessage = encodeURIComponent(message);
+    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodedMessage}&number=${encodeURIComponent(number)}`;
 
     try {
       const response = await axios.get(apiUrl);
