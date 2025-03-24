@@ -44,11 +44,9 @@ module.exports = {
     }
 
     if (pogi[0] && pogi[0].toLowerCase() === 'all') {
-      const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((cmd, index) => `${convertToGothic(`${index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100\n\n${convertToGothic('📌 | Hidden Features:')}\n${convertToGothic(`- Auto-download Facebook Reels, TikTok, and Instagram videos by sending the link directly.`)}`;
+      const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((cmd, index) => `${convertToGothic(`${index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
-      return sendMessage(kupal, {
-        text: helpTextMessage
-      }, sili);
+      return sendMessage(kupal, { text: helpTextMessage }, sili);
     }
 
     const startIndex = (page - 1) * commandsPerPage;
@@ -59,10 +57,8 @@ module.exports = {
       return sendMessage(kupal, { text: convertToGothic(`Invalid page number. There are only ${totalPages} pages.`) }, sili);
     }
 
-    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕 (Page ')}${page}${convertToGothic(` of ${totalPages}):`)}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commandsForPage.map((cmd, index) => `${convertToGothic(`${startIndex + index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('Type "help [page]" to see another page, or "help all" to show all commands.')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100\n\n${convertToGothic('📌 | Hidden Features:')}\n${convertToGothic(`- Auto-download Facebook Reels, TikTok, and Instagram reels vid by sending the link directly.`)}`;
+    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕 (Page ')}${page}${convertToGothic(` of ${totalPages}):`)}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commandsForPage.map((cmd, index) => `${convertToGothic(`${startIndex + index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('Type "help [page]" to see another page, or "help all" to show all commands.')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
-    sendMessage(kupal, {
-      text: helpTextMessage
-    }, sili);
+    sendMessage(kupal, { text: helpTextMessage }, sili);
   }
 };
