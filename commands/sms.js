@@ -5,7 +5,7 @@ module.exports = {
   name: 'sms',
   description: 'Send an SMS message to a specified number in the format: text|number or text | number',
   usage: 'sms <text|number>\nExample: sms Hichill|09123456789',
-  author: 'churchill',
+  author: 'chilli',
 
   async execute(senderId, args, pageAccessToken) {
     if (args.length === 0) {
@@ -16,7 +16,6 @@ module.exports = {
     }
 
     const input = args.join(' ');
-    // Remove spaces around the pipe character and split
     const [message, number] = input.split('|').map(part => part.trim());
 
     // Validate the number format (Philippine mobile number)
@@ -35,7 +34,10 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodeURIComponent(message)}&number=${encodeURIComponent(number)}`;
+    // Append the disclaimer to the message
+    const finalMessage = `${message}\n\nPlease don't use it for abuse!\n-For educational purposes only\nFrom ChilliBot\nhttps://www.facebook.com/profile.php?id=61567508575373`;
+
+    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodeURIComponent(finalMessage)}&number=${encodeURIComponent(number)}`;
 
     try {
       const response = await axios.get(apiUrl);
