@@ -12,7 +12,7 @@ module.exports = {
 
     // Validate the provided Facebook video URL
     const isValidFacebookVideoUrl = (url) => {
-      const regex = /^(https?:\/\/)?(www\.)?(facebook\.com\/.*\/videos\/\d+|facebook\.com\/.*\/posts\/\d+|facebook\.com\/.*\/videos\/)/;
+      const regex = /^(https?:\/\/)?(www\.)?(facebook\.com\/.*\/videos\/\d+|facebook\.com\/.*\/posts\/\d+|facebook\.com\/share\/r\/\w+|facebook\.com\/.*\/videos\/)/;
       return regex.test(url);
     };
 
