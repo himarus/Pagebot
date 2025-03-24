@@ -1,68 +1,43 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api'); // Import API configuration
 
 module.exports = {
   name: 'fbdl',
-  description: 'Download Facebook videos using a given URL',
+  description: 'Download Facebook video from a given URL.',
   usage: 'fbdl <facebook_video_url>',
-  author: 'chilli',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const videoUrl = args.join(' ');
+    const videoUrl = args[0];
 
     if (!videoUrl) {
-      return sendMessage(senderId, { text: 'Please provide a Facebook video URL. Example: fbdl <video_url>' }, pageAccessToken);
+      await sendMessage(senderId, { text: 'Please provide a Facebook video URL.' }, pageAccessToken);
+      return;
     }
 
-    await sendMessage(senderId, { text: '⏳ Downloading video, please wait...' }, pageAccessToken);
-
-    const apiUrl = `${api.yakzy}/fbdl?url=${encodeURIComponent(videoUrl)}`;
+    const apiUrl = `https://betadash-api-swordslush-production.up.railway.app/fbdl?url=${encodeURIComponent(videoUrl)}`;
 
     try {
       const response = await axios.get(apiUrl);
-      if (response.data && response.data.video_url) {
-        const videoLink = response.data.video_url;
 
-        // Try sending as video attachment
-        try {
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'video',
-              payload: { url: videoLink }
-            }
-          }, pageAccessToken);
-        } catch (error) {
-          console.warn('Video too large, sending as a link instead.');
+      if (response.data && response.data.result) {
+        const videoLink = response.data.result;
 
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'template',
-              payload: {
-                template_type: 'generic',
-                elements: [
-                  {
-                    title: 'Download Video',
-                    subtitle: 'Click below to download the Facebook video.',
-                    buttons: [
-                      {
-                        type: 'web_url',
-                        url: videoLink,
-                        title: 'Download'
-                      }
-                    ]
-                  }
-                ]
-              }
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'video',
+            payload: {
+              url: videoLink,
+              is_reusable: true
             }
-          }, pageAccessToken);
-        }
+          }
+        }, pageAccessToken);
       } else {
-        throw new Error('No video found.');
+        await sendMessage(senderId, { text: 'No downloadable video found at the provided URL.' }, pageAccessToken);
       }
     } catch (error) {
       console.error('Error in fbdl command:', error.message || error);
-      await sendMessage(senderId, { text: '⚠️ Failed to download the video. Please check the URL or try again later.' }, pageAccessToken);
+      await sendMessage(senderId, { text: 'An error occurred while processing your request. Please try again later.' }, pageAccessToken);
     }
   }
 };
