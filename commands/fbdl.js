@@ -15,36 +15,38 @@ module.exports = {
       return;
     }
 
+    await sendMessage(senderId, { text: `🔍 Fetching video from: ${videoUrl}` }, pageAccessToken);
+
     const apiUrl = `https://betadash-api-swordslush-production.up.railway.app/fbdl?url=${encodeURIComponent(videoUrl)}`;
 
     try {
-      const response = await axios.get(apiUrl, { responseType: 'json' });
+      const response = await axios.get(apiUrl);
 
-      console.log('Response Type:', typeof response.data);
-      console.log('API Response:', response.data);
+      if (response.data && response.data.result) {
+        const videoLink = response.data.result;
 
-      if (typeof response.data !== 'object') {
-        throw new Error('Invalid API response format.');
-      }
+        // Check if the video link is accessible
+        const checkVideo = await axios.head(videoLink);
+        const type = checkVideo.headers['content-type'] || '';
 
-      const videoLink = response.data.video || response.data.url || response.data.result;
-
-      if (videoLink) {
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'video',
-            payload: {
-              url: videoLink,
-              is_reusable: true
+        if (type.includes('video')) {
+          await sendMessage(senderId, {
+            attachment: {
+              type: 'video',
+              payload: {
+                url: videoLink
+              }
             }
-          }
-        }, pageAccessToken);
+          }, pageAccessToken);
+        } else {
+          await sendMessage(senderId, { text: '⚠️ No downloadable video found at the provided URL.' }, pageAccessToken);
+        }
       } else {
-        await sendMessage(senderId, { text: 'No downloadable video found at the provided URL.' }, pageAccessToken);
+        await sendMessage(senderId, { text: '⚠️ No downloadable video found at the provided URL.' }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error in fbdl command:', error.response?.data || error.message || error);
-      await sendMessage(senderId, { text: 'An error occurred while processing your request. Please try again later.' }, pageAccessToken);
+      console.error('Error in fbdl command:', error.message || error);
+      await sendMessage(senderId, { text: '⚠️ An error occurred while processing your request. Please try again later.' }, pageAccessToken);
     }
   }
 };
