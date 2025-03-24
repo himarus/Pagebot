@@ -18,10 +18,15 @@ module.exports = {
     const apiUrl = `https://betadash-api-swordslush-production.up.railway.app/fbdl?url=${encodeURIComponent(videoUrl)}`;
 
     try {
-      const response = await axios.get(apiUrl);
-      console.log('API Response:', response.data); // Debugging log
+      const response = await axios.get(apiUrl, { responseType: 'json' });
 
-      // Hanapin ang tamang key sa API response
+      console.log('Response Type:', typeof response.data);
+      console.log('API Response:', response.data);
+
+      if (typeof response.data !== 'object') {
+        throw new Error('Invalid API response format.');
+      }
+
       const videoLink = response.data.video || response.data.url || response.data.result;
 
       if (videoLink) {
