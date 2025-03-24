@@ -10,11 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (args.length === 0) {
       await sendMessage(senderId, {
-        text: '⚠️ Please provide a message and a number in the format:\n\n' +
-              'text|number\n' +
-              'or\n' +
-              'text | number\n\n' +
-              'Example: sms Hichill|09123456789'
+        text: '⚠️ Please provide a message and a number in the format:\n\nExample: sms Hichill | 09123456789'
       }, pageAccessToken);
       return;
     }
