@@ -29,7 +29,7 @@ module.exports = {
 
     if (!phoneNumberPattern.test(number)) {
       await sendMessage(senderId, {
-        text: '⚠️ Invalid phone number. Use a valid format: 09123456789\n\nNote: This command is only valid for PH numbers.'
+        text: '⚠️ Invalid phone number. Use a valid format: 09123456789 or +639123456789.'
       }, pageAccessToken);
       return;
     }
