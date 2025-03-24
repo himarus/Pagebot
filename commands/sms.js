@@ -28,7 +28,6 @@ module.exports = {
     let message = parts[0].trim();
     const number = parts[1].trim();
 
-    // Validate the number format (Philippine mobile number)
     const phoneNumberPattern = /^(09|\+639)\d{9}$/;
     if (!phoneNumberPattern.test(number)) {
       await sendMessage(senderId, {
@@ -37,7 +36,7 @@ module.exports = {
       return;
     }
 
-    // Encode message properly to preserve capitalization
+    
     const encodedMessage = encodeURIComponent(message);
     const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodedMessage}&number=${encodeURIComponent(number)}`;
 
