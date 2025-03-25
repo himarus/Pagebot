@@ -49,19 +49,28 @@ module.exports = {
       return;
     }
 
-    const encodedMessage = encodeURIComponent(message);
-    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodedMessage}&number=${encodeURIComponent(number)}`;
+    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodeURIComponent(message)}&number=${encodeURIComponent(number)}`;
 
     try {
       const response = await axios.get(apiUrl);
+      let data = response.data;
 
-      if (response.data && response.data.status) {
+      if (data.status) {
+        let filteredMessage = data.message
+          .replace(/📨 From: Anonymous[\s\S]*💬 Message:/, '') // Removes "📨 From: Anonymous" and "💬 Message:"
+          .replace(/📢 SMS Service Notice:[\s\S]*$/, '') // Removes "📢 SMS Service Notice" and extra disclaimer
+          .trim();
+
         await sendMessage(senderId, {
-          text: `✅ SMS sent successfully!\nMessage sent: "${message}"`
+          text: `✅ SMS sent successfully!\nMessage sent: "${filteredMessage}"`
         }, pageAccessToken);
 
         cooldowns.set(senderId, Date.now());
         setTimeout(() => cooldowns.delete(senderId), cooldownTime);
+      } else if (data.error) {
+        await sendMessage(senderId, {
+          text: `⚠️ ${data.error}`
+        }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
           text: '⚠️ Failed to send SMS. Please try again.'
