@@ -1,6 +1,8 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
+const cooldowns = new Map();
+
 module.exports = {
   name: 'sms',
   description: 'Send an SMS message to a specified number in the format: text|number or text | number',
@@ -8,6 +10,17 @@ module.exports = {
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
+    const cooldownTime = 10 * 1000;
+    const lastUsed = cooldowns.get(senderId);
+
+    if (lastUsed && Date.now() - lastUsed < cooldownTime) {
+      const remainingTime = ((cooldownTime - (Date.now() - lastUsed)) / 1000).toFixed(1);
+      await sendMessage(senderId, {
+        text: `⚠️ You are on cooldown! Please wait ${remainingTime} seconds before sending another SMS.`
+      }, pageAccessToken);
+      return;
+    }
+
     if (args.length === 0) {
       await sendMessage(senderId, {
         text: '⚠️ Please provide a message and a number in the format:\n\nExample: sms Hichill | 09123456789'
@@ -36,7 +49,6 @@ module.exports = {
       return;
     }
 
-    
     const encodedMessage = encodeURIComponent(message);
     const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodedMessage}&number=${encodeURIComponent(number)}`;
 
@@ -47,6 +59,9 @@ module.exports = {
         await sendMessage(senderId, {
           text: `✅ SMS sent successfully!\nMessage sent: "${message}"`
         }, pageAccessToken);
+
+        cooldowns.set(senderId, Date.now());
+        setTimeout(() => cooldowns.delete(senderId), cooldownTime);
       } else {
         await sendMessage(senderId, {
           text: '⚠️ Failed to send SMS. Please try again.'
