@@ -23,7 +23,7 @@ module.exports = {
 
     if (args.length === 0) {
       await sendMessage(senderId, {
-        text: '⚠️ Please provide sender, message, and number in this format:\n\nExample: sms ChilliBot|Hello|09123456789'
+        text: '⚠️ Please provide sender, message, and number in this format:\n\nExample: sms ChilliBot | Hello | 09123456789'
       }, pageAccessToken);
       return;
     }
