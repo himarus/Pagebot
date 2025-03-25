@@ -19,7 +19,7 @@ module.exports = {
     const match = input.match(/^(\d{11})\s*\|\s*(.+)$/);
 
     if (!match) {
-      return sendMessage(senderId, { text: '⚠️ Invalid format! Use: sms <number>|<message>\nExample: sms 09814746590|Hello' }, pageAccessToken);
+      return sendMessage(senderId, { text: '⚠️ Invalid format! Use: sms <number>|<message>\nExample: sms 09123456789|Hello' }, pageAccessToken);
     }
 
     const [, number, message] = match;
