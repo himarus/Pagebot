@@ -5,8 +5,8 @@ const cooldowns = new Map();
 
 module.exports = {
   name: 'sms',
-  description: 'Send an SMS message to a specified number in the format: text|number or text | number',
-  usage: 'sms <text|number>\nExample: sms Hichill|09123456789',
+  description: 'Send an SMS message with a custom sender name in the format: from|text|number',
+  usage: 'sms <from|text|number>\nExample: sms ChilliBot|Hello|09123456789',
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
@@ -23,7 +23,7 @@ module.exports = {
 
     if (args.length === 0) {
       await sendMessage(senderId, {
-        text: '⚠️ Please provide a message and a number in the format:\n\nExample: sms Hichill | 09123456789'
+        text: '⚠️ Please provide sender, message, and number in this format:\n\nExample: sms ChilliBot|Hello|09123456789'
       }, pageAccessToken);
       return;
     }
@@ -31,15 +31,16 @@ module.exports = {
     const input = args.join(' ');
     const parts = input.split('|');
 
-    if (parts.length !== 2) {
+    if (parts.length !== 3) {
       await sendMessage(senderId, {
-        text: '⚠️ Invalid format. Please use like this\n\nExample: sms Hichill | 09123456789'
+        text: '⚠️ Invalid format. Please use:\n\nExample: sms ChilliBot|Hello|09123456789'
       }, pageAccessToken);
       return;
     }
 
-    let message = parts[0].trim();
-    const number = parts[1].trim();
+    let sender = parts[0].trim();
+    let message = parts[1].trim();
+    const number = parts[2].trim();
 
     const phoneNumberPattern = /^(09|\+639)\d{9}$/;
     if (!phoneNumberPattern.test(number)) {
@@ -49,37 +50,33 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms?text=${encodeURIComponent(message)}&number=${encodeURIComponent(number)}`;
+    const apiUrl = `https://haji-mix.up.railway.app/api/lbcsms`;
+    const payload = { from: sender, text: message, number: number };
 
     try {
-      const response = await axios.get(apiUrl);
+      const response = await axios.post(apiUrl, payload);
       let data = response.data;
 
       if (data.status) {
-        let filteredMessage = data.message
-          .replace(/📨 From: Anonymous[\s\S]*💬 Message:/, '') // Removes "📨 From: Anonymous" and "💬 Message:"
-          .replace(/📢 SMS Service Notice:[\s\S]*$/, '') // Removes "📢 SMS Service Notice" and extra disclaimer
+        let cleanMessage = message
+          .replace(/📢 SMS Service Notice:[\s\S]*$/, '') // Remove everything after the notice
           .trim();
 
         await sendMessage(senderId, {
-          text: `✅ SMS sent successfully!\nMessage sent: "${filteredMessage}"`
+          text: `✅ SMS sent successfully!\n📩 From: ${sender}\n💬 Message: "${cleanMessage}"`
         }, pageAccessToken);
 
         cooldowns.set(senderId, Date.now());
         setTimeout(() => cooldowns.delete(senderId), cooldownTime);
-      } else if (data.error) {
-        await sendMessage(senderId, {
-          text: `⚠️ ${data.error}`
-        }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: '⚠️ Failed to send SMS. Please try again.'
+          text: `⚠️ Error: ${data.error || "Failed to send SMS. Please try again."}`
         }, pageAccessToken);
       }
     } catch (error) {
       console.error('Error sending SMS:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while sending the SMS. Please try again later.'
+        text: `⚠️ API Error: ${error.response?.data?.error || error.message || "An unexpected error occurred."}`
       }, pageAccessToken);
     }
   }
