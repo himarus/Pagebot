@@ -1,49 +1,45 @@
 const axios = require("axios");
-const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api');
+const { sendMessage } = require("../handles/sendMessage");
+const api = require("../handles/api");
 
 module.exports = {
-  name: "gemini",
-  description: "Analyze images or answer text-based queries using Gemini.",
-  usage: "gemini <question> | [Attach or Reply to an image]",
+  name: "remini",
+  description: "Enhance image quality using Zaik API.",
+  usage: "Reply with 'remini' to enhance an image.",
   author: "chilli",
 
   async execute(senderId, args, pageAccessToken, event, imageUrl) {
-    const userPrompt = args.join(" ").trim();
-
-    if (!userPrompt && !imageUrl && !getAttachmentUrl(event)) {
-      return sendMessage(senderId, {
-        text: "❗ Usage: Send 'gemini <question>' with image or without an image."
-      }, pageAccessToken);
-    }
-
     if (!imageUrl) {
       imageUrl = getAttachmentUrl(event) || (await getRepliedImage(event, pageAccessToken));
     }
 
+    if (!imageUrl) {
+      return sendMessage(senderId, {
+        text: "❗ Please reply to an image or send an image with 'remini'."
+      }, pageAccessToken);
+    }
+
+    // Notify the user that the enhancement is in progress
+    await sendMessage(senderId, { text: "⏳ Enhancing your image, please wait..." }, pageAccessToken);
+
     try {
-      const apiUrl = `${api.kaizen}/api/gemini-vision`;
-      const query = {
-        q: userPrompt || "Answer all questions that need to answer?",
-        uid: senderId,
-        imageUrl: imageUrl || ""
-      };
+      const apiUrl = `${api.zaik}/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
+      const { data } = await axios.get(apiUrl);
 
-      const { data } = await axios.get(apiUrl, { params: query });
-
-      if (!data || !data.response) {
-        return sendMessage(senderId, {
-          text: "⚠️ Unable to process your request. Please try again."
-        }, pageAccessToken);
+      if (!data || !data.url) {
+        return sendMessage(senderId, { text: "⚠️ Enhancement failed. Please try again later." }, pageAccessToken);
       }
 
-      await sendMessage(senderId, { text: data.response }, pageAccessToken);
+      await sendMessage(senderId, {
+        attachment: {
+          type: "image",
+          payload: { url: data.url }
+        }
+      }, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Gemini command:", error.message || error);
-      await sendMessage(senderId, {
-        text: "⚠️ An error occurred. Please try again later."
-      }, pageAccessToken);
+      console.error("Error in Remini command:", error.message || error);
+      await sendMessage(senderId, { text: "⚠️ An error occurred. Please try again later." }, pageAccessToken);
     }
   }
 };
