@@ -11,23 +11,20 @@ module.exports = {
   author: 'chilli',
 
   async execute(senderId, args, pageAccessToken, event) {
-    // Step 1: Kunin ang image URL mula sa attachment o reply
-    let imageUrl = getAttachmentUrl(event) || await getRepliedImage(event, pageAccessToken);
-
-    if (!imageUrl) {
-      return sendMessage(senderId, { text: '❗ Please reply to an image to enhance.' }, pageAccessToken);
-    }
-
     try {
+      // Step 1: Kunin ang image URL mula sa attachment o reply
+      let imageUrl = await getImageUrl(event, pageAccessToken);
+
+      if (!imageUrl) {
+        return sendMessage(senderId, { text: '❗ Please reply to an image to enhance.' }, pageAccessToken);
+      }
+
       // Step 2: Notify user
       await sendMessage(senderId, { text: '⏳ Uploading image, please wait...' }, pageAccessToken);
 
       // Step 3: Upload image to Imgbb (to shorten URL)
       const imgbbResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
-        params: {
-          key: IMGBB_API_KEY,
-          image: imageUrl,
-        },
+        params: { key: IMGBB_API_KEY, image: imageUrl },
       });
 
       if (!imgbbResponse.data.success) {
@@ -49,10 +46,7 @@ module.exports = {
       const base64Image = Buffer.from(enhanceResponse.data, 'binary').toString('base64');
 
       const imgbbEnhancedResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
-        params: {
-          key: IMGBB_API_KEY,
-          image: base64Image,
-        },
+        params: { key: IMGBB_API_KEY, image: base64Image },
       });
 
       if (!imgbbEnhancedResponse.data.success) {
@@ -76,24 +70,27 @@ module.exports = {
   }
 };
 
-// Function to get image URL from attachment
-function getAttachmentUrl(event) {
-  const attachment = event.message?.attachments?.[0];
-  return attachment?.type === 'image' ? attachment.payload.url : null;
-}
+// Function to get image URL from attachment or replied message
+async function getImageUrl(event, pageAccessToken) {
+  try {
+    // Check if the message contains an image attachment
+    const attachment = event.message?.attachments?.[0];
+    if (attachment?.type === 'image') {
+      return attachment.payload.url;
+    }
 
-// Function to get image URL from replied message
-async function getRepliedImage(event, pageAccessToken) {
-  if (event.message?.reply_to?.mid) {
-    try {
+    // Check if the message is a reply to an image
+    if (event.message?.reply_to?.mid) {
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
-      return data?.data?.[0]?.image_data?.url || null;
-    } catch (error) {
-      console.error('Error fetching replied image:', error.message || error);
-      return null;
+
+      return data?.data?.[0]?.payload?.url || null;
     }
+
+    return null;
+  } catch (error) {
+    console.error('❌ Error fetching image URL:', error.message || error);
+    return null;
   }
-  return null;
 }
