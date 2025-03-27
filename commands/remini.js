@@ -12,7 +12,7 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken, event) {
     try {
-      // Step 1: Kunin ang image URL mula sa attachment o reply
+      // Kunin ang image URL mula sa attachment o replied message
       let imageUrl = await getImageUrl(event, pageAccessToken);
 
       if (!imageUrl) {
@@ -22,47 +22,41 @@ module.exports = {
 
       console.log('✅ Image URL detected:', imageUrl);
 
-      // Step 2: Notify user
+      // Notify user
       await sendMessage(senderId, { text: '⏳ Uploading image, please wait...' }, pageAccessToken);
 
-      // Step 3: Upload image to Imgbb (to shorten URL)
+      // Upload image to Imgbb
       const imgbbResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
         params: { key: IMGBB_API_KEY, image: imageUrl },
       });
 
-      if (!imgbbResponse.data.success) {
-        throw new Error('Imgbb upload failed.');
-      }
+      if (!imgbbResponse.data.success) throw new Error('Imgbb upload failed.');
 
       const shortImageUrl = imgbbResponse.data.data.url;
-
       console.log('✅ Image uploaded to Imgbb:', shortImageUrl);
 
-      // Step 4: Notify user that enhancement is in progress
+      // Notify user that enhancement is in progress
       await sendMessage(senderId, { text: '✨ Enhancing your image, please wait...' }, pageAccessToken);
 
-      // Step 5: Send request to Remini API with the shorter Imgbb URL
+      // Send request to Remini API
       const enhanceResponse = await axios.get(`${api.zaik}/api/enhancev1`, {
         params: { url: shortImageUrl },
         responseType: 'arraybuffer'
       });
 
-      // Step 6: Encode image to base64 and upload again to Imgbb
+      // Encode image to base64 and upload again to Imgbb
       const base64Image = Buffer.from(enhanceResponse.data, 'binary').toString('base64');
 
       const imgbbEnhancedResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
         params: { key: IMGBB_API_KEY, image: base64Image },
       });
 
-      if (!imgbbEnhancedResponse.data.success) {
-        throw new Error('Imgbb upload failed for enhanced image.');
-      }
+      if (!imgbbEnhancedResponse.data.success) throw new Error('Imgbb upload failed for enhanced image.');
 
       const enhancedImageUrl = imgbbEnhancedResponse.data.data.url;
-
       console.log('✅ Enhanced image uploaded to Imgbb:', enhancedImageUrl);
 
-      // Step 7: Send enhanced image via Messenger
+      // Send enhanced image via Messenger
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
