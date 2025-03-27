@@ -1,6 +1,7 @@
 const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
+const FormData = require("form-data"); // ✅ Import correct FormData
 const { sendMessage } = require("../handles/sendMessage");
 const api = require("../handles/api");
 
@@ -30,9 +31,8 @@ module.exports = {
       const apiUrl = `${api.zaik}/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
       console.log(`📡 Sending request to: ${apiUrl}`);
 
-      const response = await axios.get(apiUrl, { responseType: "arraybuffer" }); // Get raw image
+      const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
 
-      // Check if the response is valid
       if (!response.data) {
         return sendMessage(senderId, { text: "⚠️ Enhancement failed. No valid image received." }, pageAccessToken);
       }
@@ -40,13 +40,12 @@ module.exports = {
       // Save the enhanced image temporarily
       const filePath = path.join(__dirname, `enhanced_${Date.now()}.jpg`);
       fs.writeFileSync(filePath, response.data);
-
       console.log(`✅ Image saved temporarily: ${filePath}`);
 
-      // Upload the image to Facebook
+      // Upload the enhanced image to Facebook
       const formData = new FormData();
       formData.append("message", "✨ Here's your enhanced image!");
-      formData.append("file", fs.createReadStream(filePath));
+      formData.append("source", fs.createReadStream(filePath)); // ✅ Correct form field for images
 
       const uploadResponse = await axios.post(
         `https://graph.facebook.com/v21.0/me/photos`,
@@ -54,7 +53,7 @@ module.exports = {
         {
           headers: {
             Authorization: `Bearer ${pageAccessToken}`,
-            ...formData.getHeaders(),
+            ...formData.getHeaders(), // ✅ Fix the error here
           },
         }
       );
