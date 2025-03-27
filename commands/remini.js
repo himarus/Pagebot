@@ -1,4 +1,6 @@
 const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 const { sendMessage } = require("../handles/sendMessage");
 const api = require("../handles/api");
 
@@ -28,19 +30,39 @@ module.exports = {
       const apiUrl = `${api.zaik}/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
       console.log(`📡 Sending request to: ${apiUrl}`);
 
-      const { data } = await axios.get(apiUrl);
-      console.log(`✅ API Response:`, data);
+      const response = await axios.get(apiUrl, { responseType: "arraybuffer" }); // Get raw image
 
-      if (!data || !data.url) {
-        return sendMessage(senderId, { text: "⚠️ Enhancement failed. The API did not return a valid response." }, pageAccessToken);
+      // Check if the response is valid
+      if (!response.data) {
+        return sendMessage(senderId, { text: "⚠️ Enhancement failed. No valid image received." }, pageAccessToken);
       }
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: "image",
-          payload: { url: data.url }
+      // Save the enhanced image temporarily
+      const filePath = path.join(__dirname, `enhanced_${Date.now()}.jpg`);
+      fs.writeFileSync(filePath, response.data);
+
+      console.log(`✅ Image saved temporarily: ${filePath}`);
+
+      // Upload the image to Facebook
+      const formData = new FormData();
+      formData.append("message", "✨ Here's your enhanced image!");
+      formData.append("file", fs.createReadStream(filePath));
+
+      const uploadResponse = await axios.post(
+        `https://graph.facebook.com/v21.0/me/photos`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${pageAccessToken}`,
+            ...formData.getHeaders(),
+          },
         }
-      }, pageAccessToken);
+      );
+
+      console.log(`✅ Upload Response:`, uploadResponse.data);
+
+      // Delete the temporary file after sending
+      fs.unlinkSync(filePath);
 
     } catch (error) {
       console.error("❌ Error in Remini command:", error.response?.data || error.message || error);
