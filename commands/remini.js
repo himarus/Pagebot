@@ -19,15 +19,20 @@ module.exports = {
       }, pageAccessToken);
     }
 
+    console.log(`🔍 Image URL to Enhance: ${imageUrl}`);
+
     // Notify the user that the enhancement is in progress
     await sendMessage(senderId, { text: "⏳ Enhancing your image, please wait..." }, pageAccessToken);
 
     try {
       const apiUrl = `${api.zaik}/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
+      console.log(`📡 Sending request to: ${apiUrl}`);
+
       const { data } = await axios.get(apiUrl);
+      console.log(`✅ API Response:`, data);
 
       if (!data || !data.url) {
-        return sendMessage(senderId, { text: "⚠️ Enhancement failed. Please try again later." }, pageAccessToken);
+        return sendMessage(senderId, { text: "⚠️ Enhancement failed. The API did not return a valid response." }, pageAccessToken);
       }
 
       await sendMessage(senderId, {
@@ -38,7 +43,7 @@ module.exports = {
       }, pageAccessToken);
 
     } catch (error) {
-      console.error("Error in Remini command:", error.message || error);
+      console.error("❌ Error in Remini command:", error.response?.data || error.message || error);
       await sendMessage(senderId, { text: "⚠️ An error occurred. Please try again later." }, pageAccessToken);
     }
   }
@@ -52,13 +57,18 @@ function getAttachmentUrl(event) {
 async function getRepliedImage(event, pageAccessToken) {
   if (event.message?.reply_to?.mid) {
     try {
+      console.log(`🔄 Fetching replied image for MID: ${event.message.reply_to.mid}`);
+
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
+
+      console.log(`📥 Facebook API Response:`, data);
+
       const imageData = data?.data?.[0]?.image_data;
       return imageData ? imageData.url : null;
     } catch (error) {
-      console.error("Error fetching replied image:", error.message || error);
+      console.error("❌ Error fetching replied image:", error.response?.data || error.message || error);
       return null;
     }
   }
