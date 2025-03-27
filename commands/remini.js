@@ -1,95 +1,80 @@
-const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
-const FormData = require("form-data"); // ✅ Import correct FormData
-const { sendMessage } = require("../handles/sendMessage");
-const api = require("../handles/api");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
+
+const IMGBB_API_KEY = '79310ecb7673ce380ebd7c46652e3b9c'; // Palitan ng iyong Imgbb API Key
 
 module.exports = {
-  name: "remini",
-  description: "Enhance image quality using Zaik API.",
-  usage: "Reply with 'remini' to enhance an image.",
-  author: "chilli",
+  name: 'remini',
+  description: 'Enhance image quality using Remini API.',
+  usage: 'remini [Reply to an image]',
+  author: 'chilli',
 
-  async execute(senderId, args, pageAccessToken, event, imageUrl) {
+  async execute(senderId, args, pageAccessToken, event) {
+    // Kunin ang image URL mula sa attachment o reply
+    let imageUrl = getAttachmentUrl(event) || await getRepliedImage(event, pageAccessToken);
+
     if (!imageUrl) {
-      imageUrl = getAttachmentUrl(event) || (await getRepliedImage(event, pageAccessToken));
+      return sendMessage(senderId, { text: '❗ Please reply to an image to enhance.' }, pageAccessToken);
     }
-
-    if (!imageUrl) {
-      return sendMessage(senderId, {
-        text: "❗ Please reply to an image or send an image with 'remini'."
-      }, pageAccessToken);
-    }
-
-    console.log(`🔍 Image URL to Enhance: ${imageUrl}`);
-
-    // Notify the user that the enhancement is in progress
-    await sendMessage(senderId, { text: "⏳ Enhancing your image, please wait..." }, pageAccessToken);
 
     try {
-      const apiUrl = `${api.zaik}/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
-      console.log(`📡 Sending request to: ${apiUrl}`);
+      // Notify user
+      await sendMessage(senderId, { text: '⏳ Enhancing your image, please wait...' }, pageAccessToken);
 
-      const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+      // Send request to Remini API
+      const enhanceResponse = await axios.get(`${api.zaik}/api/enhancev1`, {
+        params: { url: imageUrl },
+        responseType: 'arraybuffer' // Para makuha ang image bilang buffer
+      });
 
-      if (!response.data) {
-        return sendMessage(senderId, { text: "⚠️ Enhancement failed. No valid image received." }, pageAccessToken);
+      // Encode image to base64
+      const base64Image = Buffer.from(enhanceResponse.data, 'binary').toString('base64');
+
+      // Upload to Imgbb
+      const imgbbResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
+        params: {
+          key: IMGBB_API_KEY,
+          image: base64Image, // Base64 encoded image
+        },
+      });
+
+      if (imgbbResponse.data.success) {
+        const imgbbUrl = imgbbResponse.data.data.url;
+
+        // Send enhanced image via Messenger
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: imgbbUrl },
+          },
+        }, pageAccessToken);
+      } else {
+        throw new Error('Imgbb upload failed.');
       }
 
-      // Save the enhanced image temporarily
-      const filePath = path.join(__dirname, `enhanced_${Date.now()}.jpg`);
-      fs.writeFileSync(filePath, response.data);
-      console.log(`✅ Image saved temporarily: ${filePath}`);
-
-      // Upload the enhanced image to Facebook
-      const formData = new FormData();
-      formData.append("message", "✨ Here's your enhanced image!");
-      formData.append("source", fs.createReadStream(filePath)); // ✅ Correct form field for images
-
-      const uploadResponse = await axios.post(
-        `https://graph.facebook.com/v21.0/me/photos`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${pageAccessToken}`,
-            ...formData.getHeaders(), // ✅ Fix the error here
-          },
-        }
-      );
-
-      console.log(`✅ Upload Response:`, uploadResponse.data);
-
-      // Delete the temporary file after sending
-      fs.unlinkSync(filePath);
-
     } catch (error) {
-      console.error("❌ Error in Remini command:", error.response?.data || error.message || error);
-      await sendMessage(senderId, { text: "⚠️ An error occurred. Please try again later." }, pageAccessToken);
+      console.error('❌ Error in Remini command:', error.message || error);
+      await sendMessage(senderId, { text: '⚠️ Enhancement failed. Please try again later.' }, pageAccessToken);
     }
   }
 };
 
 function getAttachmentUrl(event) {
   const attachment = event.message?.attachments?.[0];
-  return attachment?.type === "image" ? attachment.payload.url : null;
+  return attachment?.type === 'image' ? attachment.payload.url : null;
 }
 
 async function getRepliedImage(event, pageAccessToken) {
   if (event.message?.reply_to?.mid) {
     try {
-      console.log(`🔄 Fetching replied image for MID: ${event.message.reply_to.mid}`);
-
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
-
-      console.log(`📥 Facebook API Response:`, data);
-
       const imageData = data?.data?.[0]?.image_data;
       return imageData ? imageData.url : null;
     } catch (error) {
-      console.error("❌ Error fetching replied image:", error.response?.data || error.message || error);
+      console.error('Error fetching replied image:', error.message || error);
       return null;
     }
   }
