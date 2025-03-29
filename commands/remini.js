@@ -11,8 +11,7 @@ async function getRepliedImage(event, pageAccessToken) {
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
-      const imageData = data?.data?.[0]?.image_data;
-      return imageData ? imageData.url : null;
+      return data?.data?.[0]?.image_data?.url || null;
     } catch (error) {
       console.error("Error fetching replied image:", error.message || error);
       return null;
@@ -46,7 +45,7 @@ module.exports = {
       const imgbbResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
         params: {
           key: IMGBB_API_KEY,
-          image: enhancedImageUrl,
+          image: enhancedImageUrl, // Direct URL upload
         },
       });
 
