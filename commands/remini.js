@@ -2,6 +2,27 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
+// ImgBB API Key
+const imgbbApiKey = '79310ecb7673ce380ebd7c46652e3b9c';
+
+// Function to upload image to ImgBB
+async function uploadImageToImgBB(imageUrl) {
+  try {
+    const response = await axios.post(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+      image: imageUrl
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+
+    return response.data.data.url;
+  } catch (error) {
+    console.error('Error uploading image to ImgBB:', error.message || error);
+    return null;
+  }
+}
+
 module.exports = {
   name: 'remini',
   description: 'Enhance an image using Remini AI.',
@@ -18,7 +39,15 @@ module.exports = {
 
       await sendMessage(senderId, { text: '🛠️ Enhancing your image... Please wait.' }, pageAccessToken);
 
-      const apiUrl = `${api.xnil}/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}`;
+      // Upload image to ImgBB
+      const imgbbImageUrl = await uploadImageToImgBB(imageUrl);
+
+      if (!imgbbImageUrl) {
+        throw new Error('Failed to upload image to ImgBB.');
+      }
+
+      // Use ImgBB URL for Remini API
+      const apiUrl = `${api.xnil}/xnil/remini?imageUrl=${encodeURIComponent(imgbbImageUrl)}`;
 
       await sendMessage(senderId, { 
         attachment: { 
@@ -35,19 +64,3 @@ module.exports = {
     }
   }
 };
-
-async function getRepliedImage(event, pageAccessToken) {
-  if (event.message?.reply_to?.mid) {
-    try {
-      const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
-        params: { access_token: pageAccessToken }
-      });
-      const imageData = data?.data?.[0]?.image_data;
-      return imageData ? imageData.url : null;
-    } catch (error) {
-      console.error("Error fetching replied image:", error.message || error);
-      return null;
-    }
-  }
-  return null;
-}
