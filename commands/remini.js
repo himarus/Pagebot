@@ -56,8 +56,10 @@ async function getRepliedImage(event, pageAccessToken) {
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
+
       const imageData = data?.data?.[0]?.image_data;
-      return imageData ? imageData.url : null;
+      return imageData?.preview_url || imageData?.url || null; // Gamitin ang preview_url kung available
+
     } catch (error) {
       console.error("Error fetching replied image:", error.message || error);
       return null;
