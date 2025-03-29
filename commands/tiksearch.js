@@ -5,7 +5,7 @@ module.exports = {
   name: 'tiksearch',
   description: 'Search for TikTok videos using a keyword.',
   usage: 'tiksearch <keyword>',
-  author: 'Your Name',
+  author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
     const keyword = args.join(' ');
