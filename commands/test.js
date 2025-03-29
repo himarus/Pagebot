@@ -36,7 +36,7 @@ module.exports = {
             elements: tracks.map(track => ({
               title: track.title,
               subtitle: `Artist: ${track.artist}\nAlbum: ${track.artist_album}\nDuration: ${Math.floor(track.duration / 60000)}m ${Math.floor((track.duration % 60000) / 1000)}s`,
-              image_url: this.getAlbumArtUrl(track.album_id), // Call function to get album art URL
+              image_url: 'https://i.imgur.com/5OWChRD.jpeg', // Set default image URL
               buttons: [
                 {
                   type: 'postback',
@@ -61,21 +61,6 @@ module.exports = {
       }, pageAccessToken);
     }
   },
-    // Helper function to fetch album art URL
-    async getAlbumArtUrl(albumId) {
-        try {
-            const albumUrl = `https://api.zetsu.xyz/spotify/album?id=${albumId}`;
-            const response = await axios.get(albumUrl);
-            if (response.data && response.data.images && response.data.images.length > 0) {
-                return response.data.images[0].url; // Return the largest image
-            } else {
-                return 'https://i.ibb.co/6BRZ1Dg/spotify-logo.png'; // Return a default image URL
-            }
-        } catch (error) {
-            console.error('Error fetching album art:', error);
-            return 'https://i.ibb.co/6BRZ1Dg/spotify-logo.png'; // Return a default image URL
-        }
-    },
 
   // Handle postbacks for playing full track
   async handlePostback(senderId, payload, pageAccessToken) {
