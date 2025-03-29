@@ -13,8 +13,9 @@ module.exports = {
 
     if (!keyword || (keyword && keyword.trim() === '')) {
       await sendMessage(senderId, {
-        text: 'Please provide a keyword to search for.\n\nNote: If you\'re using Facebook Lite, try using the command like this: tiksearch cat | fblite'
-      }, pageAccessToken);
+  text: `Please provide a keyword to search for.\n\nNote: If you're using Facebook Lite, try using the command like this: tiksearch cat | fblite\n\nIf you're using Messenger, you can search directly by typing: tiksearch cat`
+}, pageAccessToken);
+
       return;
     }
 
