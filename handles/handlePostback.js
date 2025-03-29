@@ -1,6 +1,6 @@
 const { sendMessage } = require('./sendMessage');
 
-const handlePostback = (event, pageAccessToken) => {
+const handlePostback = async (event, pageAccessToken) => {
   const senderId = event.sender?.id;
   const payload = event.postback?.payload;
 
@@ -30,8 +30,7 @@ const handlePostback = (event, pageAccessToken) => {
         ]
       };
 
-      sendMessage(senderId, combinedMessage, pageAccessToken);
-
+      await sendMessage(senderId, combinedMessage, pageAccessToken);
     } else if (payload.startsWith('WATCH_VIDEO_PAYLOAD|')) {
       const videoUrl = payload.split('|')[1];
 
