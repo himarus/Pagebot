@@ -9,58 +9,39 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     const query = args.join(' ');
-    
+
     if (!query) {
       return sendMessage(senderId, {
-        text: "⚠️ provide music title\nexample: test your mine"
+        text: "⚠️ Pakilagay ang pangalan ng kanta\nHalimbawa: test your mine"
       }, pageAccessToken);
     }
 
     try {
       // Stage 1: Search Track
       const searchResponse = await axios.get(`https://api.zetsu.xyz/search/spotify?q=${encodeURIComponent(query)}`);
-      
+
       if (!searchResponse.data.status || searchResponse.data.result.length === 0) {
         throw new Error('Walang nahanap na track');
       }
 
-      // Stage 2: Track Selection Logic
-      const validTracks = searchResponse.data.result.filter(track => 
-        track.direct_url && track.duration > 60000 // Filter short previews
-      );
+      // Stage 2: Display All Tracks
+      const tracks = searchResponse.data.result;
 
-      if (validTracks.length === 0) {
-        throw new Error('Walang available na full track');
-      }
-
-      const primaryTrack = validTracks[0];
-
-      // Stage 3: Audio Handling
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'audio',
-          payload: {
-            url: primaryTrack.direct_url,
-            is_reusable: true
-          }
-        }
-      }, pageAccessToken);
-
-      // Stage 4: Track Metadata Display
+      // Stage 3: Track Metadata Display
       await sendMessage(senderId, {
         attachment: {
           type: 'template',
           payload: {
             template_type: 'generic',
-            elements: validTracks.slice(0, 3).map(track => ({
+            elements: tracks.map(track => ({
               title: track.title,
-              subtitle: `Artist: ${track.artist}\nDuration: ${Math.floor(track.duration/1000)}s`,
-              image_url: 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228',
+              subtitle: `Artist: ${track.artist}\nAlbum: ${track.artist_album}\nDuration: ${Math.floor(track.duration / 60000)}m ${Math.floor((track.duration % 60000) / 1000)}s`,
+              image_url: this.getAlbumArtUrl(track.album_id), // Call function to get album art URL
               buttons: [
                 {
-                  type: 'web_url',
+                  type: 'postback',
                   title: '🎵 Play Full',
-                  url: track.direct_url
+                  payload: `PLAY_FULL_${track.direct_url}`
                 },
                 {
                   type: 'web_url',
@@ -77,6 +58,38 @@ module.exports = {
       console.error('Test Command Error:', error);
       await sendMessage(senderId, {
         text: `❌ Error: ${error.message}`
+      }, pageAccessToken);
+    }
+  },
+    // Helper function to fetch album art URL
+    async getAlbumArtUrl(albumId) {
+        try {
+            const albumUrl = `https://api.zetsu.xyz/spotify/album?id=${albumId}`;
+            const response = await axios.get(albumUrl);
+            if (response.data && response.data.images && response.data.images.length > 0) {
+                return response.data.images[0].url; // Return the largest image
+            } else {
+                return 'https://i.ibb.co/6BRZ1Dg/spotify-logo.png'; // Return a default image URL
+            }
+        } catch (error) {
+            console.error('Error fetching album art:', error);
+            return 'https://i.ibb.co/6BRZ1Dg/spotify-logo.png'; // Return a default image URL
+        }
+    },
+
+  // Handle postbacks for playing full track
+  async handlePostback(senderId, payload, pageAccessToken) {
+    if (payload.startsWith('PLAY_FULL_')) {
+      const audioUrl = payload.substring(10);
+
+      await sendMessage(senderId, {
+        attachment: {
+          type: 'audio',
+          payload: {
+            url: audioUrl,
+            is_reusable: true
+          }
+        }
       }, pageAccessToken);
     }
   }
