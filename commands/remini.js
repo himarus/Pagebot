@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: 'remini',
@@ -17,7 +18,7 @@ module.exports = {
 
       await sendMessage(senderId, { text: '🛠️ Enhancing your image... Please wait.' }, pageAccessToken);
 
-      const apiUrl = `https://xnilnew404.onrender.com/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}`;
+      const apiUrl = `${api.xnil}/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}`;
 
       await sendMessage(senderId, { 
         attachment: { 
@@ -25,7 +26,7 @@ module.exports = {
           payload: { url: apiUrl } 
         } 
       }, pageAccessToken);
-      
+
     } catch (error) {
       console.error('Error in Remini command:', error.message || error);
       await sendMessage(senderId, {
