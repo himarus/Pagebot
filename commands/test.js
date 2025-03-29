@@ -1,75 +1,82 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: "test",
-  description: "Search for a Spotify track and play it",
-  author: "churchill",
+  name: 'test',
+  description: 'Advanced Spotify music player with full track logic',
+  usage: 'test <song title>',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const searchQuery = args.join(" ");
-
-    if (!searchQuery) {
+    const query = args.join(' ');
+    
+    if (!query) {
       return sendMessage(senderId, {
-        text: `Usage: spotify [song title]`
+        text: "⚠️ provide music title\nexample: test your mine"
       }, pageAccessToken);
     }
 
     try {
-      // Fetch song data from the API
-      const res = await axios.get(`https://api.zetsu.xyz/search/spotify`, {
-        params: { q: searchQuery }
-      });
-
-      if (!res || !res.data || res.data.result.length === 0) {
-        throw new Error("No results found.");
+      // Stage 1: Search Track
+      const searchResponse = await axios.get(`https://api.zetsu.xyz/search/spotify?q=${encodeURIComponent(query)}`);
+      
+      if (!searchResponse.data.status || searchResponse.data.result.length === 0) {
+        throw new Error('Walang nahanap na track');
       }
 
-      // Extract up to 10 songs (Messenger limit)
-      const songs = res.data.result.slice(0, 10);
+      // Stage 2: Track Selection Logic
+      const validTracks = searchResponse.data.result.filter(track => 
+        track.direct_url && track.duration > 60000 // Filter short previews
+      );
 
-      // Prepare elements for generic template
-      const elements = songs.map(song => ({
-        title: `${song.title} - ${song.artist}`,
-        subtitle: `Album: ${song.artist_album} | Released: ${song.album_release_date}`,
-        image_url: song.album_url.replace("open.spotify.com/album", "i.scdn.co/image"), // Convert to album cover URL
-        default_action: {
-          type: "web_url",
-          url: song.url,
-          webview_height_ratio: "tall"
-        },
-        buttons: [
-          {
-            type: "web_url",
-            url: song.url,
-            title: "View on Spotify"
-          },
-          {
-            type: "postback",
-            title: "Play Full Audio",
-            payload: JSON.stringify({
-              type: "spotify_play",
-              track_url: song.full_audio_url // This should point to the full track
-            })
-          }
-        ]
-      }));
+      if (validTracks.length === 0) {
+        throw new Error('Walang available na full track');
+      }
 
-      // Send generic template with search results
+      const primaryTrack = validTracks[0];
+
+      // Stage 3: Audio Handling
       await sendMessage(senderId, {
         attachment: {
-          type: "template",
+          type: 'audio',
           payload: {
-            template_type: "generic",
-            elements: elements
+            url: primaryTrack.direct_url,
+            is_reusable: true
+          }
+        }
+      }, pageAccessToken);
+
+      // Stage 4: Track Metadata Display
+      await sendMessage(senderId, {
+        attachment: {
+          type: 'template',
+          payload: {
+            template_type: 'generic',
+            elements: validTracks.slice(0, 3).map(track => ({
+              title: track.title,
+              subtitle: `Artist: ${track.artist}\nDuration: ${Math.floor(track.duration/1000)}s`,
+              image_url: 'https://i.scdn.co/image/ab67616d00001e02ff9ca10b55ce82ae553c8228',
+              buttons: [
+                {
+                  type: 'web_url',
+                  title: '🎵 Play Full',
+                  url: track.direct_url
+                },
+                {
+                  type: 'web_url',
+                  title: '📀 View Album',
+                  url: track.album_url
+                }
+              ]
+            }))
           }
         }
       }, pageAccessToken);
 
     } catch (error) {
-      console.error("Error retrieving Spotify track:", error);
-      sendMessage(senderId, {
-        text: `Error retrieving the Spotify track. Please try again.`
+      console.error('Test Command Error:', error);
+      await sendMessage(senderId, {
+        text: `❌ Error: ${error.message}`
       }, pageAccessToken);
     }
   }
