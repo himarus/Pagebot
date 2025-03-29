@@ -5,7 +5,7 @@ const handlePostback = async (event, pageAccessToken) => {
   const payload = event.postback?.payload;
 
   if (senderId && payload) {
-    if (payload === 'GET_STARTED_PAYLOAD') {
+    if (payload === 'WELCOME_MESSAGE') {
       const combinedMessage = {
         text: `🔥 Welcome to CHILLI BOT! 🔥\n\nI'm your AI-powered assistant, here to make things spicier and smoother! 🌶️\n\n𝗧𝗘𝗥𝗠𝗦 𝗢𝗙 𝗦𝗘𝗥𝗩𝗜𝗖𝗘 & 𝗣𝗥𝗜𝗩𝗔𝗖𝗬 𝗣𝗢𝗟𝗜𝗖𝗬\n\nBy using this bot, you agree to:\n1. 𝗜𝗻𝘁𝗲𝗿𝗮𝗰𝘁𝗶𝗼𝗻: Automated responses may log interactions to improve service.\n2. 𝗗𝗮𝘁𝗮: We collect data to enhance functionality without sharing it.\n3. 𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆: Your data is protected.\n4. 𝗖𝗼𝗺𝗽𝗹𝗶𝗮𝗻𝗰𝗲: Follow Facebook's terms or risk access restrictions.\n5. 𝗨𝗽𝗱𝗮𝘁𝗲𝘀: Terms may change, and continued use implies acceptance.\n\nFailure to comply may result in access restrictions.\n\nType "help" to see commands.`,
         quick_replies: [
@@ -17,14 +17,7 @@ const handlePostback = async (event, pageAccessToken) => {
         ]
       };
 
-      try {
-        await sendMessage(senderId, combinedMessage, pageAccessToken);
-      } catch (error) {
-        console.error('Error sending welcome message:', error);
-        await sendMessage(senderId, {
-          text: `🔥 Welcome to CHILLI BOT! 🔥\n\nI'm your AI-powered assistant, here to make things spicier and smoother! 🌶️\n\nPlease note: If you're using Facebook Lite, some features might not work as expected.`
-        }, pageAccessToken);
-      }
+      await sendMessage(senderId, combinedMessage, pageAccessToken);
     } else if (payload.startsWith('WATCH_VIDEO_PAYLOAD|')) {
       const [_, keyword, videoUrl] = payload.split('|');
 
