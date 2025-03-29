@@ -27,9 +27,14 @@ module.exports = {
 
             const tracks = searchResponse.data.result.slice(0, 5);
             
-            const trackElements = tracks.map(track => ({
+            const trackElements = tracks.map(track => {
+              const durationMinutes = Math.floor(track.duration / 60000);
+              const durationSeconds = Math.floor((track.duration % 60000) / 1000);
+              const durationString = `${durationMinutes}m ${durationSeconds}s`;
+
+              return {
                 title: track.title,
-                subtitle: `Artist: ${track.artist}\nAlbum: ${track.artist_album}\nDuration: ${Math.floor(track.duration / 60000)}m ${Math.floor((track.duration % 60000) / 1000)}s`,
+                subtitle: `Artist: ${track.artist}\nAlbum: ${track.artist_album}\nDuration: ${durationString}`,
                 image_url: 'https://i.imgur.com/5OWChRD.jpeg',
                 buttons: [
                     {
@@ -43,7 +48,8 @@ module.exports = {
                         url: track.album_url
                     }
                 ]
-            }));
+              };
+            });
 
             await sendMessage(senderId, {
                 attachment: {
@@ -68,8 +74,9 @@ module.exports = {
             try {
                 const audioUrl = decodeURIComponent(payload.substring(10));
                 
-                if (!audioUrl.startsWith('https://') || !audioUrl.endsWith('.mp3')) {
-                    throw new Error('Invalid audio format');
+                // Validate audio URL format more strictly
+                if (!audioUrl.startsWith('https://p.scdn.co/mp3-preview/') || !audioUrl.includes('?cid=')) {
+                    throw new Error('Invalid audio format or URL structure');
                 }
 
                 await sendMessage(senderId, {
