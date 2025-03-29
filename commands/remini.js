@@ -1,113 +1,46 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api');
 
-const IMGBB_API_KEY = '79310ecb7673ce380ebd7c46652e3b9c'; // Palitan ng iyong Imgbb API Key
-
-module.exports = {
-  name: 'remini',
-  description: 'Enhance image quality using Remini API.',
-  usage: 'remini [Reply to an image]',
-  author: 'chilli',
-
-  async execute(senderId, args, pageAccessToken, event) {
+async function getRepliedImage(event, pageAccessToken) {
+  if (event.message?.reply_to?.mid) {
     try {
-      // Kunin ang image URL mula sa attachment o replied message
-      let imageUrl = await getImageUrl(event, pageAccessToken);
-
-      if (!imageUrl) {
-        await sendMessage(senderId, { text: '❗ Please reply to an image to enhance.' }, pageAccessToken);
-        return;
-      }
-
-      console.log('✅ Image URL detected:', imageUrl);
-
-      // Notify user
-      await sendMessage(senderId, { text: '⏳ Uploading image, please wait...' }, pageAccessToken);
-
-      // Upload image to Imgbb
-      const imgbbResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
-        params: { key: IMGBB_API_KEY, image: imageUrl },
-      });
-
-      if (!imgbbResponse.data.success) throw new Error('Imgbb upload failed.');
-
-      const shortImageUrl = imgbbResponse.data.data.url;
-      console.log('✅ Image uploaded to Imgbb:', shortImageUrl);
-
-      // Notify user that enhancement is in progress
-      await sendMessage(senderId, { text: '✨ Enhancing your image, please wait...' }, pageAccessToken);
-
-      // Send request to Remini API
-      const enhanceResponse = await axios.get(`${api.zaik}/api/enhancev1`, {
-        params: { url: shortImageUrl },
-        responseType: 'arraybuffer'
-      });
-
-      // Encode image to base64 and upload again to Imgbb
-      const base64Image = Buffer.from(enhanceResponse.data, 'binary').toString('base64');
-
-      const imgbbEnhancedResponse = await axios.post(`https://api.imgbb.com/1/upload`, null, {
-        params: { key: IMGBB_API_KEY, image: base64Image },
-      });
-
-      if (!imgbbEnhancedResponse.data.success) throw new Error('Imgbb upload failed for enhanced image.');
-
-      const enhancedImageUrl = imgbbEnhancedResponse.data.data.url;
-      console.log('✅ Enhanced image uploaded to Imgbb:', enhancedImageUrl);
-
-      // Send enhanced image via Messenger
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: { url: enhancedImageUrl },
-        },
-      }, pageAccessToken);
-
-    } catch (error) {
-      console.error('❌ Error in Remini command:', error.message || error);
-      await sendMessage(senderId, { text: '⚠️ Enhancement failed. Please try again later.' }, pageAccessToken);
-    }
-  }
-};
-
-// Function to get image URL from attachment or replied message
-async function getImageUrl(event, pageAccessToken) {
-  try {
-    console.log('🔍 Checking for image URL in event:', JSON.stringify(event, null, 2));
-
-    // Check if the message contains an image attachment
-    if (event.message?.attachments) {
-      for (let attachment of event.message.attachments) {
-        if (attachment.type === 'image' && attachment.payload?.url) {
-          console.log('✅ Found image in attachment:', attachment.payload.url);
-          return attachment.payload.url;
-        }
-      }
-    }
-
-    // Check if the message is a reply to an image
-    if (event.message?.reply_to?.mid) {
-      console.log('🔍 Checking replied message for image:', event.message.reply_to.mid);
-
       const { data } = await axios.get(`https://graph.facebook.com/v21.0/${event.message.reply_to.mid}/attachments`, {
         params: { access_token: pageAccessToken }
       });
+      const imageData = data?.data?.[0]?.image_data;
+      return imageData ? imageData.url : null;
+    } catch (error) {
+      console.error("Error fetching replied image:", error.message || error);
+      return null;
+    }
+  }
+  return null;
+}
 
-      if (data?.data?.length > 0) {
-        for (let attachment of data.data) {
-          if (attachment?.payload?.url) {
-            console.log('✅ Found image in replied message:', attachment.payload.url);
-            return attachment.payload.url;
-          }
-        }
-      }
+module.exports = {
+  name: 'remini',
+  description: 'Enhance image quality using Remini API',
+  author: 'chill',
+  
+  async execute(senderId, args, pageAccessToken, event) {
+    const imageUrl = await getRepliedImage(event, pageAccessToken);
+
+    if (!imageUrl) {
+      await sendMessage(senderId, { text: '⚠️ Please reply to an image to enhance.' }, pageAccessToken);
+      return;
     }
 
-    console.log('❌ No image URL found.');
-    return null;
-  } catch (error) {
-    console.error('❌ Error fetching image URL:', error.message || error);
-    return null;
+    try {
+      const apiUrl = `https://renzsuperb.onrender.com/api/enhancev1?url=${encodeURIComponent(imageUrl)}`;
+      await sendMessage(senderId, { 
+        attachment: { 
+          type: 'image', 
+          payload: { url: apiUrl, is_reusable: true } 
+        } 
+      }, pageAccessToken);
+    } catch (error) {
+      console.error('Error in remini command:', error.message || error);
+      await sendMessage(senderId, { text: '⚠️ An error occurred while enhancing the image. Please try again.' }, pageAccessToken);
+    }
   }
-}
+};
