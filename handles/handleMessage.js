@@ -115,17 +115,13 @@ async function handleMessage(event, pageAccessToken) {
     if (payload === "MORE_SHOTI") {
       const command = commands.get('shoti');
       if (command) {
-        await command.execute(senderId, [], pageAccessToken);
+        await command.execute(senderId, ['more'], pageAccessToken);
       } else {
         await sendMessage(senderId, {
           text: "Failed to execute command. Please try again."
         }, pageAccessToken);
       }
     } else if (payload === "NO_MORE_SHOTI") {
-      await sendMessage(senderId, {
-        text: "You won't receive any more Shoti videos."
-      }, pageAccessToken);
-
       await sendMessage(senderId, {
         text: "Ayaw muna mag LULU?"
       }, pageAccessToken);
