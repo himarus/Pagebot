@@ -125,8 +125,6 @@ async function handleMessage(event, pageAccessToken) {
       text: "Failed to execute command. Please try again."
     }, pageAccessToken);
   }
-}
-
     } else if (payload === "NO_MORE_SHOTI") {
       await sendMessage(senderId, {
         text: "Ayaw muna mag LULU?"
