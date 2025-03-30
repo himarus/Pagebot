@@ -3,7 +3,7 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'pinterest',
+  name: 'test',
   description: 'Search for images on Pinterest using the Kaizen API.',
   usage: 'pinterest <search-term> - <number-of-images>\nExample: pinterest cat - 10',
   author: 'chill',
