@@ -108,6 +108,22 @@ async function handleMessage(event, pageAccessToken) {
       }, pageAccessToken);
     }
   }
+
+  // Handle Quick Replies
+  if (event.message && event.message.quick_reply) {
+    const payload = event.message.quick_reply.payload;
+
+    if (payload === "MORE_SHOTI") {
+      const command = commands.get('shoti');
+      if (command) {
+        await command.execute(senderId, [], pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: "Failed to execute command. Please try again."
+        }, pageAccessToken);
+      }
+    }
+  }
 }
 
 async function getAttachments(mid, pageAccessToken) {
