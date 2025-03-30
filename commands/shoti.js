@@ -31,6 +31,11 @@ module.exports = {
             content_type: "text",
             title: "More Shoti",
             payload: "MORE_SHOTI"
+          },
+          {
+            content_type: "text",
+            title: "No More Shoti",
+            payload: "NO_MORE_SHOTI"
           }
         ]
       }, pageAccessToken);
