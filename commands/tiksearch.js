@@ -26,7 +26,7 @@ module.exports = {
       }, pageAccessToken);
 
       const count = isFbLite ? 1 : 5;
-      const apiUrl = `${api.kaizen}/tiksearchv2?search=${encodeURIComponent(keyword.replace(' | fblite', ''))}&count=${count}`;
+      const apiUrl = `${api.yakzy}/tiksearchv2?search=${encodeURIComponent(keyword.replace(' | fblite', ''))}&count=${count}`;
       const response = await axios.get(apiUrl);
 
       if (response.data && Array.isArray(response.data.data) && response.data.data.length > 0) {
