@@ -113,14 +113,20 @@ async function handleMessage(event, pageAccessToken) {
     const payload = event.message.quick_reply.payload;
 
     if (payload === "MORE_SHOTI") {
-      const command = commands.get('shoti');
-      if (command) {
-        await command.execute(senderId, ['more'], pageAccessToken);
-      } else {
-        await sendMessage(senderId, {
-          text: "Failed to execute command. Please try again."
-        }, pageAccessToken);
-      }
+  await sendMessage(senderId, {
+    text: "Sending more Shoti vid, wait lang lulu na lulu kana eh..."
+  }, pageAccessToken);
+
+  const command = commands.get('shoti');
+  if (command) {
+    await command.execute(senderId, ['more'], pageAccessToken);
+  } else {
+    await sendMessage(senderId, {
+      text: "Failed to execute command. Please try again."
+    }, pageAccessToken);
+  }
+}
+
     } else if (payload === "NO_MORE_SHOTI") {
       await sendMessage(senderId, {
         text: "Ayaw muna mag LULU?"
