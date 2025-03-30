@@ -113,18 +113,34 @@ async function handleMessage(event, pageAccessToken) {
     const payload = event.message.quick_reply.payload;
 
     if (payload === "MORE_SHOTI") {
-  await sendMessage(senderId, {
-    text: "Sending more Shoti vid, wait lang lulu na lulu kana eh..."
-  }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: "Sending more Shoti vid, wait lang lulu na lulu kana eh..."
+      }, pageAccessToken);
 
-  const command = commands.get('shoti');
-  if (command) {
-    await command.execute(senderId, ['more'], pageAccessToken);
-  } else {
-    await sendMessage(senderId, {
-      text: "Failed to execute command. Please try again."
-    }, pageAccessToken);
-  }
+      const command = commands.get('shoti');
+      if (command) {
+        await command.execute(senderId, ['more'], pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: "Failed to execute command. Please try again."
+        }, pageAccessToken);
+      }
+
+      await sendMessage(senderId, {
+        text: "Want to see more Shoti videos?",
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "More Shoti",
+            payload: "MORE_SHOTI"
+          },
+          {
+            content_type: "text",
+            title: "No More Shoti",
+            payload: "NO_MORE_SHOTI"
+          }
+        ]
+      }, pageAccessToken);
     } else if (payload === "NO_MORE_SHOTI") {
       await sendMessage(senderId, {
         text: "Ayaw muna mag LULU?"
