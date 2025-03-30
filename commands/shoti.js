@@ -23,9 +23,20 @@ module.exports = {
           }
         }
       }, pageAccessToken);
+
+      await sendMessage(senderId, {
+        text: "Want to see more Shoti videos?",
+        quick_replies: [
+          {
+            content_type: "text",
+            title: "More Shoti",
+            payload: "MORE_SHOTI"
+          }
+        ]
+      }, pageAccessToken);
     } catch (error) {
       console.error("Failed to fetch the Chilli video:", error);
-      sendMessage(senderId, {
+      await sendMessage(senderId, {
         text: `Failed to fetch the Chilli video. Error: ${error.message || "Unknown error"}`
       }, pageAccessToken);
     }
