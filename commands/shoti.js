@@ -21,22 +21,6 @@ module.exports = {
             }
           }
         }, pageAccessToken);
-
-        await sendMessage(senderId, {
-          text: "Want to see more Shoti videos?",
-          quick_replies: [
-            {
-              content_type: "text",
-              title: "More Shoti",
-              payload: "MORE_SHOTI"
-            },
-            {
-              content_type: "text",
-              title: "No More Shoti",
-              payload: "NO_MORE_SHOTI"
-            }
-          ]
-        }, pageAccessToken);
       } else {
         const { username, nickname, duration } = response.data;
 
