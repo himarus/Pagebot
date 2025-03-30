@@ -95,7 +95,7 @@ async function handleMessage(event, pageAccessToken) {
       } catch (error) {
         sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
       }
-    } else {
+    } else if (!event.message.quick_reply) {
       sendMessage(senderId, {
         text: `Unknown command: "${commandName}". Type "help" for a list of available commands.`,
         quick_replies: [
@@ -109,7 +109,6 @@ async function handleMessage(event, pageAccessToken) {
     }
   }
 
-  // Handle Quick Replies
   if (event.message && event.message.quick_reply) {
     const payload = event.message.quick_reply.payload;
 
@@ -122,6 +121,14 @@ async function handleMessage(event, pageAccessToken) {
           text: "Failed to execute command. Please try again."
         }, pageAccessToken);
       }
+    } else if (payload === "NO_MORE_SHOTI") {
+      await sendMessage(senderId, {
+        text: "You won't receive any more Shoti videos."
+      }, pageAccessToken);
+
+      await sendMessage(senderId, {
+        text: "Ayaw muna mag LULU?"
+      }, pageAccessToken);
     }
   }
 }
