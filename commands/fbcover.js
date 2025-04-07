@@ -1,10 +1,9 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api');
 
 module.exports = {
   name: 'fbcover',
-  description: 'Generate a custom Facebook cover image with your details.',
+  description: 'Generate a custom Facebook cover image using your profile picture.',
   usage: 'fbcover <name> | <subname> | <sdt> | <address> | <email> | <color>',
   author: 'churchill',
 
@@ -19,59 +18,40 @@ module.exports = {
     }
 
     try {
-      // Fetch profile picture URL
-      const picRes = await axios.get(`https://graph.facebook.com/v21.0/${senderId}/picture`, {
+      // Get profile pic from Graph API
+      const profileRes = await axios.get(`https://graph.facebook.com/${senderId}`, {
         params: {
-          access_token: pageAccessToken,
-          type: 'large',
-          redirect: false
+          fields: 'profile_pic',
+          access_token: pageAccessToken
         }
       });
 
-      const profilePic = picRes.data?.data?.url;
-      if (!profilePic) throw new Error('Could not fetch profile picture.');
+      const profilePicUrl = profileRes.data?.profile_pic;
 
-      // Build image generation API URL
-      const imageUrl = `${api.josh}/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&avatar=${encodeURIComponent(profilePic)}&color=${encodeURIComponent(color)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
+      if (!profilePicUrl) throw new Error('No profile pic found.');
 
-      // Upload image first to avoid (#100) error
-      const uploadRes = await axios.post(
-        `https://graph.facebook.com/v21.0/me/message_attachments?access_token=${pageAccessToken}`,
-        {
-          message: {
-            attachment: {
-              type: 'image',
-              payload: {
-                is_reusable: true,
-                url: imageUrl
-              }
-            }
-          }
-        }
-      );
+      const apiUrl = `https://api.zetsu.xyz/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(profilePicUrl)}&color=${encodeURIComponent(color)}`;
 
-      const attachmentId = uploadRes.data.attachment_id;
-
-      // Send confirmation + attachment
+      // 1st message (text info)
       await sendMessage(senderId, {
         text:
-`✅ Your custom FB cover has been generated!
+`✅ FB Cover Details:
 
 • Name: ${name}
 • Subname: ${subname}
 • SDT: ${sdt}
 • Address: ${address}
 • Email: ${email}
-• Color: ${color}
-
-Here's your image:`
+• Color: ${color}`
       }, pageAccessToken);
 
+      // 2nd message (image)
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            attachment_id: attachmentId
+            url: apiUrl,
+            is_reusable: true
           }
         }
       }, pageAccessToken);
@@ -79,7 +59,7 @@ Here's your image:`
     } catch (error) {
       console.error('FB Cover error:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ Error generating FB cover. Please try again later or double-check your input.'
+        text: '⚠️ Error: Failed to generate FB cover. Please try again.'
       }, pageAccessToken);
     }
   }
