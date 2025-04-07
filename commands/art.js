@@ -16,12 +16,12 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    // Send indicator message
+    // Indicator message
     await sendMessage(senderId, {
       text: `🎨 Generating your image for: "${prompt}"\nPlease wait a few moments...`
     }, pageAccessToken);
 
-    const apiUrl = `${api.josh}/api/midjourney?prompt=${encodeURIComponent(prompt)}`;
+    const apiUrl = `${api.josh}/api/midjourney?prompt=${encodeURIComponent(prompt)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
 
     try {
       const res = await axios.get(apiUrl);
