@@ -3,12 +3,12 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'fbcover',
-  description: 'Generate a custom Facebook cover image using your profile pic.',
+  description: 'Generate a Facebook cover using user input and Imgur fallback',
   usage: 'fbcover <name> | <subname> | <sdt> | <address> | <email> | <color>',
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    const input = args.join(' ').split('|').map(s => s.trim());
+    const input = args.join(' ').split('|').map(x => x.trim());
     const [A, B, C, D, E, F] = input;
 
     if (!A || !B || !C || !D || !E || !F) {
@@ -18,24 +18,14 @@ module.exports = {
     }
 
     try {
-      const profile = await axios.get(`https://graph.facebook.com/${senderId}`, {
-        params: {
-          fields: 'profile_pic',
-          access_token: pageAccessToken
-        }
+      const fbcoverUrl = `https://api.zetsu.xyz/canvas/fbcover?name=${encodeURIComponent(A)}&subname=${encodeURIComponent(B)}&sdt=${encodeURIComponent(C)}&address=${encodeURIComponent(D)}&email=${encodeURIComponent(E)}&uid=${senderId}&color=${encodeURIComponent(F)}`;
+
+      const imgurUpload = await axios.get('https://betadash-uploader.vercel.app/imgur', {
+        params: { link: fbcoverUrl }
       });
 
-      const pic = profile.data?.profile_pic;
-      if (!pic) throw new Error('No profile pic');
-
-      const reupload = await axios.get('https://betadash-uploader.vercel.app/imgur', {
-        params: { link: pic }
-      });
-
-      const img = reupload.data?.uploaded?.image;
-      if (!img) throw new Error('Imgur upload failed');
-
-      const url = `https://api.zetsu.xyz/canvas/fbcover?name=${encodeURIComponent(A)}&subname=${encodeURIComponent(B)}&sdt=${encodeURIComponent(C)}&address=${encodeURIComponent(D)}&email=${encodeURIComponent(E)}&uid=${encodeURIComponent(img)}&color=${encodeURIComponent(F)}`;
+      const imgurImage = imgurUpload.data?.uploaded?.image;
+      if (!imgurImage) throw new Error('Imgur upload failed');
 
       await sendMessage(senderId, {
         text:
@@ -53,7 +43,7 @@ module.exports = {
         attachment: {
           type: 'image',
           payload: {
-            url: url,
+            url: imgurImage,
             is_reusable: true
           }
         }
@@ -62,7 +52,7 @@ module.exports = {
     } catch (err) {
       console.error('FB Cover error:', err.message || err);
       await sendMessage(senderId, {
-        text: '⚠️ Error: Failed to generate FB cover. Please try again.'
+        text: '⚠️ Error: Could not generate or upload FB cover image.'
       }, pageAccessToken);
     }
   }
