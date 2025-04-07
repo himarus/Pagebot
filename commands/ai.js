@@ -1,37 +1,36 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api'); // Import API configuration
+const api = require('../handles/api');
 
 module.exports = {
   name: 'ai',
-  description: 'Chat with Learnlm 1.5 Pro Exp (With Previous Conversation)',
-  usage: 'ai <message>',
-  author: 'Churchill',
+  description: 'Ask anything to ChatGPT-4o',
+  usage: 'ai <your question>',
+  author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    const message = args.join(' ');
-
-    if (!message || message.trim() === '') {
-      await sendMessage(senderId, {
-        text: 'Please provide a message. Example: ai Hello!'
+    const prompt = args.join(' ');
+    if (!prompt) {
+      return sendMessage(senderId, {
+        text: 'Please provide a prompt. Example: ai What is the capital of Japan?'
       }, pageAccessToken);
-      return;
     }
 
-    const apiUrl = `${api.hazey}/api/gemini5?message=${encodeURIComponent(message)}`;
+    const apiUrl = `${api.josh}/api/chatgpt-4o-latest?uid=${senderId}&prompt=${encodeURIComponent(prompt)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
 
     try {
-      const response = await axios.get(apiUrl);
+      const res = await axios.get(apiUrl);
+      const reply = res.data?.response;
 
-      if (response.data && response.data.chat) {
-        await sendMessage(senderId, { text: response.data.chat }, pageAccessToken);
-      } else {
-        throw new Error('Invalid API response.');
-      }
-    } catch (error) {
-      console.error('Error in AI command:', error.message || error);
+      if (!reply) throw new Error('No response from API.');
+
       await sendMessage(senderId, {
-        text: `⚠️ An error occurred while processing your request. Please try again later.`
+        text: reply
+      }, pageAccessToken);
+    } catch (error) {
+      console.error('AI command error:', error.message || error);
+      await sendMessage(senderId, {
+        text: '⚠️ Error: Unable to get response from AI. Try again later. or try to use "ai2"'
       }, pageAccessToken);
     }
   }
