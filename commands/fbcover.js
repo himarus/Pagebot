@@ -3,61 +3,64 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'fbcover',
-  description: 'Generate a custom Facebook cover image using your profile picture.',
+  description: 'Generate a custom Facebook cover image using your profile pic.',
   usage: 'fbcover <name> | <subname> | <sdt> | <address> | <email> | <color>',
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    const fullInput = args.join(' ').split('|').map(str => str.trim());
-    const [name, subname, sdt, address, email, color] = fullInput;
+    const input = args.join(' ').split('|').map(s => s.trim());
+    const [A, B, C, D, E, F] = input;
 
-    if (!name || !subname || !sdt || !address || !email || !color) {
+    if (!A || !B || !C || !D || !E || !F) {
       return sendMessage(senderId, {
         text: '❌ Format:\nfbcover <name> | <subname> | <sdt> | <address> | <email> | <color>\n\nExample:\nfbcover Mark | Zuckerberg | n/a | USA | zuck@gmail.com | Cyan'
       }, pageAccessToken);
     }
 
     try {
-      // Get profile pic from Graph API
-      const profileRes = await axios.get(`https://graph.facebook.com/${senderId}`, {
+      const profile = await axios.get(`https://graph.facebook.com/${senderId}`, {
         params: {
           fields: 'profile_pic',
           access_token: pageAccessToken
         }
       });
 
-      const profilePicUrl = profileRes.data?.profile_pic;
+      const pic = profile.data?.profile_pic;
+      if (!pic) throw new Error('No profile pic');
 
-      if (!profilePicUrl) throw new Error('No profile pic found.');
+      const reupload = await axios.get('https://betadash-uploader.vercel.app/imgur', {
+        params: { link: pic }
+      });
 
-      const apiUrl = `https://api.zetsu.xyz/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(profilePicUrl)}&color=${encodeURIComponent(color)}`;
+      const img = reupload.data?.uploaded?.image;
+      if (!img) throw new Error('Imgur upload failed');
 
-      // 1st message (text info)
+      const url = `https://api.zetsu.xyz/canvas/fbcover?name=${encodeURIComponent(A)}&subname=${encodeURIComponent(B)}&sdt=${encodeURIComponent(C)}&address=${encodeURIComponent(D)}&email=${encodeURIComponent(E)}&uid=${encodeURIComponent(img)}&color=${encodeURIComponent(F)}`;
+
       await sendMessage(senderId, {
         text:
 `✅ FB Cover Details:
 
-• Name: ${name}
-• Subname: ${subname}
-• SDT: ${sdt}
-• Address: ${address}
-• Email: ${email}
-• Color: ${color}`
+• Name: ${A}
+• Subname: ${B}
+• SDT: ${C}
+• Address: ${D}
+• Email: ${E}
+• Color: ${F}`
       }, pageAccessToken);
 
-      // 2nd message (image)
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: apiUrl,
+            url: url,
             is_reusable: true
           }
         }
       }, pageAccessToken);
 
-    } catch (error) {
-      console.error('FB Cover error:', error.message || error);
+    } catch (err) {
+      console.error('FB Cover error:', err.message || err);
       await sendMessage(senderId, {
         text: '⚠️ Error: Failed to generate FB cover. Please try again.'
       }, pageAccessToken);
