@@ -4,13 +4,13 @@ const api = require('../handles/api');
 module.exports = {
   name: 'fbcover',
   description: 'Generate a Facebook cover image using user details.',
-  usage: 'fbcover <name> | <subname> | <sdt> | <address> | <email> | <uid> | <color>',
+  usage: 'fbcover <name> | <subname> | <sdt> | <address> | <email> | <uid> | <color>\nExample: fbcover John Doe | Chill Dev | 123-456-7890 | QC, PH | john@example.com | 100010101010101 | red',
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
     if (!args.length) {
       await sendMessage(senderId, {
-        text: 'Usage: fbcover <name> | <subname> | <sdt> | <address> | <email> | <uid> | <color>'
+        text: 'Usage: fbcover <name> | <subname> | <sdt> | <address> | <email> | <uid> | <color>\n\nExample: fbcover John Doe | Chill Dev | 123-456-7890 | QC, PH | john@example.com | 100010101010101 | red'
       }, pageAccessToken);
       return;
     }
@@ -19,7 +19,7 @@ module.exports = {
 
     if (rawInput.length < 7) {
       await sendMessage(senderId, {
-        text: 'Incomplete input. Please provide all 7 fields separated by "|".'
+        text: '⚠️ Incomplete input. Please provide all 7 fields separated by "|".\n\nExample: fbcover John Doe | Chill Dev | 123-456-7890 | QC, PH | john@example.com | 100010101010101 | red'
       }, pageAccessToken);
       return;
     }
