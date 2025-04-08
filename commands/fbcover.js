@@ -29,7 +29,10 @@ module.exports = {
     const apiUrl = `${api.josh}/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(uid)}&color=${encodeURIComponent(color)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
 
     try {
-      // Ping image to preload it before sending to Messenger
+      await sendMessage(senderId, {
+        text: `[ ⏳ ] 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗶𝗻𝗴 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝗖𝗼𝘃𝗲𝗿...\n\n𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝗮 𝗺𝗼𝗺𝗲𝗻𝘁.`
+      }, pageAccessToken);
+
       await axios.get(apiUrl, { responseType: 'arraybuffer' });
 
       await sendMessage(senderId, {
