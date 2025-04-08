@@ -3,8 +3,8 @@ const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
 module.exports = {
-  name: 'removebg',
-  description: 'Remove background from an image.',
+  name: 'remini',
+  description: 'Enhance an image using Remini AI.',
   author: 'chill',
 
   async execute(senderId, args, pageAccessToken, event) {
@@ -13,14 +13,19 @@ module.exports = {
 
       if (!imageUrl) {
         await sendMessage(senderId, {
-          text: '⚠️ Please reply to an image to remove its background.\n\nNote: This only works in Messenger, not in FB Lite or unsupported platforms.'
+          text: '⚠️ Please reply to an image to enhance it using Remini.\n\nNote: This only works in Messenger, not in FB Lite or unsupported platforms.'
         }, pageAccessToken);
         return;
       }
 
-      await sendMessage(senderId, { text: '⏳ Removing background... Please wait.' }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: '🛠️ Enhancing your image... Please wait.'
+      }, pageAccessToken);
 
-      const apiUrl = `${api.josh}/tools/removebg?url=${encodeURIComponent(imageUrl)}`;
+      // Double encode the image URL to ensure safe query format
+      const encodedUrl = encodeURIComponent(encodeURIComponent(imageUrl));
+      const apiUrl = `${api.josh}/tools/restore?url=${encodedUrl}`;
+
       const response = await axios.get(apiUrl);
 
       if (response.data?.status && response.data.result) {
@@ -31,13 +36,13 @@ module.exports = {
           }
         }, pageAccessToken);
       } else {
-        throw new Error('Invalid response from removebg API');
+        throw new Error('Invalid response from Remini API');
       }
 
     } catch (error) {
-      console.error('Error in RemoveBG command:', error.message || error);
+      console.error('Error in Remini command:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ An error occurred while removing the background. Please try again later.'
+        text: '⚠️ An error occurred while enhancing the image. Please try again later.'
       }, pageAccessToken);
     }
   }
