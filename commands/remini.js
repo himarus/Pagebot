@@ -12,20 +12,29 @@ module.exports = {
       const imageUrl = await getRepliedImage(event, pageAccessToken);
 
       if (!imageUrl) {
-        await sendMessage(senderId, { text: '⚠️ Please reply to an image to enhance it using Remini.\n\nNote: This only works in Messenger, not in FB Lite or unsupported platforms.' }, pageAccessToken);
+        await sendMessage(senderId, {
+          text: '⚠️ Please reply to an image to enhance it using Remini.\n\nNote: This only works in Messenger, not in FB Lite or unsupported platforms.'
+        }, pageAccessToken);
         return;
       }
 
-      await sendMessage(senderId, { text: '🛠️ Enhancing your image... Please wait.' }, pageAccessToken);
-
-      const apiUrl = `${api.xnil}/xnil/remini?imageUrl=${encodeURIComponent(imageUrl)}`;
-
-      await sendMessage(senderId, { 
-        attachment: { 
-          type: 'image', 
-          payload: { url: apiUrl } 
-        } 
+      await sendMessage(senderId, {
+        text: '🛠️ Enhancing your image... Please wait.'
       }, pageAccessToken);
+
+      const apiUrl = `${api.josh}/tools/restore?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(apiUrl);
+
+      if (response.data?.status && response.data.result) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: response.data.result }
+          }
+        }, pageAccessToken);
+      } else {
+        throw new Error('Invalid response from Remini API');
+      }
 
     } catch (error) {
       console.error('Error in Remini command:', error.message || error);
