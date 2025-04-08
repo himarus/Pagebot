@@ -2,51 +2,6 @@ const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
-module.exports = {
-  name: 'removebg',
-  description: 'Remove background from an image.',
-  author: 'chill',
-
-  async execute(senderId, args, pageAccessToken, event) {
-    try {
-      const imageUrl = await getRepliedImage(event, pageAccessToken);
-
-      if (!imageUrl) {
-        await sendMessage(senderId, {
-          text: '⚠️ Please reply to an image to remove its background.\n\nNote: This only works in Messenger, not in FB Lite or unsupported platforms.'
-        }, pageAccessToken);
-        return;
-      }
-
-      await sendMessage(senderId, {
-        text: '⏳ Removing background... Please wait.'
-      }, pageAccessToken);
-
-      // Double encode image URL
-      const encodedUrl = encodeURIComponent(encodeURIComponent(imageUrl));
-      const apiUrl = `${api.josh}/tools/removebg?url=${encodedUrl}`;
-      const response = await axios.get(apiUrl);
-
-      if (response.data?.status && response.data.result) {
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'image',
-            payload: { url: response.data.result }
-          }
-        }, pageAccessToken);
-      } else {
-        throw new Error('Invalid response from RemoveBG API');
-      }
-
-    } catch (error) {
-      console.error('Error in RemoveBG command:', error.message || error);
-      await sendMessage(senderId, {
-        text: '⚠️ An error occurred while removing the background. Please try again later.'
-      }, pageAccessToken);
-    }
-  }
-};
-
 async function getRepliedImage(event, pageAccessToken) {
   if (event.message?.reply_to?.mid) {
     try {
@@ -62,3 +17,48 @@ async function getRepliedImage(event, pageAccessToken) {
   }
   return null;
 }
+
+module.exports = {
+  name: 'remini',
+  description: 'Enhance photo using Remini AI (reply with photo)',
+  usage: 'remini (reply to a photo)',
+  author: 'churchill',
+
+  async execute(senderId, args, pageAccessToken, event) {
+    const imageUrl = await getRepliedImage(event, pageAccessToken);
+
+    if (!imageUrl) {
+      return sendMessage(senderId, {
+        text: '⚠️ Please reply to a photo you want to enhance.\n\n*Note: This command only works on Messenger. If you’re using Facebook Lite or other platforms, reply detection may not work.*'
+      }, pageAccessToken);
+    }
+
+    await sendMessage(senderId, {
+      text: '✨ Enhancing your image, please wait...'
+    }, pageAccessToken);
+
+    try {
+      const apiUrl = `${api.josh}/tools/restore?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(apiUrl);
+
+      if (response.data?.status && response.data.result) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: {
+              url: response.data.result,
+              is_reusable: true
+            }
+          }
+        }, pageAccessToken);
+      } else {
+        throw new Error('Invalid API response.');
+      }
+    } catch (error) {
+      console.error('Remini command error:', error.message || error);
+      await sendMessage(senderId, {
+        text: '⚠️ Failed to enhance image. Please try again later.'
+      }, pageAccessToken);
+    }
+  }
+};
