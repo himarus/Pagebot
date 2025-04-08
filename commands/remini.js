@@ -38,10 +38,10 @@ module.exports = {
     }, pageAccessToken);
 
     try {
-      const apiUrl = `https://ccexplorerapisjonell.vercel.app/api/remini?imageUrl=${encodeURIComponent(imageUrl)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
+      const apiUrl = `${api.josh}/tools/restore?url=${encodeURIComponent(imageUrl)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
       const response = await axios.get(apiUrl);
 
-      if (response.data?.result) {
+      if (response.data?.status && response.data.result) {
         await sendMessage(senderId, {
           attachment: {
             type: 'image',
