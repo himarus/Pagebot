@@ -21,13 +21,18 @@ module.exports = {
       await sendMessage(senderId, { text: '⏳ Removing background... Please wait.' }, pageAccessToken);
 
       const apiUrl = `${api.josh}/tools/removebg?url=${encodeURIComponent(imageUrl)}`;
+      const response = await axios.get(apiUrl);
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'image',
-          payload: { url: apiUrl }
-        }
-      }, pageAccessToken);
+      if (response.data?.status && response.data.result) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'image',
+            payload: { url: response.data.result }
+          }
+        }, pageAccessToken);
+      } else {
+        throw new Error('Invalid response from removebg API');
+      }
 
     } catch (error) {
       console.error('Error in RemoveBG command:', error.message || error);
