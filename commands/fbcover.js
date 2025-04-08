@@ -26,28 +26,17 @@ module.exports = {
     }
 
     const [name, subname, sdt, address, email, uid, color] = rawInput;
-    const joshUrl = `${api.josh}/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(uid)}&color=${encodeURIComponent(color)}&apikey=05b1c379d5886d1b846d45572ee1e0e`;
-
-    const imgbbKey = '1853a90240cf6cebbfe191fa0112d154';
+    const apiUrl = `${api.josh}/canvas/fbcover?name=${encodeURIComponent(name)}&subname=${encodeURIComponent(subname)}&sdt=${encodeURIComponent(sdt)}&address=${encodeURIComponent(address)}&email=${encodeURIComponent(email)}&uid=${encodeURIComponent(uid)}&color=${encodeURIComponent(color)}&apikey=05b1c379d5886d1b846d45572ee1e0e`;
 
     try {
-      // Upload to ImgBB
-      const imgbbRes = await axios.post('https://api.imgbb.com/1/upload', null, {
-        params: {
-          key: imgbbKey,
-          image: joshUrl
-        }
-      });
-
-      const hostedImage = imgbbRes.data?.data?.url;
-
-      if (!hostedImage) throw new Error("ImgBB upload failed.");
+      // Ping image to preload it before sending to Messenger
+      await axios.get(apiUrl, { responseType: 'arraybuffer' });
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: hostedImage,
+            url: apiUrl,
             is_reusable: true
           }
         }
