@@ -5,7 +5,7 @@ module.exports = {
   name: 'quiz',
   description: 'Get a fun quiz question',
   usage: 'quiz',
-  author: 'chill',
+  author: 'yazky',
 
   async execute(senderId, args, pageAccessToken) {
     const apiUrl = 'https://betadash-api-swordslush-production.up.railway.app/quiz';
@@ -16,29 +16,18 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const quizData = response.data.questions[0];
 
-      const buttons = Object.entries(quizData.choices).map(([key, value]) => ({
-        type: 'postback',
+      const quickReplies = Object.entries(quizData.choices).map(([key, value]) => ({
+        content_type: "text",
         title: `${key}: ${value}`,
         payload: `QUIZ_ANSWER|${key}|${quizData.correct_answer}`
       }));
 
-      await sendMessage(senderId, {
-        text: `📚 Category: ${quizData.category}\n🔄 Difficulty: ${quizData.difficulty}`
-      }, pageAccessToken);
+      const message = {
+        text: `📚 Category: ${quizData.category}\n🔄 Difficulty: ${quizData.difficulty}\n\n${quizData.question}`,
+        quick_replies: quickReplies.slice(0, 11) 
+      };
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'template',
-          payload: {
-            template_type: 'generic',
-            elements: [{
-              title: '✨ Quiz Time!',
-              subtitle: quizData.question,
-              buttons: buttons
-            }]
-          }
-        }
-      }, pageAccessToken);
+      await sendMessage(senderId, message, pageAccessToken);
 
       await sendMessage(senderId, {
         attachment: {
