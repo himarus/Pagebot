@@ -56,7 +56,7 @@ const handlePostback = async (event, pageAccessToken) => {
       await sendMessage(senderId, quickReplies, pageAccessToken);
     } else if (payload === 'NEW_QUIZ') {
       await sendMessage(senderId, { text: '🔄 Loading a new question...' }, pageAccessToken);
-      // Call the quiz command again here
+      
       const quizModule = require('./quiz');
       await quizModule.execute(senderId, [], pageAccessToken);
     } else if (payload === 'QUIT_QUIZ') {
