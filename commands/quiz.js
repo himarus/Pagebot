@@ -5,7 +5,7 @@ module.exports = {
   name: 'quiz',
   description: 'Get a fun quiz question',
   usage: 'quiz',
-  author: 'yazky',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     const apiUrl = 'https://betadash-api-swordslush-production.up.railway.app/quiz';
