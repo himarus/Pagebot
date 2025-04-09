@@ -7,7 +7,7 @@ const handlePostback = async (event, pageAccessToken) => {
   if (senderId && payload) {
     if (payload === 'WELCOME_MESSAGE') {
       const combinedMessage = {
-        text: `🔥 Welcome to CHILLI BOT! 🔥\n\nI'm your AI-powered assistant, here to make things spicier and smoother! 🌶️\n\n𝗧𝗘𝗥𝗠𝗦 𝗢𝗙 𝗦𝗘𝗥𝗩𝗜𝗖𝗘 & 𝗣𝗥𝗜𝗩𝗔𝗖𝗬 𝗣𝗢𝗟𝗜𝗖𝗬\n\nBy using this bot, you agree to:\n1. 𝗜𝗻𝘁𝗲𝗿𝗮𝗰𝘁𝗶𝗼𝗻: Automated responses may log interactions to improve service.\n2. 𝗗𝗮𝘁𝗮: We collect data to enhance functionality without sharing it.\n3. 𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆: Your data is protected.\n4. 𝗖𝗼𝗺𝗽𝗹𝗶𝗮𝗻𝗰𝗲: Follow Facebook's terms or risk access restrictions.\n5. 𝗨𝗽𝗱𝗮𝘁𝗲𝘀: Terms may change, and continued use implies acceptance.\n\nFailure to comply may result in access restrictions.\n\nType "help" to see commands.`,
+        text: `🔥 Welcome to CHILLI BOT! 🔥\n\nI'm your AI-powered assistant, here to make things spicier and smoother! 🌶️\n\nTERMS OF SERVICE & PRIVACY POLICY\n\nBy using this bot, you agree to:\n1. INTERACTION: Automated responses may log interactions to improve service.\n2. DATA: We collect data to enhance functionality without sharing it.\n3. SECURITY: Your data is protected.\n4. COMPLIANCE: Follow Facebook's terms or risk access restrictions.\n5. UPDATES: Terms may change, and continued use implies acceptance.\n\nFailure to comply may result in access restrictions.\n\nType "help" to see commands.`,
         quick_replies: [
           {
             content_type: "text",
@@ -38,6 +38,36 @@ const handlePostback = async (event, pageAccessToken) => {
           text: `Failed to send video. Please try accessing it here: ${videoUrl}`
         }, pageAccessToken);
       }
+    } else if (payload.startsWith('QUIZ_ANSWER')) {
+      const [_, userAnswer, correctAnswer] = payload.split('|');
+      
+      const resultText = (userAnswer === correctAnswer) 
+        ? '🎉 Correct! Well done!' 
+        : `❌ Incorrect. The correct answer was ${correctAnswer}`;
+
+      const quickReplies = {
+        text: `${resultText}\n\nWant another question?`,
+        quick_replies: [
+          { content_type: "text", title: "♻️ New Question", payload: "NEW_QUIZ" },
+          { content_type: "text", title: "🚫 Quit", payload: "QUIT_QUIZ" }
+        ]
+      };
+
+      await sendMessage(senderId, quickReplies, pageAccessToken);
+    } else if (payload === 'NEW_QUIZ') {
+      await sendMessage(senderId, { text: '🔄 Loading a new question...' }, pageAccessToken);
+      // Call the quiz command again here
+      const quizModule = require('./quiz');
+      await quizModule.execute(senderId, [], pageAccessToken);
+    } else if (payload === 'QUIT_QUIZ') {
+      await sendMessage(senderId, { text: 'Thanks for playing! 😊' }, pageAccessToken);
+    } else if (payload === 'HELP_PAYLOAD') {
+      await sendMessage(senderId, {
+        text: 'Available commands:\n1. quiz - Play a quiz game\n2. help - Show this message\n3. [Other commands...]',
+        quick_replies: [
+          { content_type: "text", title: "Quiz", payload: "NEW_QUIZ" }
+        ]
+      }, pageAccessToken);
     } else {
       console.log('Unknown payload:', payload);
     }
