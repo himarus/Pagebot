@@ -1,7 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-
 const sessions = {};
 
 module.exports = {
@@ -10,13 +9,14 @@ module.exports = {
   usage: 'quiz',
   author: 'chill',
 
-  async execute(senderId, args, pageAccessToken) {
-    
-    const answer = args.join(' ').trim();
+  async execute(senderId, args, pageAccessToken, rawMessage) {
+    const text = rawMessage?.text?.trim();
 
-    if (sessions[senderId] && sessions[senderId].question) {
+    // Check if user is in a quiz session
+    if (sessions[senderId]) {
       const correct = sessions[senderId].correct;
-      if (answer.toLowerCase() === correct.toLowerCase()) {
+
+      if (text?.toLowerCase() === correct.toLowerCase()) {
         await sendMessage(senderId, {
           text: `✅ Correct! Want another one?`,
           quick_replies: [
@@ -26,18 +26,25 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: `❌ Wrong! The correct answer is: ${correct}\nTry another one?`,
+          text: `❌ Wrong! The correct answer was: ${correct}\nTry again?`,
           quick_replies: [
             { content_type: "text", title: "More Question", payload: "quiz" },
             { content_type: "text", title: "Exit Quiz", payload: "exit_quiz" }
           ]
         }, pageAccessToken);
       }
-      delete sessions[senderId]; // clear session
+
+      delete sessions[senderId];
       return;
     }
 
-    // Start new quiz
+    // If message is "Exit Quiz"
+    if (text?.toLowerCase() === 'exit quiz') {
+      await sendMessage(senderId, { text: '🛑 Quiz ended. Come back anytime!' }, pageAccessToken);
+      return;
+    }
+
+    // New quiz
     try {
       const res = await axios.get('https://opentdb.com/api.php?amount=1&type=multiple');
       const data = res.data.results[0];
@@ -48,7 +55,6 @@ module.exports = {
 
       const choices = [...incorrect, correct].sort(() => Math.random() - 0.5);
 
-      // Save session
       sessions[senderId] = {
         question,
         correct
@@ -56,7 +62,7 @@ module.exports = {
 
       await sendMessage(senderId, {
         text: `🧠 Quiz Time!\n\n${question}`,
-        quick_replies: choices.slice(0, 4).map(choice => ({
+        quick_replies: choices.map(choice => ({
           content_type: "text",
           title: choice,
           payload: choice
@@ -65,7 +71,7 @@ module.exports = {
     } catch (err) {
       console.error("Quiz error:", err);
       await sendMessage(senderId, {
-        text: '⚠️ Failed to load quiz. Try again.'
+        text: '⚠️ Failed to load quiz. Try again later.'
       }, pageAccessToken);
     }
   }
