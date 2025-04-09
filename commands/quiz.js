@@ -12,15 +12,8 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, rawMessage) {
     const text = rawMessage?.text?.trim();
 
-    if (text?.toLowerCase() === 'exit quiz') {
-      delete sessions[senderId];
-      await sendMessage(senderId, { text: '🛑 Quiz ended. Come back anytime!' }, pageAccessToken);
-      return;
-    }
-
     if (sessions[senderId]) {
       const correct = sessions[senderId].correct;
-      clearTimeout(sessions[senderId].timeout);
 
       if (text?.toLowerCase() === correct.toLowerCase()) {
         await sendMessage(senderId, {
@@ -44,27 +37,24 @@ module.exports = {
       return;
     }
 
+    if (text?.toLowerCase() === 'exit quiz') {
+      await sendMessage(senderId, { text: '🛑 Quiz ended. Come back anytime!' }, pageAccessToken);
+      return;
+    }
+
     try {
       const res = await axios.get('https://opentdb.com/api.php?amount=1&type=multiple');
       const data = res.data.results[0];
+
       const question = decodeHTMLEntities(data.question);
       const correct = decodeHTMLEntities(data.correct_answer);
-      const incorrect = data.incorrect_answers.map(decodeHTMLEntities);
+      const incorrect = data.incorrect_answers.map(a => decodeHTMLEntities(a));
+
       const choices = [...incorrect, correct].sort(() => Math.random() - 0.5);
 
       sessions[senderId] = {
         question,
-        correct,
-        timeout: setTimeout(async () => {
-          await sendMessage(senderId, {
-            text: `⏰ Time's up! The correct answer was: ${correct}`,
-            quick_replies: [
-              { content_type: "text", title: "More Question", payload: "quiz" },
-              { content_type: "text", title: "Exit Quiz", payload: "exit_quiz" }
-            ]
-          }, pageAccessToken);
-          delete sessions[senderId];
-        }, 60000) // 1 minute timeout
+        correct
       };
 
       await sendMessage(senderId, {
