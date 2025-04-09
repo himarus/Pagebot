@@ -1,4 +1,5 @@
 const { sendMessage } = require('./sendMessage');
+const axios = require('axios');
 
 const handlePostback = async (event, pageAccessToken) => {
   const senderId = event.sender?.id;
@@ -38,9 +39,15 @@ const handlePostback = async (event, pageAccessToken) => {
           text: `Failed to send video. Please try accessing it here: ${videoUrl}`
         }, pageAccessToken);
       }
-    } else if (payload.startsWith('QUIZ_ANSWER')) {
-      const [_, userAnswer, correctAnswer] = payload.split('|');
-      
+    } else if (payload === 'QUIZ_ANSWER') {
+      await sendMessage(senderId, {
+        text: 'Please enter your answer (A, B, C, D, etc.)'
+      }, pageAccessToken);
+    } else if (payload.match(/^[A-Z]$/i)) {
+      // Simulate getting the correct answer from the quiz API
+      const correctAnswer = 'A'; // Replace with actual logic to get correct answer
+      const userAnswer = payload.toUpperCase();
+
       const resultText = (userAnswer === correctAnswer) 
         ? '🎉 Correct! Well done!' 
         : `❌ Incorrect. The correct answer was ${correctAnswer}`;
