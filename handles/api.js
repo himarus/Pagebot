@@ -4,7 +4,7 @@ module.exports = {
   josh: "https://api.zetsu.xyz",
   kaizen: "https://kaiz-apis.gleeze.com",
   nethApi: "https://nethwieginedev.vercel.app",
-  jonel: "https://ccprojectapis.ddns.net",
+  jonel: "https://jonell01-ccprojectsapihshs.hf.space",
   canvasApi: "https://api-canvass.vercel.app",
   yakzy: "https://betadash-api-swordslush-production.up.railway.app",
   zaik: "https://renzsuperb.onrender.com",
