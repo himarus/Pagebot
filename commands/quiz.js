@@ -5,7 +5,7 @@ module.exports = {
   name: 'quiz',
   description: 'Get a fun quiz question',
   usage: 'quiz',
-  author: 'chill',
+  author: 'yazky',
 
   async execute(senderId, args, pageAccessToken) {
     const apiUrl = 'https://betadash-api-swordslush-production.up.railway.app/quiz';
@@ -16,13 +16,15 @@ module.exports = {
       const response = await axios.get(apiUrl);
       const quizData = response.data.questions[0];
 
-      const choicesText = Object.entries(quizData.choices).map(([key, value]) => `${key}: ${value}`).join('\n');
+      const quickReplies = Object.entries(quizData.choices).map(([key, value]) => ({
+        content_type: "text",
+        title: `Quiz Answer ${key}`,
+        payload: `QUIZ_ANSWER|${key}|${quizData.correct_answer}`
+      }));
 
       const message = {
-        text: `📚 Category: ${quizData.category}\n🔄 Difficulty: ${quizData.difficulty}\n\n${quizData.question}\n\nChoices:\n${choicesText}`,
-        quick_replies: [
-          { content_type: "text", title: "Quiz Answer", payload: "QUIZ_ANSWER" }
-        ]
+        text: `📚 Category: ${quizData.category}\n🔄 Difficulty: ${quizData.difficulty}\n\n${quizData.question}`,
+        quick_replies: quickReplies.slice(0, 11) // Hanggang 11 quick replies
       };
 
       await sendMessage(senderId, message, pageAccessToken);
