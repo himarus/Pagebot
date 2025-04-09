@@ -146,6 +146,23 @@ async function handleMessage(event, pageAccessToken) {
         text: "Ayaw muna mag LULU?"
       }, pageAccessToken);
     }
+
+    // Quiz response handling
+    if (payload === "quiz") {
+      const quizCommand = commands.get('quiz');
+      if (quizCommand) {
+        await quizCommand.execute(senderId, [], pageAccessToken, event.message);
+      }
+      return;
+    }
+
+    if (payload === "exit_quiz") {
+      const quizCommand = commands.get('quiz');
+      if (quizCommand) {
+        await quizCommand.execute(senderId, [], pageAccessToken, { text: 'exit quiz' });
+      }
+      return;
+    }
   }
 }
 
