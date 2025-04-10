@@ -23,23 +23,31 @@ module.exports = {
       const response = await axios.get(apiUrl);
 
       if (response.data?.status === 'success' && response.data.downloadUrls?.length > 0) {
+        const videoUrl = response.data.downloadUrls[0];
+        const videoTitle = response.data.title || 'Untitled';
+
+        // Send video attachment
         await sendMessage(senderId, {
           attachment: {
             type: 'video',
             payload: {
-              url: response.data.downloadUrls[0],
+              url: videoUrl,
               is_reusable: true
             }
           }
         }, pageAccessToken);
 
+        // Send video title
         await sendMessage(senderId, {
-          text: `✅ Download Successful\n\nTitle: ${response.data.title || 'Untitled'}`
+          text: `✅ Download Successful\n\nTitle: ${videoTitle}`
         }, pageAccessToken);
       } else {
-        throw new Error('Invalid API response format');
+        await sendMessage(senderId, {
+          text: '⚠️ Failed to process the TikTok video. The API returned an unexpected response.'
+        }, pageAccessToken);
       }
     } catch (error) {
+      console.error('Error:', error.message || error);
       await sendMessage(senderId, {
         text: '⚠️ Failed to download TikTok video. Please check the URL or try again later.'
       }, pageAccessToken);
