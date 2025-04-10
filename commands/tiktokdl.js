@@ -1,4 +1,7 @@
 const axios = require('axios');
+const FormData = require('form-data');
+const fs = require('fs');
+const path = require('path');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
@@ -13,7 +16,7 @@ module.exports = {
 
     if (!videoUrl || !tiktokUrlPattern.test(videoUrl)) {
       await sendMessage(senderId, {
-        text: 'Noto ❌ Invalid TikTok video URL.\n\nUsage: tiktokdl <TikTok Video URL>'
+        text: '❌ Invalid TikTok URL.\n\nUsage: tiktokdl <TikTok Video URL>'
       }, pageAccessToken);
       return;
     }
@@ -22,36 +25,41 @@ module.exports = {
       text: '[⏳] Downloading TikTok video, please wait...'
     }, pageAccessToken);
 
-    const apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(videoUrl)}`;
-
     try {
-      const response = await axios.get(apiUrl);
-      const result = response.data;
+      const apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(videoUrl)}`;
+      const res = await axios.get(apiUrl);
+      const data = res.data?.data;
 
-      if (result.code === 0 && result.data && result.data.play) {
-        const data = result.data;
+      if (!data || !data.play) {
         await sendMessage(senderId, {
-          text: `✅ Video found!\n\n📌 Title: ${data.title || 'N/A'}\n👤 Author: ${data.author?.nickname || 'Unknown'}`
+          text: '⚠️ Could not retrieve the video. Please try another link.'
         }, pageAccessToken);
-
-        await sendMessage(senderId, {
-          attachment: {
-            type: 'video',
-            payload: {
-              url: data.play,
-              is_reusable: true
-            }
-          }
-        }, pageAccessToken);
-      } else {
-        await sendMessage(senderId, {
-          text: '⚠️ TikTok video found but cannot retrieve playable link. Try a different video.'
-        }, pageAccessToken);
+        return;
       }
+
+      const videoResponse = await axios.get(data.play, {
+        responseType: 'arraybuffer'
+      });
+
+      const tempPath = path.join(__dirname, `temp_${Date.now()}.mp4`);
+      fs.writeFileSync(tempPath, videoResponse.data);
+
+      const form = new FormData();
+      form.append('message', `✅ Video found!\n\n📌 Title: ${data.title || 'N/A'}\n👤 Author: ${data.author?.nickname || 'Unknown'}`);
+      form.append('filedata', fs.createReadStream(tempPath));
+
+      const facebookRes = await axios.post(
+        `https://graph.facebook.com/v18.0/me/messages?access_token=${pageAccessToken}`,
+        form,
+        { headers: form.getHeaders(), params: { recipient: JSON.stringify({ id: senderId }) } }
+      );
+
+      fs.unlinkSync(tempPath); // Clean up temp file
+
     } catch (error) {
-      console.error('tiktokdl error:', error.message || error);
+      console.error('Force download error:', error.message || error);
       await sendMessage(senderId, {
-        text: '❌ An error occurred while downloading the video. Please try again later.'
+        text: '❌ Something went wrong while downloading the video. Try again later.'
       }, pageAccessToken);
     }
   }
