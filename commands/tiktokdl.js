@@ -1,50 +1,56 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
-const tiktokRegex = /^https?:\/\/(www\.)?(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)\/.+$/;
-
 module.exports = {
   name: 'tiktokdl',
-  description: 'Download TikTok videos without watermark',
-  usage: 'tiktokdl <TikTok link>',
-  author: 'chill',
+  description: 'Download TikTok videos without watermark.',
+  usage: 'tiktokdl <TikTok Video URL>',
+  author: 'chillibot',
 
   async execute(senderId, args, pageAccessToken) {
-    const link = args.join(' ');
+    const videoUrl = args[0];
+    const tiktokUrlPattern = /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+/;
 
-    if (!link || !tiktokRegex.test(link)) {
-      return sendMessage(senderId, {
-        text: 'Please provide a valid TikTok video link.\nExample: tiktokdl https://www.tiktok.com/@xxx/video/xxxxxxxxxxxxxxx'
+    if (!videoUrl || !tiktokUrlPattern.test(videoUrl)) {
+      await sendMessage(senderId, {
+        text: '❌ Invalid TikTok video URL.\n\nUsage: tiktokdl <TikTok Video URL>'
       }, pageAccessToken);
+      return;
     }
 
+    await sendMessage(senderId, {
+      text: '[⏳] Downloading TikTok video, please wait...'
+    }, pageAccessToken);
+
+    const apiUrl = `https://tikwm.com/api/?url=${encodeURIComponent(videoUrl)}`;
+
     try {
-      const { data } = await axios.post(
-        'https://tikwm.com/api/',
-        `url=${encodeURIComponent(link)}&count=12&cursor=0&web=1&hd=1`,
-        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-      );
+      const response = await axios.get(apiUrl);
+      const data = response.data?.data;
 
-      const { title, hdplay } = data.data;
+      if (data && data.play) {
+        await sendMessage(senderId, {
+          text: `✅ Video found!\n\n📌 Title: ${data.title || 'N/A'}\n👤 Author: ${data.author?.nickname || 'Unknown'}`
+        }, pageAccessToken);
 
-      if (!hdplay) throw new Error('No downloadable video found');
-
-      await sendMessage(senderId, {
-        text: `✅ Video Found: ${title || 'Untitled'}\n\nDownloading...`
-      }, pageAccessToken);
-
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'video',
-          payload: {
-            url: hdplay
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'video',
+            payload: {
+              url: data.play,
+              is_reusable: true
+            }
           }
-        }
-      }, pageAccessToken);
-    } catch (err) {
-      console.error('TikTokDL Error:', err.message || err);
+        }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: '⚠️ Failed to retrieve the video. Please make sure the link is correct.'
+        }, pageAccessToken);
+      }
+    } catch (error) {
+      console.error('Error in tiktokdl command:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ Failed to download the video. Please make sure the link is correct or try again later.'
+        text: '❌ An error occurred while downloading the video. Please try again later.'
       }, pageAccessToken);
     }
   }
