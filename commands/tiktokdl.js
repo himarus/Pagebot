@@ -1,22 +1,22 @@
 const axios = require('axios');
-const { sendMessage } = require("../handles/sendMessage");
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: "tiktokdl",
-  description: "Download TikTok video using a link",
-  usage: "tiktokdl <tiktok link>",
-  author: "chilli",
+  name: 'tiktokdl',
+  description: 'Download TikTok video using a link',
+  usage: 'tiktokdl <tiktok link>',
+  author: 'chilli',
 
-  execute: async function ({ args, event, api, senderId, pageAccessToken }) {
+  async execute(senderId, args, pageAccessToken) {
     const link = args[0];
     if (!link || !link.includes("tiktok.com")) {
       return sendMessage(senderId, {
-        text: "Please provide a valid TikTok link.\nExample: tiktokdl https://www.tiktok.com/@user/video/123456789"
+        text: 'Please provide a valid TikTok link.\nExample: tiktokdl https://www.tiktok.com/@user/video/123456789'
       }, pageAccessToken);
     }
 
     await sendMessage(senderId, {
-      text: "Downloading TikTok video, please wait..."
+      text: '⏳ Downloading TikTok video, please wait...'
     }, pageAccessToken);
 
     try {
@@ -27,29 +27,29 @@ module.exports = {
         }
       });
 
-      if (!res.data || !res.data.data || !res.data.data.play) {
+      const data = res.data?.data;
+      if (!data || !data.play) {
         return sendMessage(senderId, {
-          text: "Failed to retrieve video. The TikTok link may be invalid or private."
+          text: '⚠️ Failed to retrieve video. The TikTok link may be invalid or private.'
         }, pageAccessToken);
       }
 
-      const data = res.data.data;
       const video = await axios.get(data.play, { responseType: 'stream' });
 
-      sendMessage(senderId, {
-        text: `✅ TikTok Download Successful!\n\nTitle: ${data.title}\nLikes: ${data.digg_count}\nComments: ${data.comment_count}`,
+      await sendMessage(senderId, {
+        text: `✅ Download complete!\n\nTitle: ${data.title || 'Untitled'}\nLikes: ${data.digg_count} | Comments: ${data.comment_count}`,
         attachment: {
-          type: "video",
+          type: 'video',
           payload: {
             is_reusable: true,
             filedata: video.data
           }
         }
       }, pageAccessToken);
-    } catch (e) {
-      console.error("TikTokDL Error:", e.message);
-      sendMessage(senderId, {
-        text: "An error occurred while downloading the video. Please try again later."
+    } catch (error) {
+      console.error('TikTokDL Error:', error.message || error);
+      await sendMessage(senderId, {
+        text: '⚠️ Error: Failed to download TikTok video. Please try again later.'
       }, pageAccessToken);
     }
   }
