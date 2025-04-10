@@ -3,6 +3,21 @@ const { sendMessage } = require('../handles/sendMessage');
 
 const tiktokRegex = /^https?:\/\/(www\.)?(tiktok\.com|vt\.tiktok\.com|vm\.tiktok\.com)\/.+$/;
 
+async function resolveRedirect(url) {
+  try {
+    const response = await axios.get(url, {
+      maxRedirects: 0,
+      validateStatus: status => status >= 300 && status < 400,
+    });
+    return response.headers.location || url;
+  } catch (error) {
+    if (error.response?.headers?.location) {
+      return error.response.headers.location;
+    }
+    return url;
+  }
+}
+
 module.exports = {
   name: 'tiktokdl',
   description: 'Download TikTok videos without watermark',
@@ -10,17 +25,19 @@ module.exports = {
   author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const link = args.join(' ');
+    const inputLink = args.join(' ');
 
-    if (!link || !tiktokRegex.test(link)) {
+    if (!inputLink || !tiktokRegex.test(inputLink)) {
       return sendMessage(senderId, {
-        text: 'Please provide a valid TikTok video link.\nExample: tiktokdl https://www.tiktok.com/@xxx/video/xxxxxxxxxxxxxxx'
+        text: 'Please provide a valid TikTok video link.\nExample: tiktokdl https://vt.tiktok.com/ZSraRB1sq'
       }, pageAccessToken);
     }
 
     try {
+      const finalLink = await resolveRedirect(inputLink);
+
       const response = await axios.get(`https://www.tikwm.com/api/`, {
-        params: { url: link }
+        params: { url: finalLink }
       });
 
       const result = response.data?.data;
