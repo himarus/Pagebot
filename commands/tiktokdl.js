@@ -15,7 +15,6 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    // Send "Downloading..." indicator
     await sendMessage(senderId, {
       text: "Downloading TikTok video, please wait..."
     }, pageAccessToken);
@@ -27,6 +26,12 @@ module.exports = {
           'Content-Type': 'application/json',
         }
       });
+
+      if (!res.data || !res.data.data || !res.data.data.play) {
+        return sendMessage(senderId, {
+          text: "Failed to retrieve video. The TikTok link may be invalid or private."
+        }, pageAccessToken);
+      }
 
       const data = res.data.data;
       const video = await axios.get(data.play, { responseType: 'stream' });
@@ -42,6 +47,7 @@ module.exports = {
         }
       }, pageAccessToken);
     } catch (e) {
+      console.error("TikTokDL Error:", e.message);
       sendMessage(senderId, {
         text: "An error occurred while downloading the video. Please try again later."
       }, pageAccessToken);
