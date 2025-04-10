@@ -9,11 +9,11 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     const videoUrl = args[0];
-    const tiktokUrlPattern = /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+/;
+    const tiktokUrlPattern = /(?:https?:\/\/)?(?:www\.)?(tiktok\.com\/@[\w.-]+\/video\/\d+|vt\.tiktok\.com\/[\w\d]+)/;
 
     if (!videoUrl || !tiktokUrlPattern.test(videoUrl)) {
       await sendMessage(senderId, {
-        text: '❌ Invalid TikTok video URL.\n\nUsage: tiktokdl <TikTok Video URL>'
+        text: 'Noto ❌ Invalid TikTok video URL.\n\nUsage: tiktokdl <TikTok Video URL>'
       }, pageAccessToken);
       return;
     }
