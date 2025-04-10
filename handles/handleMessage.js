@@ -32,9 +32,6 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-    if (await handleTikTokVideo(event, pageAccessToken)) return;
-    if (await handleInstagramVideo(event, pageAccessToken)) return;
-
     if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
       const lastVideo = lastVideoByUser.get(senderId);
