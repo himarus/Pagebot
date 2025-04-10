@@ -26,9 +26,10 @@ module.exports = {
 
     try {
       const response = await axios.get(apiUrl);
-      const data = response.data?.data;
+      const result = response.data;
 
-      if (data && data.play) {
+      if (result.code === 0 && result.data && result.data.play) {
+        const data = result.data;
         await sendMessage(senderId, {
           text: `✅ Video found!\n\n📌 Title: ${data.title || 'N/A'}\n👤 Author: ${data.author?.nickname || 'Unknown'}`
         }, pageAccessToken);
@@ -44,11 +45,11 @@ module.exports = {
         }, pageAccessToken);
       } else {
         await sendMessage(senderId, {
-          text: '⚠️ Failed to retrieve the video. Please make sure the link is correct.'
+          text: '⚠️ TikTok video found but cannot retrieve playable link. Try a different video.'
         }, pageAccessToken);
       }
     } catch (error) {
-      console.error('Error in tiktokdl command:', error.message || error);
+      console.error('tiktokdl error:', error.message || error);
       await sendMessage(senderId, {
         text: '❌ An error occurred while downloading the video. Please try again later.'
       }, pageAccessToken);
