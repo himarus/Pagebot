@@ -26,38 +26,14 @@ module.exports = {
     const commands = commandFiles.map((file) => {
       const command = require(path.join(commandsDir, file));
       if (command.name) {
-        return {
-          title: command.name,
-          payload: `${command.name.toUpperCase()}_PAYLOAD`
-        };
+        return command.name;
       }
       return null;
-    }).filter(cmd => cmd !== null);
+    }).filter(name => name !== null);
 
     const totalCommands = commands.length;
-    const commandsPerPage = 10;
-    const totalPages = Math.ceil(totalCommands / commandsPerPage);
-    let page = parseInt(pogi[0], 10);
 
-    if (isNaN(page) || page < 1) {
-      page = 1;
-    }
-
-    if (pogi[0] && pogi[0].toLowerCase() === 'all') {
-      const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((cmd, index) => `${convertToGothic(`${index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
-
-      return sendMessage(kupal, { text: helpTextMessage }, sili);
-    }
-
-    const startIndex = (page - 1) * commandsPerPage;
-    const endIndex = startIndex + commandsPerPage;
-    const commandsForPage = commands.slice(startIndex, endIndex);
-
-    if (commandsForPage.length === 0) {
-      return sendMessage(kupal, { text: convertToGothic(`Invalid page number. There are only ${totalPages} pages.`) }, sili);
-    }
-
-    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕 (Page ')}${page}${convertToGothic(` of ${totalPages}):`)}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commandsForPage.map((cmd, index) => `${convertToGothic(`${startIndex + index + 1}. ${cmd.title}`)}`).join('\n')}\n\n${convertToGothic('Type "help [page]" to see another page, or "help all" to show all commands.')}\n\n${convertToGothic('If you have any problems with the pagebot, contact the developer:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
+    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((name, index) => `${convertToGothic(`${index + 1}. ${name}`)}`).join('\n')}\n\n${convertToGothic('ℹ 𝗪𝗲 𝗮𝗹𝘀𝗼 𝗵𝗮𝘃𝗲 𝗮𝗻 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗰 𝗧𝗶𝗸𝗧𝗼𝗸 𝘃𝗶𝗱𝗲𝗼 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗿! 𝗝𝘂𝘀𝘁 𝘀𝗲𝗻𝗱 𝗮 𝗧𝗶𝗸𝗧𝗼𝗸 𝗹𝗶𝗻𝗸.')}\n\n${convertToGothic('⚙ 𝗙𝗼𝗿 𝗶𝘀𝘀𝘂𝗲𝘀 𝗼𝗿 𝗿𝗲𝗽𝗼𝗿𝘁𝘀, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁 𝘁𝗵𝗲 𝗱𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗿:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
     sendMessage(kupal, { text: helpTextMessage }, sili);
   }
