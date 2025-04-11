@@ -1,25 +1,32 @@
+const yts = require('yt-search');
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'music',
-  description: 'Search and send music audio with details using the API.',
-  usage: 'music <song name>\nExample: music just know',
-  author: 'chilli',
+  description: 'Search and play music from YouTube with mp3 audio and preview.',
+  usage: 'music <title>',
+  author: 'churchill',
+
   async execute(senderId, args, pageAccessToken) {
-    if (!args || args.length === 0) {
-      await sendMessage(senderId, {
-        text: 'Please provide a song name to search.\nExample: music just know'
+    const query = args.join(' ');
+
+    if (!query) {
+      return sendMessage(senderId, {
+        text: 'Please enter a music title.\nUsage: music <title>'
       }, pageAccessToken);
-      return;
     }
 
-    const query = args.join(' ');
-    const apiUrl = `https://dlvc.vercel.app/yt-audio?search=${encodeURIComponent(query)}`;
-
     try {
-      const response = await axios.get(apiUrl);
-      const { title, downloadUrl, time, views, thumbnail, channelName } = response.data;
+      const searchResult = await yts(query);
+      const video = searchResult.videos[0];
+
+      if (!video) {
+        return sendMessage(senderId, { text: 'No results found.' }, pageAccessToken);
+      }
+
+      const apiUrl = `https://nodejs-version-ytdlcc-production.up.railway.app/ytdl?url=${video.url}&type=mp3`;
+      const { data } = await axios.get(apiUrl);
 
       await sendMessage(senderId, {
         attachment: {
@@ -28,35 +35,45 @@ module.exports = {
             template_type: 'generic',
             elements: [
               {
-                title: title,
-                image_url: thumbnail,
-                subtitle: `${views} • ${channelName} • ${time}`,
+                title: data.title || video.title,
+                image_url: video.thumbnail,
+                subtitle: `Artist: ${data.author || video.author.name}\nDuration: ${video.timestamp}`,
                 default_action: {
                   type: 'web_url',
-                  url: thumbnail,
-                  webview_height_ratio: 'tall'
-                }
+                  url: video.url,
+                  webview_height_ratio: 'compact'
+                },
+                buttons: [
+                  {
+                    type: 'web_url',
+                    url: video.url,
+                    title: 'Watch on YouTube'
+                  },
+                  {
+                    type: 'web_url',
+                    url: data.download,
+                    title: 'Download MP3'
+                  }
+                ]
               }
             ]
           }
         }
       }, pageAccessToken);
 
-      // Sending the audio kupal
       await sendMessage(senderId, {
         attachment: {
           type: 'audio',
           payload: {
-            url: downloadUrl,
-            is_reusable: true
+            url: data.download
           }
         }
       }, pageAccessToken);
 
-    } catch (error) {
-      console.error('Error fetching music data:', error);
+    } catch (err) {
+      console.error('Error in music command:', err.message || err);
       await sendMessage(senderId, {
-        text: 'An error occurred while fetching the music. Please try again later, or use Spotify.'
+        text: '⚠️ Error while searching or fetching MP3. Please try again.'
       }, pageAccessToken);
     }
   }
