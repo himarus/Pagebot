@@ -14,7 +14,7 @@ async function handleTikTokVideo(chilli, kupal) {
       const videoUrl = data.play;
       const videoSize = data.size;
 
-      if (videoSize && videoSize <= 100 * 1024 * 1024) {
+      if (videoSize && videoSize <= 30 * 1024 * 1024) {
         await sendMessage(pogi, {
           attachment: {
             type: 'video',
