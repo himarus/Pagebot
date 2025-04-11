@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
-const { autoTikTokDownloader } = require('./tiktokdl');
+const { handleTikTokVideo } = require('./handleTikTok');
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -31,21 +31,11 @@ async function handleMessage(event, pageAccessToken) {
   }
 
   if (event.message && event.message.text) {
-    const messageText = event.message.text.trim();
+    const messageText = event.message.text.trim().toLowerCase();
 
-    // === AUTO TIKTOK DOWNLOADER ===
-    if (messageText.includes('tiktok.com') || messageText.includes('vt.tiktok.com')) {
-      const words = messageText.split(/\s+/);
-      const tiktokLink = words.find(word => word.includes('tiktok.com'));
-      if (tiktokLink) {
-        await autoTikTokDownloader(senderId, tiktokLink, pageAccessToken);
-        return;
-      }
-    }
+    if (await handleTikTokVideo(event, pageAccessToken)) return;
 
-    const loweredText = messageText.toLowerCase();
-
-    if (loweredText === 'imgur') {
+    if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
       const lastVideo = lastVideoByUser.get(senderId);
       const mediaToUpload = lastImage || lastVideo;
@@ -60,7 +50,7 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    if (loweredText.startsWith('gemini')) {
+    if (messageText.startsWith('gemini')) {
       const lastImage = lastImageByUser.get(senderId);
       const args = messageText.split(/\s+/).slice(1);
 
@@ -74,12 +64,12 @@ async function handleMessage(event, pageAccessToken) {
     }
 
     let commandName, args;
-    if (loweredText.startsWith('-')) {
-      const argsArray = loweredText.slice(1).trim().split(/\s+/);
+    if (messageText.startsWith('-')) {
+      const argsArray = messageText.slice(1).trim().split(/\s+/);
       commandName = argsArray.shift().toLowerCase();
       args = argsArray;
     } else {
-      const words = loweredText.trim().split(/\s+/);
+      const words = messageText.trim().split(/\s+/);
       commandName = words.shift().toLowerCase();
       args = words;
     }
