@@ -28,6 +28,8 @@ module.exports = {
       const apiUrl = `https://nodejs-version-ytdlcc-production.up.railway.app/ytdl?url=${video.url}&type=mp3`;
       const { data } = await axios.get(apiUrl);
 
+      const forceDownloadUrl = `${data.download}?dl=1`;
+
       await sendMessage(senderId, {
         attachment: {
           type: 'template',
@@ -37,7 +39,7 @@ module.exports = {
               {
                 title: data.title || video.title,
                 image_url: video.thumbnail,
-                subtitle: `Artist: ${data.author || video.author.name}\nDuration: ${video.timestamp}`,
+                subtitle: `Artist: ${video.author.name}\nDuration: ${video.timestamp}`,
                 default_action: {
                   type: 'web_url',
                   url: video.url,
@@ -51,7 +53,7 @@ module.exports = {
                   },
                   {
                     type: 'web_url',
-                    url: data.download,
+                    url: forceDownloadUrl,
                     title: 'Download MP3'
                   }
                 ]
