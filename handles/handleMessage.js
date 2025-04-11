@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const { autoTikTokDownloader } = require('./tiktokdl');
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -30,9 +31,21 @@ async function handleMessage(event, pageAccessToken) {
   }
 
   if (event.message && event.message.text) {
-    const messageText = event.message.text.trim().toLowerCase();
+    const messageText = event.message.text.trim();
 
-    if (messageText === 'imgur') {
+    // === AUTO TIKTOK DOWNLOADER ===
+    if (messageText.includes('tiktok.com') || messageText.includes('vt.tiktok.com')) {
+      const words = messageText.split(/\s+/);
+      const tiktokLink = words.find(word => word.includes('tiktok.com'));
+      if (tiktokLink) {
+        await autoTikTokDownloader(senderId, tiktokLink, pageAccessToken);
+        return;
+      }
+    }
+
+    const loweredText = messageText.toLowerCase();
+
+    if (loweredText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
       const lastVideo = lastVideoByUser.get(senderId);
       const mediaToUpload = lastImage || lastVideo;
@@ -47,7 +60,7 @@ async function handleMessage(event, pageAccessToken) {
       return;
     }
 
-    if (messageText.startsWith('gemini')) {
+    if (loweredText.startsWith('gemini')) {
       const lastImage = lastImageByUser.get(senderId);
       const args = messageText.split(/\s+/).slice(1);
 
@@ -61,12 +74,12 @@ async function handleMessage(event, pageAccessToken) {
     }
 
     let commandName, args;
-    if (messageText.startsWith('-')) {
-      const argsArray = messageText.slice(1).trim().split(/\s+/);
+    if (loweredText.startsWith('-')) {
+      const argsArray = loweredText.slice(1).trim().split(/\s+/);
       commandName = argsArray.shift().toLowerCase();
       args = argsArray;
     } else {
-      const words = messageText.trim().split(/\s+/);
+      const words = loweredText.trim().split(/\s+/);
       commandName = words.shift().toLowerCase();
       args = words;
     }
