@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
-const { handleTikTokVideo } = require('./handleTikTok');
+const { handleTikTokVideo } = require('./handletikTok');
 
 const commands = new Map();
 const lastImageByUser = new Map();
