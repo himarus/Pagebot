@@ -3,8 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTiktok');
-const { handleFacebookVideo } = require('./fb');
-
+const { handleFacebookVideo } = require('./handleFacebookVideo'); // NEW IMPORT
 
 const commands = new Map();
 const lastImageByUser = new Map();
@@ -35,8 +34,9 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
+    // Check for TikTok or Facebook links
     if (await handleTikTokVideo(event, pageAccessToken)) return;
-if (await fb(event, pageAccessToken)) return;
+    if (await handleFacebookVideo(event, pageAccessToken)) return;
 
     if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
