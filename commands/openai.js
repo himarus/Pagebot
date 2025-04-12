@@ -1,46 +1,50 @@
-const axios = require("axios");
-const { sendMessage } = require("../handles/sendMessage");
+const axios = require('axios');
+const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-  name: "openai",
-  description: "Generate voice using Pollinations API with OpenAI audio",
-  usage: "openai <text>",
-  author: "chilli",
+  name: 'openai',
+  description: 'Generate a voice response using OpenAI voice model via Pollinations',
+  usage: 'openai <text>',
+  author: 'chill',
 
-  execute: async function ({ event, args, senderId, pageAccessToken }) {
-    if (!args || args.length === 0) {
-      return sendMessage(senderId, {
-        text: "Please enter the text you want to convert to voice.\nExample: openai What if you loved someone you’re not allowed to love?"
+  async execute(senderId, args, pageAccessToken) {
+    const prompt = args.join(' ');
+
+    if (!prompt || prompt.trim() === '') {
+      await sendMessage(senderId, {
+        text: 'Please enter a message. Example: openai What if you fall in love with someone you cannot have?'
       }, pageAccessToken);
+      return;
     }
 
-    const query = args.join(" ");
-    const encodedQuery = encodeURIComponent(query);
-    const audioUrl = `https://text.pollinations.ai/${encodedQuery}?model=openai-audio&voice=ash`;
+    // Encode prompt
+    const encodedPrompt = encodeURIComponent(prompt);
+    const voice = 'ash';
+    const apiUrl = `https://text.pollinations.ai/${encodedPrompt}?model=openai-audio&voice=${voice}`;
 
     try {
-      const check = await axios.head(audioUrl);
-      const type = check.headers['content-type'] || "";
+      // Check if URL returns audio
+      const checkAudio = await axios.head(apiUrl);
+      const type = checkAudio.headers['content-type'] || '';
 
-      if (type.includes("audio")) {
-        return sendMessage(senderId, {
+      if (type.includes('audio')) {
+        await sendMessage(senderId, {
           attachment: {
-            type: "audio",
+            type: 'audio',
             payload: {
-              url: audioUrl,
-              is_reusable: true
+              url: apiUrl
             }
           }
         }, pageAccessToken);
       } else {
-        return sendMessage(senderId, {
-          text: "API did not return audio. Try different text."
+        await sendMessage(senderId, {
+          text: '⚠️ No audio was returned from the API. Please try a different prompt.'
         }, pageAccessToken);
       }
-    } catch (err) {
-      console.error("Error in openai command:", err.message);
-      return sendMessage(senderId, {
-        text: "An error occurred while generating the voice. Please try again later."
+    } catch (error) {
+      console.error("OpenAI audio error:", error.message || error);
+      await sendMessage(senderId, {
+        text: '⚠️ Error generating audio. Please try again later or use a different text.'
       }, pageAccessToken);
     }
   }
