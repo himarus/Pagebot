@@ -3,7 +3,7 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTiktok');
-const { handleFacebookVideo } = require('./handleFacebookVideo'); // NEW IMPORT
+const { handleFacebookVideo } = require('./handleFb'); 
 
 const commands = new Map();
 const lastImageByUser = new Map();
