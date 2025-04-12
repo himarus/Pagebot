@@ -48,7 +48,7 @@ module.exports = {
       }
     } catch (error) {
       await sendMessage(chilli, {
-        text: '⚠️ An error occurred while trying to retrieve the audio.'
+        text: '⚠️ An error occurred plss try to use music instead.'
       }, pogi);
     }
   }
