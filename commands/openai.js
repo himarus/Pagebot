@@ -1,7 +1,4 @@
 const axios = require("axios");
-const fs = require("fs");
-const path = require("path");
-const { default: Axios } = require("axios");
 const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
@@ -12,40 +9,39 @@ module.exports = {
 
   execute: async function ({ event, args, senderId, pageAccessToken }) {
     if (!args[0]) {
-      return sendMessage(senderId, { text: "Please provide text to generate voice.\nExample: openai What if you fall for someone you're not allowed to love?" }, pageAccessToken);
+      return sendMessage(senderId, {
+        text: "Please provide a question.\nExample: openai What if you fall for someone you're not allowed to love?"
+      }, pageAccessToken);
     }
 
-    const text = encodeURIComponent(args.join(" "));
-    const url = `https://text.pollinations.ai/${text}?model=openai-audio&voice=ash`;
+    const query = args.join(" ");
+    const encodedText = encodeURIComponent(query);
+    const audioUrl = `https://text.pollinations.ai/${encodedText}?model=openai-audio&voice=ash`;
 
     try {
-      const response = await Axios({
-        url,
-        method: "GET",
-        responseType: "arraybuffer",
-        headers: {
-          "Content-Type": "audio/mpeg",
-        },
-      });
+      const checkAudio = await axios.head(audioUrl);
+      const type = checkAudio.headers["content-type"] || "";
 
-      const filePath = path.join(__dirname, "audio.mp3");
-      fs.writeFileSync(filePath, response.data);
-
-      const messageData = {
-        attachment: {
-          type: "audio",
-          payload: {
-            is_reusable: true,
-          },
-        },
-        filedata: fs.createReadStream(filePath),
-      };
-
-      await sendMessage(senderId, messageData, pageAccessToken);
-      fs.unlinkSync(filePath);
+      if (type.includes("audio")) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: "audio",
+            payload: {
+              url: audioUrl,
+              is_reusable: true
+            }
+          }
+        }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: "No audio was returned from the API. Try again with a different message."
+        }, pageAccessToken);
+      }
     } catch (error) {
-      console.error("Error fetching voice audio:", error.message);
-      return sendMessage(senderId, { text: "Something went wrong while fetching the audio." }, pageAccessToken);
+      console.error("Pollinations error:", error.message);
+      await sendMessage(senderId, {
+        text: "Something went wrong while accessing the audio. Please try again later."
+      }, pageAccessToken);
     }
   },
 };
