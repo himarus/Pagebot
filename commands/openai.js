@@ -3,27 +3,27 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "openai",
-  description: "Generate voice using OpenAI audio via Pollinations API",
+  description: "Generate voice using Pollinations API with OpenAI audio",
   usage: "openai <text>",
   author: "chilli",
 
   execute: async function ({ event, args, senderId, pageAccessToken }) {
-    if (!args[0]) {
+    if (!args || args.length === 0) {
       return sendMessage(senderId, {
-        text: "Please provide a question.\nExample: openai What if you fall for someone you're not allowed to love?"
+        text: "Please enter the text you want to convert to voice.\nExample: openai What if you loved someone you’re not allowed to love?"
       }, pageAccessToken);
     }
 
     const query = args.join(" ");
-    const encodedText = encodeURIComponent(query);
-    const audioUrl = `https://text.pollinations.ai/${encodedText}?model=openai-audio&voice=ash`;
+    const encodedQuery = encodeURIComponent(query);
+    const audioUrl = `https://text.pollinations.ai/${encodedQuery}?model=openai-audio&voice=ash`;
 
     try {
-      const checkAudio = await axios.head(audioUrl);
-      const type = checkAudio.headers["content-type"] || "";
+      const check = await axios.head(audioUrl);
+      const type = check.headers['content-type'] || "";
 
       if (type.includes("audio")) {
-        await sendMessage(senderId, {
+        return sendMessage(senderId, {
           attachment: {
             type: "audio",
             payload: {
@@ -33,15 +33,15 @@ module.exports = {
           }
         }, pageAccessToken);
       } else {
-        await sendMessage(senderId, {
-          text: "No audio was returned from the API. Try again with a different message."
+        return sendMessage(senderId, {
+          text: "API did not return audio. Try different text."
         }, pageAccessToken);
       }
-    } catch (error) {
-      console.error("Pollinations error:", error.message);
-      await sendMessage(senderId, {
-        text: "Something went wrong while accessing the audio. Please try again later."
+    } catch (err) {
+      console.error("Error in openai command:", err.message);
+      return sendMessage(senderId, {
+        text: "An error occurred while generating the voice. Please try again later."
       }, pageAccessToken);
     }
-  },
+  }
 };
