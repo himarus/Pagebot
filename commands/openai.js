@@ -6,13 +6,13 @@ const { sendMessage } = require("../handles/sendMessage");
 
 module.exports = {
   name: "openai",
-  description: "Gumawa ng voice gamit ang OpenAI audio sa pollinations API",
+  description: "Generate voice using OpenAI audio via Pollinations API",
   usage: "openai <text>",
   author: "chilli",
 
   execute: async function ({ event, args, senderId, pageAccessToken }) {
     if (!args[0]) {
-      return sendMessage(senderId, { text: "Maglagay ka ng text na ipa-voice.\nHalimbawa: openai Paano kung bawal siyang mahalin?" }, pageAccessToken);
+      return sendMessage(senderId, { text: "Please provide text to generate voice.\nExample: openai What if you fall for someone you're not allowed to love?" }, pageAccessToken);
     }
 
     const text = encodeURIComponent(args.join(" "));
@@ -45,7 +45,7 @@ module.exports = {
       fs.unlinkSync(filePath);
     } catch (error) {
       console.error("Error fetching voice audio:", error.message);
-      return sendMessage(senderId, { text: "Nagkaproblema sa pagkuha ng audio." }, pageAccessToken);
+      return sendMessage(senderId, { text: "Something went wrong while fetching the audio." }, pageAccessToken);
     }
   },
 };
