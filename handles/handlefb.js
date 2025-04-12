@@ -22,9 +22,9 @@ async function handleFacebookVideo(event, pageAccessToken) {
       const head = await axios.head(videoUrl);
       const contentLength = head.headers['content-length'];
 
-      if (contentLength && parseInt(contentLength) > 35 * 1024 * 1024) {
+      if (contentLength && parseInt(contentLength) > 40 * 1024 * 1024) {
         await sendMessage(senderId, {
-          text: `The video is larger than 35MB. You can download it directly here:\n${videoUrl}`
+          text: `The video is larger than 40MB. You can download it directly here:\n${videoUrl}`
         }, pageAccessToken);
         return true;
       }
