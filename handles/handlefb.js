@@ -5,7 +5,8 @@ async function handleFacebookVideo(event, pageAccessToken) {
   const senderId = event.sender.id;
   const messageText = event.message.text;
 
-  const regEx_fb = /https:\/\/(www\.)?(facebook\.com|fb\.watch)\//;
+  const regEx_fb = /https:\/\/(www\.)?facebook\.com\/(?:groups\/\d+\/permalink\/\d+|watch\/?\?v=\d+|.+\/videos\/\d+|.+\/posts\/\d+|story\.php\?story_fbid=\d+&id=\d+|reel\/\d+)/;
+
   if (regEx_fb.test(messageText)) {
     await sendMessage(senderId, { text: 'Downloading your Facebook video, please wait...' }, pageAccessToken);
 
@@ -39,6 +40,7 @@ async function handleFacebookVideo(event, pageAccessToken) {
         }
       }, pageAccessToken);
     } catch (error) {
+      console.error('FB Video Download Error:', error.message);
       await sendMessage(senderId, {
         text: 'An error occurred while downloading the Facebook video. Please try again later.'
       }, pageAccessToken);
