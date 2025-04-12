@@ -4,41 +4,32 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'humanize',
-  description: 'Convert AI-generated text into human-like text using Kaizen\'s API.',
-  usage: 'humanizer <text>\nExample: humanizer This is an AI-generated sentence.',
-  author: 'chill',
+  description: 'Get a humanized AI response',
+  usage: 'humanize <text>',
+  author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    const text = args.join(' ');
-
-    if (!text || text.trim() === '') {
-      await sendMessage(senderId, {
-        text: '📝 Please provide a text to humanize.\n\nExample: humanizer This is an AI-generated sentence.'
-      }, pageAccessToken);
+    if (!args || args.length === 0) {
+      await sendMessage(senderId, { text: 'Please provide a message to humanize. Example: humanize hatdog' }, pageAccessToken);
       return;
     }
 
-    const apiUrl = `${api.kaizen}/api/humanizer?q=${encodeURIComponent(text)}`;
+    const text = args.join(' ');
+    const apiUrl = `${api.jonel}/api/aihuman?text=${encodeURIComponent(text)}`;
 
     try {
-      const response = await axios.get(apiUrl);
+      const { data } = await axios.get(apiUrl);
 
-      if (response.data && response.data.response) {
-        const resultMessage = 
-          `🔹 *AI to Human Text Conversion* 🔹\n\n` +
-          `💻 *AI Text:* ${text}\n` +
-          `📝 *Humanized Version:* ${response.data.response}\n\n` +
-          `✅ *Your text now sounds more natural!*`;
-
-        await sendMessage(senderId, { text: resultMessage }, pageAccessToken);
+      if (data.error?.toLowerCase() === 'no') {
+        const reply = `🗣️ ${data.message}\n\n💬 ${data.message2}`;
+        await sendMessage(senderId, { text: reply }, pageAccessToken);
       } else {
-        throw new Error('Invalid API response.');
+        await sendMessage(senderId, { text: '⚠️ An error occurred. Please try again later.' }, pageAccessToken);
       }
+
     } catch (error) {
-      console.error('Error in Humanizer command:', error.message || error);
-      await sendMessage(senderId, {
-        text: `⚠️ An error occurred while processing your request. Please try again later.`
-      }, pageAccessToken);
+      console.error('Error in humanize command:', error.message || error);
+      await sendMessage(senderId, { text: '⚠️ Failed to get humanized response.' }, pageAccessToken);
     }
   }
 };
