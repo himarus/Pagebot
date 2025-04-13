@@ -4,8 +4,8 @@ const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
   name: 'openai',
-  description: 'Generate audio from OpenAI voice',
-  usage: 'openai <text>',
+  description: 'Generate audio from OpenAI voice model.',
+  usage: 'openai <message>',
   author: 'chillibot',
 
   async execute(chilli, args, pogi) {
@@ -21,12 +21,9 @@ module.exports = {
     const audioUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai-audio&voice=ash`;
 
     try {
-      // Get the audio as a buffer
-      const response = await axios.get(audioUrl, {
-        responseType: 'arraybuffer'
-      });
+      const audioResponse = await axios.get(audioUrl, { responseType: 'arraybuffer' });
+      const audioBuffer = Buffer.from(audioResponse.data);
 
-      const buffer = Buffer.from(response.data);
       const form = new FormData();
       form.append('recipient', JSON.stringify({ id: chilli }));
       form.append('message', JSON.stringify({
@@ -35,20 +32,21 @@ module.exports = {
           payload: {}
         }
       }));
-      form.append('filedata', buffer, {
+      form.append('filedata', audioBuffer, {
         filename: 'voice.mp3',
         contentType: 'audio/mpeg'
       });
 
-      // Send directly to FB Messenger Send API
-      await axios.post(`https://graph.facebook.com/v18.0/me/messages?access_token=${pogi}`, form, {
-        headers: form.getHeaders()
-      });
+      await axios.post(
+        `https://graph.facebook.com/v18.0/me/messages?access_token=${pogi}`,
+        form,
+        { headers: form.getHeaders() }
+      );
 
-    } catch (error) {
-      console.error('Upload error:', error?.response?.data || error.message);
+    } catch (err) {
+      console.error('Upload error:', err.response?.data || err.message);
       await sendMessage(chilli, {
-        text: '⚠️ Failed to send audio. The API might not be returning a valid file or Facebook rejected the upload.'
+        text: '⚠️ Failed to send audio. Make sure the text is valid and try again.'
       }, pogi);
     }
   }
