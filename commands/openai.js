@@ -1,6 +1,6 @@
 const axios = require('axios');
+const FormData = require('form-data');
 const { sendMessage } = require('../handles/sendMessage');
-const { Readable } = require('stream');
 
 module.exports = {
   name: 'openai',
@@ -21,29 +21,34 @@ module.exports = {
     const audioUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai-audio&voice=ash`;
 
     try {
-      // Download as buffer
+      // Get the audio as a buffer
       const response = await axios.get(audioUrl, {
         responseType: 'arraybuffer'
       });
 
-      const audioBuffer = Buffer.from(response.data);
-
-      // Convert buffer to Readable stream (required by FB API)
-      const stream = Readable.from(audioBuffer);
-
-      await sendMessage(chilli, {
+      const buffer = Buffer.from(response.data);
+      const form = new FormData();
+      form.append('recipient', JSON.stringify({ id: chilli }));
+      form.append('message', JSON.stringify({
         attachment: {
           type: 'audio',
-          payload: {
-            is_reusable: true
-          }
-        },
-        filedata: stream
-      }, pogi);
-    } catch (err) {
-      console.error('Audio download/upload failed:', err.message);
+          payload: {}
+        }
+      }));
+      form.append('filedata', buffer, {
+        filename: 'voice.mp3',
+        contentType: 'audio/mpeg'
+      });
+
+      // Send directly to FB Messenger Send API
+      await axios.post(`https://graph.facebook.com/v18.0/me/messages?access_token=${pogi}`, form, {
+        headers: form.getHeaders()
+      });
+
+    } catch (error) {
+      console.error('Upload error:', error?.response?.data || error.message);
       await sendMessage(chilli, {
-        text: '⚠️ Failed to get audio. Try again later or change your prompt.'
+        text: '⚠️ Failed to send audio. The API might not be returning a valid file or Facebook rejected the upload.'
       }, pogi);
     }
   }
