@@ -12,7 +12,7 @@ module.exports = {
 
     if (!text) {
       await sendMessage(senderId, { 
-        text: '❌ Please provide the text to convert to audio.\nExample: openai I love you but it’s forbidden' 
+        text: ' Please provide a question.\n\nExample: openai Who are you?' 
       }, pageAccessToken);
       return;
     }
