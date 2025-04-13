@@ -1,43 +1,49 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const { Readable } = require('stream');
 
 module.exports = {
   name: 'openai',
-  description: 'Generate audio using OpenAI voice based on a prompt',
-  usage: 'openai <message>',
+  description: 'Generate audio from OpenAI voice',
+  usage: 'openai <text>',
   author: 'chillibot',
 
   async execute(chilli, args, pogi) {
-    const query = args.join(' ');
+    const prompt = args.join(' ');
 
-    if (!query || query.trim() === '') {
+    if (!prompt) {
       await sendMessage(chilli, {
         text: 'Please enter a message to convert to audio.\n\nExample: openai Paano kung magmahal ka ng taong bawal mahalin?'
       }, pogi);
       return;
     }
 
-    const encoded = encodeURIComponent(query);
-    const apiUrl = `https://text.pollinations.ai/${encoded}?model=openai-audio&voice=ash`;
+    const audioUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?model=openai-audio&voice=ash`;
 
     try {
-      // Optional: HEAD check kung gusto mo pa rin i-log content-type
-      const head = await axios.head(apiUrl);
-      console.log('Content-Type:', head.headers['content-type']); // Debug lang
+      // Download as buffer
+      const response = await axios.get(audioUrl, {
+        responseType: 'arraybuffer'
+      });
 
-      // Diretso send audio, kahit anong content-type
+      const audioBuffer = Buffer.from(response.data);
+
+      // Convert buffer to Readable stream (required by FB API)
+      const stream = Readable.from(audioBuffer);
+
       await sendMessage(chilli, {
         attachment: {
           type: 'audio',
           payload: {
-            url: apiUrl
+            is_reusable: true
           }
-        }
+        },
+        filedata: stream
       }, pogi);
     } catch (err) {
-      console.error('Error:', err.message);
+      console.error('Audio download/upload failed:', err.message);
       await sendMessage(chilli, {
-        text: '⚠️ Something went wrong. Try again with a different prompt.'
+        text: '⚠️ Failed to get audio. Try again later or change your prompt.'
       }, pogi);
     }
   }
