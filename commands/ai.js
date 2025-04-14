@@ -4,33 +4,35 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'ai',
-  description: 'Ask anything to ChatGPT-4o',
-  usage: 'ai <your question>',
+  description: 'bitcanything',
+  usage: 'ai <question>',
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
-    const prompt = args.join(' ');
-    if (!prompt) {
-      return sendMessage(senderId, {
-        text: 'Please provide a prompt. Example: ai What is the capital of Japan?'
+    const question = args.join(' ');
+
+    if (!question || question.trim() === '') {
+      await sendMessage(senderId, {
+        text: 'Please provide a question. Example: ai What is AI?'
       }, pageAccessToken);
+      return;
     }
 
-    const apiUrl = `${api.josh}/api/chatgpt-4o-latest?uid=${senderId}&prompt=${encodeURIComponent(prompt)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
+    const apiUrl = `${api.hazey}/api/perplexity?q=${encodeURIComponent(question)}`;
 
     try {
       const res = await axios.get(apiUrl);
-      const reply = res.data?.response;
+      const { perplexity } = res.data;
 
-      if (!reply) throw new Error('No response from API.');
+      if (!perplexity) throw new Error('No response returned.');
 
       await sendMessage(senderId, {
-        text: reply
+        text: perplexity
       }, pageAccessToken);
     } catch (error) {
-      console.error('AI command error:', error.message || error);
+      console.error('Hazey AI error:', error.response?.data || error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ Error: Unable to get response from AI. Try again later. or try to use "ai2"'
+        text: `⚠️ Error: ${error.response?.data?.message || error.message || 'Unknown error occurred.'}`
       }, pageAccessToken);
     }
   }
