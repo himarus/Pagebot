@@ -1,14 +1,13 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
+const fbWatchRegex = /https:\/\/fb\.watch\/[a-zA-Z0-9_-]+/i;
+
 async function handleFacebookVideo(event, pageAccessToken) {
   const senderId = event.sender.id;
   const messageText = event.message.text;
 
-  // Updated Regex 🔥
-  const regEx_fb = /https:\/\/(www\.|m\.)?(facebook\.com\/(?:groups\/\d+\/permalink\/\d+|watch\/?\?v=\d+|[\w\-]+\/(videos|posts)\/\d+|story\.php\?story_fbid=\d+&id=\d+|reel\/\w+|share\/v\/\w+)|fb\.watch\/\w+)/i;
-
-  if (regEx_fb.test(messageText)) {
+  if (fbWatchRegex.test(messageText)) {
     await sendMessage(senderId, { text: 'Downloading your Facebook video, please wait...' }, pageAccessToken);
 
     try {
@@ -17,7 +16,9 @@ async function handleFacebookVideo(event, pageAccessToken) {
       const videoUrl = response.data.download_url;
 
       if (!videoUrl) {
-        await sendMessage(senderId, { text: 'Failed to retrieve the video URL. Please check the link and try again.' }, pageAccessToken);
+        await sendMessage(senderId, {
+          text: 'Failed to retrieve the video URL. Please check the link and try again.'
+        }, pageAccessToken);
         return true;
       }
 
@@ -40,6 +41,7 @@ async function handleFacebookVideo(event, pageAccessToken) {
           }
         }
       }, pageAccessToken);
+
     } catch (error) {
       console.error('FB Video Download Error:', error.message);
       await sendMessage(senderId, {
