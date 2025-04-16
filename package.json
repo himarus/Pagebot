@@ -13,7 +13,6 @@
   "@types/node": "^18.0.6",
   "axios": "^1.7.2",
   "betabotz-tools": "^0.0.7",
-  "@faouzkk/lyrics-finder": "^1.0.3",
   "body-parser": "^1.20.2",
   "express": "^4.19.2",
   "fs-extra": "^11.1.1",
@@ -21,9 +20,7 @@
   "request": "^2.88.2",
   "winston": "^3.13.0",
   "pastebin-js": "^1.0.6",
-  "wattpad-scraper": "^1.0.8",
   "form-data": "^4.0.0",
-      "onesecmail": "^3.0.0",
   "yt-search": "^2.12.1"
 },
   "engines": {
