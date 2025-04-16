@@ -1,13 +1,13 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 
-const fbWatchRegex = /https:\/\/fb\.watch\/[a-zA-Z0-9_-]+/i;
+const fbVideoRegex = /^(https?:\/\/)?(www\.|m\.)?(facebook\.com|fb\.com|fb\.watch)\/[^\s]+$/i;
 
 async function handleFacebookVideo(event, pageAccessToken) {
   const senderId = event.sender.id;
   const messageText = event.message.text;
 
-  if (fbWatchRegex.test(messageText)) {
+  if (fbVideoRegex.test(messageText)) {
     await sendMessage(senderId, { text: 'Downloading your Facebook video, please wait...' }, pageAccessToken);
 
     try {
@@ -27,7 +27,7 @@ async function handleFacebookVideo(event, pageAccessToken) {
 
       if (contentLength && parseInt(contentLength) > 40 * 1024 * 1024) {
         await sendMessage(senderId, {
-          text: `The video is larger than 40MB. You can download it directly here:\n${videoUrl}`
+          text: `⚠️ The video is larger than 40MB. You can download it directly here:\n${videoUrl}`
         }, pageAccessToken);
         return true;
       }
@@ -41,11 +41,10 @@ async function handleFacebookVideo(event, pageAccessToken) {
           }
         }
       }, pageAccessToken);
-
     } catch (error) {
       console.error('FB Video Download Error:', error.message);
       await sendMessage(senderId, {
-        text: 'An error occurred while downloading the Facebook video. Please try again later.'
+        text: '⚠️ An error occurred while downloading the Facebook video. Please try again later.'
       }, pageAccessToken);
     }
 
