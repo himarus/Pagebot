@@ -17,6 +17,11 @@ module.exports = {
       }, pageAccessToken);
     }
 
+    
+    await sendMessage(senderId, {
+      text: `[⏳] Searching for "${query}"...\n\nThis may take about 1 minute and 30 seconds. Please wait.`
+    }, pageAccessToken);
+
     try {
       const searchResult = await yts(query);
       const video = searchResult.videos[0];
@@ -75,7 +80,7 @@ module.exports = {
     } catch (err) {
       console.error('Error in music command:', err.message || err);
       await sendMessage(senderId, {
-        text: '⚠️ Error while searching or fetching MP3. Please try again.'
+        text: `⚠️ Error while searching or fetching MP3: ${err.response ? err.response.data : err.message || err}`
       }, pageAccessToken);
     }
   }
