@@ -14,7 +14,7 @@ async function handleTikTokVideo(chilli, kupal) {
       const videoUrl = data.play;
       const videoSize = data.size;
 
-      if (videoSize && videoSize <= 30 * 1024 * 1024) {
+      if (videoSize && videoSize <= 40 * 1024 * 1024) {
         await sendMessage(pogi, {
           attachment: {
             type: 'video',
@@ -25,7 +25,7 @@ async function handleTikTokVideo(chilli, kupal) {
           }
         }, kupal);
       } else {
-        await sendMessage(pogi, { text: 'The video is too large to send (limit is 100 MB). Try a shorter or lower-quality video.' }, kupal);
+        await sendMessage(pogi, { text: 'The video is too large to send (limit is 40 MB). Try a shorter or lower-quality video.' }, kupal);
       }
     } catch (chilliError) {
       console.error('Error downloading TikTok video:', chilliError);
