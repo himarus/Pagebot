@@ -29,7 +29,7 @@ module.exports = {
     } catch (error) {
       console.error("AI Command Error:", error.message || error);
       await sendMessage(senderId, {
-        text: `⚠️ Error fetching AI response: ${error.message try to use ai2 || 'Unknown error try to use ai2'}`
+        text: `⚠️ Error fetching AI response: ${error.message} try to use ai2 || 'Unknown error try to use ai2'}`
       }, pageAccessToken);
     }
   }
