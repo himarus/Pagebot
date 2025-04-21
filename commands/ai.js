@@ -11,7 +11,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
       return sendMessage(senderId, {
-        text: 'Please enter a message to send to the AI.\\nUsage: ai hi>'
+        text: 'Please enter a message to send to the AI.\n\nExample: ai hi'
       }, pageAccessToken);
     }
 
