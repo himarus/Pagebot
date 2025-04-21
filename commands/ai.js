@@ -1,29 +1,36 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api');
+const api = require('../handles/api'); 
 
 module.exports = {
   name: 'ai',
-  description: 'Ask something to Zaik AI',
-  usage: 'ai <question>',
+  description: 'using Hazey API',
+  usage: 'ai <your message>',
   author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
-      return sendMessage(senderId, { text: 'Please provide a question.\n\nExample: ai what is solar system' }, pageAccessToken);
+      return sendMessage(senderId, {
+        text: 'Please enter a message to send to the AI.\\nUsage: ai hi>'
+      }, pageAccessToken);
     }
 
-    const prompt = args.join(' ');
-    const uid = senderId;
-    const apiUrl = `${api.zaik}/api/sonar-r-pro?prompt=${encodeURIComponent(prompt)}&uid=${uid}`;
+    const userMessage = args.join(' ');
+    const apiUrl = `${api.hazey}/api/openchat?message=${encodeURIComponent(userMessage)}`;
 
     try {
       const response = await axios.get(apiUrl);
-      const reply = response.data.reply || 'No reply received from AI.';
+      const reply = response.data?.openchat || "Sorry, I couldn't get a response.";
 
-      await sendMessage(senderId, { text: reply }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: reply
+      }, pageAccessToken);
+
     } catch (error) {
-      await sendMessage(senderId, { text: 'Error: Unable to fetch response from AI Please Try to use ai2.' }, pageAccessToken);
+      console.error("AI Command Error:", error.message || error);
+      await sendMessage(senderId, {
+        text: `⚠️ Error fetching AI response: ${error.message try to use ai2 || 'Unknown error try to use ai2'}`
+      }, pageAccessToken);
     }
   }
 };
