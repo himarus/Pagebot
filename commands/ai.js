@@ -10,7 +10,7 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     if (!args || args.length === 0) {
-      return sendMessage(senderId, { text: 'Please provide a question.\n\nExample: ai what is solar system<' }, pageAccessToken);
+      return sendMessage(senderId, { text: 'Please provide a question.\n\nExample: ai what is solar system' }, pageAccessToken);
     }
 
     const prompt = args.join(' ');
