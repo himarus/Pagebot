@@ -7,5 +7,5 @@ module.exports = {
   jonel: "https://jonell01-ccprojectsapihshs.hf.space",
   canvasApi: "https://api-canvass.vercel.app",
   yakzy: "https://betadash-api-swordslush-production.up.railway.app",
-  zaik: "https://renzsuperb.onrender.com",
+  zaik: "https://zaikyoov3-up.up.railway.app",
 };
