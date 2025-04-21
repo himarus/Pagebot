@@ -4,36 +4,26 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'ai',
-  description: 'bitcanything',
+  description: 'Ask something to Zaik AI',
   usage: 'ai <question>',
-  author: 'churchill',
+  author: 'chill',
 
   async execute(senderId, args, pageAccessToken) {
-    const question = args.join(' ');
-
-    if (!question || question.trim() === '') {
-      await sendMessage(senderId, {
-        text: 'Please provide a question. Example: ai What is AI?'
-      }, pageAccessToken);
-      return;
+    if (!args || args.length === 0) {
+      return sendMessage(senderId, { text: 'Please provide a question.\n\nExample: ai what is solar system<' }, pageAccessToken);
     }
 
-    const apiUrl = `${api.hazey}/api/perplexity?q=${encodeURIComponent(question)}`;
+    const prompt = args.join(' ');
+    const uid = senderId;
+    const apiUrl = `${api.zaik}/api/sonar-r-pro?prompt=${encodeURIComponent(prompt)}&uid=${uid}`;
 
     try {
-      const res = await axios.get(apiUrl);
-      const { perplexity } = res.data;
+      const response = await axios.get(apiUrl);
+      const reply = response.data.reply || 'No reply received from AI.';
 
-      if (!perplexity) throw new Error('No response returned.');
-
-      await sendMessage(senderId, {
-        text: perplexity
-      }, pageAccessToken);
+      await sendMessage(senderId, { text: reply }, pageAccessToken);
     } catch (error) {
-      console.error('Hazey AI error:', error.response?.data || error.message || error);
-      await sendMessage(senderId, {
-        text: `⚠️ Error: ${error.response?.data?.message || error.message || 'Unknown error occurred.'}`
-      }, pageAccessToken);
+      await sendMessage(senderId, { text: 'Error: Unable to fetch response from AI Please Try to use ai2.' }, pageAccessToken);
     }
   }
 };
