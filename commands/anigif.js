@@ -10,14 +10,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken) {
     try {
       const response = await axios.get(`${api.rapid}/api/animegif`);
-      const imageUrl = response.data?.url;
-
-      if (!imageUrl) {
-        return sendMessage(senderId, {
-          text: 'Failed to fetch anime gif. Please try again later.'
-        }, pageAccessToken);
-      }
-
+      
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
