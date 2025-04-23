@@ -1,4 +1,3 @@
-const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
@@ -8,9 +7,9 @@ module.exports = {
   author: 'chilli',
 
   async execute(senderId, args, pageAccessToken) {
+    const imageUrl = `${api.rapid}/api/animegif`;
+
     try {
-      const response = await axios.get(`${api.rapid}/api/animegif`);
-      
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
@@ -20,12 +19,9 @@ module.exports = {
           }
         }
       }, pageAccessToken);
-
     } catch (error) {
-      console.error('Error in anigif command:', error.message || error);
-      await sendMessage(senderId, {
-        text: 'An error occurred while fetching the anime gif.'
-      }, pageAccessToken);
+      console.error('Error sending anime gif:', error);
+      await sendMessage(senderId, { text: '⚠️ Failed to fetch anime gif.' }, pageAccessToken);
     }
   }
 };
