@@ -2,6 +2,7 @@ module.exports = {
   hazey: "https://hazeyyyy-rest-apis.onrender.com",
   xnil: "https://xnilnew404.onrender.com",
   josh: "https://api.zetsu.xyz",
+  rapid: "https://rapido.zetsu.xyz",
   kaizen: "https://kaiz-apis.gleeze.com",
   nethApi: "https://nethwieginedev.vercel.app",
   jonel: "https://jonell01-ccprojectsapihshs.hf.space",
