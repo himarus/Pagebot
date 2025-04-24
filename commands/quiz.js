@@ -10,7 +10,7 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     try {
-      const res = await axios.get(`${api.rapid}/quiz`);
+      const res = await axios.get(`${api.rapid}/api/quiz`);
       const { operator, question, options, correct_answer } = res.data;
 
       const buttons = options.map(option => ({
