@@ -18,6 +18,21 @@ async function getRepliedImage(event, pageAccessToken) {
   return null;
 }
 
+async function waitForImage(url, retries = 5, delay = 3000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await axios.head(url);
+      if (res.status === 200 && res.headers['content-type']?.startsWith('image')) {
+        return true;
+      }
+    } catch (e) {
+      // Wait and retry
+    }
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  return false;
+}
+
 module.exports = {
   name: 'ghibli',
   description: 'Convert replied image into Ghibli style using AI',
@@ -38,6 +53,9 @@ module.exports = {
     const ghibliApiUrl = `${api.zaik}/api/4o-image?prompt=${prompt}&img=${encodedImgUrl}`;
 
     try {
+      const isReady = await waitForImage(ghibliApiUrl);
+      if (!isReady) throw new Error("Image not ready after waiting");
+
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
@@ -47,7 +65,7 @@ module.exports = {
     } catch (error) {
       console.error("Error sending Ghibli image:", error.message || error);
       await sendMessage(senderId, {
-        text: 'Error: Could not generate Ghibli-style image.'
+        text: 'Error: Could not generate Ghibli-style image. Please try again later.'
       }, pageAccessToken);
     }
   }
