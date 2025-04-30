@@ -35,7 +35,7 @@ module.exports = {
 
     const prompt = encodeURIComponent('Turn this image into ghibli style');
     const encodedImgUrl = encodeURIComponent(imageUrl);
-    const ghibliApiUrl = `{api.zaik}/api/4o-image?prompt=${prompt}&img=${encodedImgUrl}`;
+    const ghibliApiUrl = `${api.zaik}/api/4o-image?prompt=${prompt}&img=${encodedImgUrl}`;
 
     try {
       await sendMessage(senderId, {
