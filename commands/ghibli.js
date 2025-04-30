@@ -18,19 +18,22 @@ async function getRepliedImage(event, pageAccessToken) {
   return null;
 }
 
-async function waitForImage(url, retries = 5, delay = 3000) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await axios.head(url);
-      if (res.status === 200 && res.headers['content-type']?.startsWith('image')) {
-        return true;
+async function uploadToImgBB(imageUrl) {
+  const imgbbApiKey = '1853a90240cf6cebbfe191fa0112d154';
+  const imgbbEndpoint = 'https://api.imgbb.com/1/upload';
+
+  try {
+    const res = await axios.post(`${imgbbEndpoint}?key=${imgbbApiKey}`, null, {
+      params: {
+        image: imageUrl
       }
-    } catch (e) {
-      // Wait and retry
-    }
-    await new Promise(resolve => setTimeout(resolve, delay));
+    });
+
+    return res.data?.data?.url || null;
+  } catch (error) {
+    console.error('Error uploading to ImgBB:', error.message || error);
+    return null;
   }
-  return false;
 }
 
 module.exports = {
@@ -44,7 +47,7 @@ module.exports = {
 
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '⚠️ Please reply to an image using Messenger.\n\nNote: This command only works if you reply directly to an image using Messenger (not IG or other platforms).'
+        text: '⚠️ Please reply to an image using Messenger.'
       }, pageAccessToken);
     }
 
@@ -53,19 +56,23 @@ module.exports = {
     const ghibliApiUrl = `${api.zaik}/api/4o-image?prompt=${prompt}&img=${encodedImgUrl}`;
 
     try {
-      const isReady = await waitForImage(ghibliApiUrl);
-      if (!isReady) throw new Error("Image not ready after waiting");
+      const imgbbUrl = await uploadToImgBB(ghibliApiUrl);
+
+      if (!imgbbUrl) {
+        throw new Error('Failed to upload generated image to ImgBB');
+      }
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
-          payload: { url: ghibliApiUrl }
+          payload: { url: imgbbUrl }
         }
       }, pageAccessToken);
+
     } catch (error) {
       console.error("Error sending Ghibli image:", error.message || error);
       await sendMessage(senderId, {
-        text: 'Error: Could not generate Ghibli-style image. Please try again later.'
+        text: 'Error: Could not generate or send Ghibli-style image.'
       }, pageAccessToken);
     }
   }
