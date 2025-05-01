@@ -36,19 +36,19 @@ module.exports = {
 
     try {
       const content = fs.readFileSync(finalPath, 'utf8');
-      const { data } = await axios.post('https://paste.d3d.dev', content, {
-        headers: { 'Content-Type': 'text/plain' }
+      const response = await axios.post('https://paste.d3d.dev/api/create', { content }, {
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      if (!data || !data.url) throw new Error("No response URL");
+      if (!response.data || !response.data.url) throw new Error("No response URL");
 
-      const shareUrl = data.url.replace('paste.d3d.dev', 'paste.d3d.dev/raw');
+      const shareUrl = response.data.url.replace('paste.d3d.dev', 'paste.d3d.dev/raw');
       await sendMessage(senderId, {
         text: `✅ File uploaded: ${shareUrl}`
       }, pageAccessToken);
 
     } catch (error) {
-      console.error("DedPaste error:", error.message || error);
+      console.error("DedPaste error:", error.response?.data || error.message || error);
       await sendMessage(senderId, {
         text: '❌ Failed to upload file to DedPaste.'
       }, pageAccessToken);
