@@ -1,70 +1,57 @@
-const PastebinAPI = require('pastebin-js');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 
 module.exports = {
-    name: "pastebin",
-    description: "Upload files to Pastebin and get a sharable link.",
-    author: "chilli",
-    async execute(kupal, pogi, pageAccessToken) {
-        const chilli = "8731046750250922";
+  name: "pastebin",
+  description: "Upload a file to DedPaste (modern Pastebin alternative)",
+  author: "chilli",
 
-        if (kupal !== chilli) {
-            return sendMessage(kupal, {
-                text: '❌ You are not authorized to use this command.'
-            }, pageAccessToken);
-        }
+  async execute(senderId, args, pageAccessToken) {
+    const ownerId = "8731046750250922";
 
-        if (!pogi || pogi.length === 0) {
-            return sendMessage(kupal, {
-                text: '❗ Please provide a filename to upload. Usage: pastebin <filename>'
-            }, pageAccessToken);
-        }
-
-        const fileName = pogi[0];
-        const filePathWithoutExtension = path.join(__dirname, fileName);
-        const filePathWithExtension = path.join(__dirname, fileName + '.js');
-
-        if (!fs.existsSync(filePathWithoutExtension) && !fs.existsSync(filePathWithExtension)) {
-            return sendMessage(kupal, {
-                text: '❌ File not found. Please provide a valid filename.'
-            }, pageAccessToken);
-        }
-
-        const filePath = fs.existsSync(filePathWithoutExtension) ? filePathWithoutExtension : filePathWithExtension;
-
-        fs.readFile(filePath, 'utf8', async (err, data) => {
-            if (err) {
-                console.error(err);
-                return sendMessage(kupal, {
-                    text: '❌ Error reading the file. Please try again.'
-                }, pageAccessToken);
-            }
-
-            try {
-                const pastebin = new PastebinAPI({
-                    api_dev_key: 'LFhKGk5aRuRBII5zKZbbEpQjZzboWDp9',
-                    api_user_key: 'LFhKGk5aRuRBII5zKZbbEpQjZzboWDp9',
-                });
-
-                const paste = await pastebin.createPaste({
-                    text: data,
-                    title: fileName,
-                    format: null,
-                    privacy: 1,
-                });
-
-                const rawPaste = paste.replace("pastebin.com", "pastebin.com/raw");
-                await sendMessage(kupal, {
-                    text: `✅ File uploaded successfully: ${rawPaste}`
-                }, pageAccessToken);
-            } catch (error) {
-                console.error("Pastebin error:", error);
-                await sendMessage(kupal, {
-                    text: '❌ Error uploading the file to Pastebin.'
-                }, pageAccessToken);
-            }
-        });
+    if (senderId !== ownerId) {
+      return sendMessage(senderId, {
+        text: '❌ You are not authorized to use this command.'
+      }, pageAccessToken);
     }
+
+    if (!args || args.length === 0) {
+      return sendMessage(senderId, {
+        text: '❗ Please provide a filename to upload.\nUsage: pastebin <filename>'
+      }, pageAccessToken);
+    }
+
+    const fileName = args[0];
+    const filePath = path.resolve(__dirname, fileName);
+    const filePathWithJs = filePath.endsWith('.js') ? filePath : filePath + '.js';
+
+    const finalPath = fs.existsSync(filePath) ? filePath : (fs.existsSync(filePathWithJs) ? filePathWithJs : null);
+    if (!finalPath) {
+      return sendMessage(senderId, {
+        text: '❌ File not found.'
+      }, pageAccessToken);
+    }
+
+    try {
+      const content = fs.readFileSync(finalPath, 'utf8');
+      const { data } = await axios.post('https://paste.d3d.dev', content, {
+        headers: { 'Content-Type': 'text/plain' }
+      });
+
+      if (!data || !data.url) throw new Error("No response URL");
+
+      const shareUrl = data.url.replace('paste.d3d.dev', 'paste.d3d.dev/raw');
+      await sendMessage(senderId, {
+        text: `✅ File uploaded: ${shareUrl}`
+      }, pageAccessToken);
+
+    } catch (error) {
+      console.error("DedPaste error:", error.message || error);
+      await sendMessage(senderId, {
+        text: '❌ Failed to upload file to DedPaste.'
+      }, pageAccessToken);
+    }
+  }
 };
