@@ -1,28 +1,46 @@
-
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api');
 
 module.exports = {
   name: "shoti",
-  description: "Sends a random Haji Shoti video",
+  description: "Sends a random Shoti video",
   author: "Chilli",
 
   async execute(senderId, args, pageAccessToken) {
     try {
-      const response = await axios.get(`${api.haji}/api/shoti?stream=true`);
-      const { url: videoUrl } = response.data;
+      const response = await axios.get('https://rapido.zetsu.xyz/api/shoti');
+      const {
+        video_url: videoUrl,
+        username,
+        nickname,
+        duration_ms
+      } = response.data;
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: "video",
-          payload: {
-            url: videoUrl
+      const duration = (duration_ms / 1000).toFixed(1); // convert ms to seconds
+
+      if (args.length > 0 && args[0] === 'more') {
+        await sendMessage(senderId, {
+          attachment: {
+            type: "video",
+            payload: {
+              url: videoUrl
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } else {
+        await sendMessage(senderId, {
+          text: `Username: ${username}\nNickname: ${nickname}\nDuration: ${duration} seconds`
+        }, pageAccessToken);
 
-      if (!(args.length > 0 && args[0] === 'more')) {
+        await sendMessage(senderId, {
+          attachment: {
+            type: "video",
+            payload: {
+              url: videoUrl
+            }
+          }
+        }, pageAccessToken);
+
         await sendMessage(senderId, {
           text: "Want to see more Shoti videos?",
           quick_replies: [
@@ -39,11 +57,10 @@ module.exports = {
           ]
         }, pageAccessToken);
       }
-
     } catch (error) {
-      console.error("Failed to fetch the Haji video:", error);
+      console.error("Failed to fetch the Shoti video:", error);
       await sendMessage(senderId, {
-        text: `Failed to fetch the Haji video. Error: ${error.message || "Unknown error"}`
+        text: `Failed to fetch the Shoti video. Error: ${error.message || "Unknown error"}`
       }, pageAccessToken);
     }
   }
