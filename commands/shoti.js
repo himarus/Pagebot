@@ -1,42 +1,28 @@
+
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "shoti",
-  description: "Sends a random Chilli video",
+  description: "Sends a random Haji Shoti video",
   author: "Chilli",
 
   async execute(senderId, args, pageAccessToken) {
     try {
-      const response = await axios.get('https://betadash-shoti-yazky.vercel.app/shotizxx?apikey=shipazu');
-      const { shotiurl: videoUrl } = response.data;
+      const response = await axios.get(`${api.haji}/api/shoti?stream=true`);
+      const { url: videoUrl } = response.data;
 
-      if (args.length > 0 && args[0] === 'more') {
-        // Send video directly without username and nickname
-        await sendMessage(senderId, {
-          attachment: {
-            type: "video",
-            payload: {
-              url: videoUrl
-            }
+      await sendMessage(senderId, {
+        attachment: {
+          type: "video",
+          payload: {
+            url: videoUrl
           }
-        }, pageAccessToken);
-      } else {
-        const { username, nickname, duration } = response.data;
+        }
+      }, pageAccessToken);
 
-        await sendMessage(senderId, {
-          text: `Username: ${username}\nNickname: ${nickname}\nDuration: ${duration} seconds`
-        }, pageAccessToken);
-
-        await sendMessage(senderId, {
-          attachment: {
-            type: "video",
-            payload: {
-              url: videoUrl
-            }
-          }
-        }, pageAccessToken);
-
+      if (!(args.length > 0 && args[0] === 'more')) {
         await sendMessage(senderId, {
           text: "Want to see more Shoti videos?",
           quick_replies: [
@@ -53,10 +39,11 @@ module.exports = {
           ]
         }, pageAccessToken);
       }
+
     } catch (error) {
-      console.error("Failed to fetch the Chilli video:", error);
+      console.error("Failed to fetch the Haji video:", error);
       await sendMessage(senderId, {
-        text: `Failed to fetch the Chilli video. Error: ${error.message || "Unknown error"}`
+        text: `Failed to fetch the Haji video. Error: ${error.message || "Unknown error"}`
       }, pageAccessToken);
     }
   }
