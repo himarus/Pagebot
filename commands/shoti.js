@@ -16,7 +16,8 @@ module.exports = {
         duration_ms
       } = response.data;
 
-      const duration = (duration_ms / 1000).toFixed(1); // convert ms to seconds
+      const duration = (duration_ms / 1000).toFixed(1);
+      const delayMs = Math.min(duration_ms + 1000, 10000); // max wait = 10s
 
       if (args.length > 0 && args[0] === 'more') {
         await sendMessage(senderId, {
@@ -27,21 +28,24 @@ module.exports = {
             }
           }
         }, pageAccessToken);
-      } else {
-        await sendMessage(senderId, {
-          text: `Username: ${username}\nNickname: ${nickname}\nDuration: ${duration} seconds`
-        }, pageAccessToken);
+        return;
+      }
 
-        await sendMessage(senderId, {
-          attachment: {
-            type: "video",
-            payload: {
-              url: videoUrl
-            }
+      await sendMessage(senderId, {
+        text: `Username: ${username}\nNickname: ${nickname}\nDuration: ${duration} seconds`
+      }, pageAccessToken);
+
+      await sendMessage(senderId, {
+        attachment: {
+          type: "video",
+          payload: {
+            url: videoUrl
           }
-        }, pageAccessToken);
+        }
+      }, pageAccessToken);
 
-        await sendMessage(senderId, {
+      setTimeout(() => {
+        sendMessage(senderId, {
           text: "Want to see more Shoti videos?",
           quick_replies: [
             {
@@ -56,7 +60,7 @@ module.exports = {
             }
           ]
         }, pageAccessToken);
-      }
+      }, delayMs);
     } catch (error) {
       console.error("Failed to fetch the Shoti video:", error);
       await sendMessage(senderId, {
