@@ -11,7 +11,6 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, event) {
     const ask = args.join(' ');
     const uid = senderId;
-    const imgbbKey = '1853a90240cf6cebbfe191fa0112d154';
 
     const recognitionNote = `Note: To use AI image recognition, **reply to an image with your prompt**.\n\nThis feature only works on **Messenger**, and not in group replies or comments.`;
 
@@ -50,31 +49,24 @@ module.exports = {
 
       if (images) {
         try {
-          const uploadRes = await axios.post(`https://api.imgbb.com/1/upload`, null, {
-            params: {
-              key: imgbbKey,
-              image: images
-            }
-          });
+          const uploadRes = await axios.get(`https://betadash-uploader.vercel.app/imgur?link=${encodeURIComponent(images)}`);
+          const imgurLink = uploadRes?.data?.uploaded?.image;
 
-          const fallbackImg = uploadRes.data?.data?.url;
-          if (fallbackImg) {
+          if (imgurLink) {
             await sendMessage(senderId, {
               attachment: {
                 type: 'image',
-                payload: { url: fallbackImg }
+                payload: { url: imgurLink }
               }
             }, pageAccessToken);
           } else {
-            await sendMessage(senderId, { text: 'Failed to rehost the image via ImgBB.' }, pageAccessToken);
+            await sendMessage(senderId, { text: 'Failed to rehost the image via Imgur.' }, pageAccessToken);
           }
-
-        } catch (imgErr) {
+        } catch {
           await sendMessage(senderId, { text: 'Image upload error. Try again later.' }, pageAccessToken);
         }
       }
-
-    } catch (err) {
+    } catch {
       await sendMessage(senderId, { text: 'Error processing your request. Please try again later.' }, pageAccessToken);
     }
   }
