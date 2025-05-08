@@ -31,7 +31,7 @@ module.exports = {
 
     const totalCommands = commands.length;
 
-    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((name, index) => `${convertToGothic(`${index + 1}. ${name}`)}`).join('\n')}\n\n${convertToGothic('ℹ 𝗪𝗲 𝗮𝗹𝘀𝗼 𝗵𝗮𝘃𝗲 𝗮𝗻 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗰 𝗧𝗶𝗸𝗧𝗼𝗸 𝗮𝗻𝗱 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸 𝘃𝗶𝗱𝗲𝗼 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗿! 𝗝𝘂𝘀𝘁 𝘀𝗲𝗻𝗱 𝗮 𝗹𝗶𝗻𝗸.')}\n\n${convertToGothic('⚙ 𝗙𝗼𝗿 𝗶𝘀𝘀𝘂𝗲𝘀 𝗼𝗿 𝗿𝗲𝗽𝗼𝗿𝘁𝘀, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁 𝘁𝗵𝗲 𝗱𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗿:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
+    const helpTextMessage = `${convertToGothic('📋 | 𝖢𝖬𝖣𝖲 𝖫𝗂𝗌𝗍: 〔𝗇𝗈 𝗉𝗋𝖾𝖿𝗂𝗑〕')}\n${convertToGothic(`🏷 Total Commands: ${totalCommands}`)}\n\n${commands.map((name, index) => `${convertToGothic(`${index + 1}. ${name}`)}`).join('\n')}\n\n${convertToGothic('ℹ 𝗪𝗲 𝗮𝗹𝘀𝗼 𝗵𝗮𝘃𝗲 𝗮𝗻 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗰 𝗧𝗶𝗸𝗧𝗼𝗸, 𝗙𝗮𝗰𝗲𝗯𝗼𝗼𝗸, 𝗮𝗻𝗱 𝗜𝗻𝘀𝘁𝗮𝗴𝗿𝗮𝗺 𝘃𝗶𝗱𝗲𝗼 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗿! 𝗝𝘂𝘀𝘁 𝘀𝗲𝗻𝗱 𝗮 𝗹𝗶𝗻𝗸.')}\n\n${convertToGothic('⚙ 𝗙𝗼𝗿 𝗶𝘀𝘀𝘂𝗲𝘀 𝗼𝗿 𝗿𝗲𝗽𝗼𝗿𝘁𝘀, 𝗰𝗼𝗻𝘁𝗮𝗰𝘁 𝘁𝗵𝗲 𝗱𝗲𝘃𝗲𝗹𝗼𝗽𝗲𝗿:')}\nFB Link: https://www.facebook.com/Churchill.Dev4100`;
 
     sendMessage(kupal, { text: helpTextMessage }, sili);
   }
