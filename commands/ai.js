@@ -12,14 +12,14 @@ module.exports = {
     const ask = args.join(' ');
     const uid = senderId;
 
-    const recognitionNote = `Note: To use AI image recognition, **reply to an image with your prompt**.\n\nThis feature only works on **Messenger**, and not in group replies or comments.`;
-
     if (!ask) {
       await sendMessage(senderId, {
         text: 'Please provide a prompt. Example: ai generate an anime cat'
       }, pageAccessToken);
 
-      await sendMessage(senderId, { text: recognitionNote }, pageAccessToken);
+      await sendMessage(senderId, {
+        text: `📌 Did you know?\n\nThis AI can also analyze and describe images — just reply to any image with your question or prompt!\n\nExample:\nSend a image of a cat, then reply to it with:\n"ai what kind of cat is this?"\n\n⚠ This feature works **only on Messenger** because only Messenger supports message replies.`
+      }, pageAccessToken);
       return;
     }
 
