@@ -11,6 +11,7 @@ module.exports = {
   async execute(senderId, args, pageAccessToken, event) {
     const ask = args.join(' ');
     const uid = senderId;
+    const imgbbKey = '1853a90240cf6cebbfe191fa0112d154';
 
     const recognitionNote = `Note: To use AI image recognition, **reply to an image with your prompt**.\n\nThis feature only works on **Messenger**, and not in group replies or comments.`;
 
@@ -18,6 +19,7 @@ module.exports = {
       await sendMessage(senderId, {
         text: 'Please provide a prompt. Example: ai generate an anime cat'
       }, pageAccessToken);
+
       await sendMessage(senderId, { text: recognitionNote }, pageAccessToken);
       return;
     }
@@ -48,42 +50,32 @@ module.exports = {
 
       if (images) {
         try {
-          await sendMessage(senderId, {
-            attachment: {
-              type: 'image',
-              payload: { url: images }
+          const uploadRes = await axios.post(`https://api.imgbb.com/1/upload`, null, {
+            params: {
+              key: imgbbKey,
+              image: images
             }
-          }, pageAccessToken);
-        } catch {
-          try {
-            const imgbbRes = await axios.post(`https://api.imgbb.com/1/upload?key=1853a90240cf6cebbfe191fa0112d154`, null, {
-              params: { image: images }
-            });
+          });
 
-            const fallbackImg = imgbbRes.data?.data?.url;
-            if (fallbackImg) {
-              await sendMessage(senderId, {
-                attachment: {
-                  type: 'image',
-                  payload: { url: fallbackImg }
-                }
-              }, pageAccessToken);
-            } else {
-              await sendMessage(senderId, {
-                text: 'Failed to rehost the image on ImgBB.'
-              }, pageAccessToken);
-            }
-          } catch {
+          const fallbackImg = uploadRes.data?.data?.url;
+          if (fallbackImg) {
             await sendMessage(senderId, {
-              text: 'Image generation failed. Please try again later.'
+              attachment: {
+                type: 'image',
+                payload: { url: fallbackImg }
+              }
             }, pageAccessToken);
+          } else {
+            await sendMessage(senderId, { text: 'Failed to rehost the image via ImgBB.' }, pageAccessToken);
           }
+
+        } catch (imgErr) {
+          await sendMessage(senderId, { text: 'Image upload error. Try again later.' }, pageAccessToken);
         }
       }
-    } catch {
-      await sendMessage(senderId, {
-        text: 'Error processing your request. Please try again later.'
-      }, pageAccessToken);
+
+    } catch (err) {
+      await sendMessage(senderId, { text: 'Error processing your request. Please try again later.' }, pageAccessToken);
     }
   }
 };
