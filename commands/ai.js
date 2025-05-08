@@ -18,7 +18,7 @@ module.exports = {
       }, pageAccessToken);
 
       await sendMessage(senderId, {
-        text: `📌 Did you know?\n\nThis AI can also analyze and describe images — just reply to any image with your question or prompt!\n\nExample:\nSend a image of a cat, then reply to it with:\n"ai what kind of cat is this?"\n\n⚠ This feature works **only on Messenger** because only Messenger supports message replies.`
+        text: 'Tip: You can also ask about an image. Just reply to the image with your question in Messenger.\n\nExample:\nSend an image of a cat, then reply to it with:\nai what kind of cat is this?\n\nNote: This works only in Messenger because only Messenger supports message replies.'
       }, pageAccessToken);
       return;
     }
@@ -43,7 +43,15 @@ module.exports = {
     try {
       const apiUrl = `${api.kaizen}/api/gpt-4o-pro?ask=${encodeURIComponent(ask)}&uid=${uid}${imageUrl ? `&imageUrl=${encodeURIComponent(imageUrl)}` : ''}`;
       const res = await axios.get(apiUrl);
-      const { response, images } = res.data;
+      let { response, images } = res.data;
+
+      if (typeof response === 'string') {
+        response = response
+          .replace(/\\n/g, '\n')
+          .replace(/\n{3,}/g, '\n\n')
+          .replace(/ {2,}/g, ' ')
+          .trim();
+      }
 
       await sendMessage(senderId, { text: response }, pageAccessToken);
 
