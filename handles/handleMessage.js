@@ -3,14 +3,14 @@ const path = require('path');
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
 const { handleTikTokVideo } = require('./handleTiktok');
-const { handleFacebookVideo } = require('./handlefb'); 
+const { handleFacebookVideo } = require('./handlefb');
+const { handleInstagramVideo } = require('./handleinstagram'); 
 
 const commands = new Map();
 const lastImageByUser = new Map();
 const lastVideoByUser = new Map();
 
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands')).filter(file => file.endsWith('.js'));
-
 for (const file of commandFiles) {
   const command = require(`../commands/${file}`);
   if (command.name && typeof command.name === 'string') {
@@ -34,10 +34,12 @@ async function handleMessage(event, pageAccessToken) {
   if (event.message && event.message.text) {
     const messageText = event.message.text.trim().toLowerCase();
 
-    // Check for TikTok or Facebook links
+    // Auto handlers
     if (await handleTikTokVideo(event, pageAccessToken)) return;
     if (await handleFacebookVideo(event, pageAccessToken)) return;
+    if (await handleInstagramVideo(event, pageAccessToken)) return; // <-- IG handler added
 
+    // Command that uses last image/video sent
     if (messageText === 'imgur') {
       const lastImage = lastImageByUser.get(senderId);
       const lastVideo = lastVideoByUser.get(senderId);
@@ -94,7 +96,9 @@ async function handleMessage(event, pageAccessToken) {
 
         await command.execute(senderId, args, pageAccessToken, event, imageUrl);
       } catch (error) {
-        sendMessage(senderId, { text: `There was an error executing the command "${commandName}". Please try again later.` }, pageAccessToken);
+        sendMessage(senderId, {
+          text: `There was an error executing the command "${commandName}". Please try again later.`
+        }, pageAccessToken);
       }
     } else if (!event.message.quick_reply) {
       sendMessage(senderId, {
