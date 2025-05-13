@@ -1,3 +1,4 @@
+
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
@@ -20,7 +21,7 @@ async function getRepliedImage(event, pageAccessToken) {
 
 module.exports = {
   name: 'removebg',
-  description: 'Remove background from an image using Kosh API',
+  description: 'Remove background from an image using Rapido API',
   usage: 'removebg (reply to a photo)',
   author: 'churchill',
 
@@ -29,7 +30,7 @@ module.exports = {
 
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '⚠️ Please reply to an image you want to remove the background from.\n\n*Note: This command only works when you reply to a photo. It may not function properly on Facebook Lite or unsupported platforms.*'
+        text: '⚠️ Please reply to an image you want to remove the background from.'
       }, pageAccessToken);
     }
 
@@ -38,21 +39,22 @@ module.exports = {
     }, pageAccessToken);
 
     try {
-      const apiUrl = `${api.josh}/tools/removebg?url=${encodeURIComponent(imageUrl)}&apikey=05b1c379d5886d1b846d45572ee1e0ef`;
+      const apiUrl = `${api.rapid}/api/remove-background?imageUrl=${encodeURIComponent(imageUrl)}`;
       const response = await axios.get(apiUrl);
 
-      if (response.data?.status && response.data.result) {
+      const resultUrl = response.data?.result;
+      if (resultUrl) {
         await sendMessage(senderId, {
           attachment: {
             type: 'image',
             payload: {
-              url: response.data.result,
+              url: resultUrl,
               is_reusable: true
             }
           }
         }, pageAccessToken);
       } else {
-        throw new Error('Invalid API response.');
+        throw new Error('No result from Rapido API');
       }
     } catch (error) {
       console.error('RemoveBG command error:', error.message || error);
