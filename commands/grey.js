@@ -1,4 +1,5 @@
 const axios = require('axios');
+const FormData = require('form-data');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
 
@@ -47,7 +48,14 @@ module.exports = {
       const base64Image = Buffer.from(res.data, 'binary').toString('base64');
       const imgurUploadUrl = `https://betadash-uploader.vercel.app/imgur`;
 
-      const uploadRes = await axios.post(imgurUploadUrl, { image: base64Image });
+      const form = new FormData();
+      form.append('image', base64Image);
+      form.append('type', 'base64');
+
+      const uploadRes = await axios.post(imgurUploadUrl, form, {
+        headers: form.getHeaders()
+      });
+
       const hostedUrl = uploadRes?.data?.uploaded?.image;
 
       if (!hostedUrl || !/\.(jpg|jpeg|png|gif)$/i.test(hostedUrl)) {
