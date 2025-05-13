@@ -20,8 +20,8 @@ async function getRepliedImage(event, pageAccessToken) {
 
 module.exports = {
   name: 'grey',
-  description: 'Convert a replied image to greyscale using Hazey API.',
-  usage: 'greyscale (reply to an image)',
+  description: 'Convert a replied image to greyscale using Hazey API with Imgur bypass.',
+  usage: 'grey (reply to an image)',
   author: 'chill',
 
   async execute(senderId, args, pageAccessToken, event) {
@@ -34,25 +34,34 @@ module.exports = {
     }
 
     await sendMessage(senderId, {
-      text: '🖤 Applying grey filter... please wait.'
+      text: '🖤 Applying greyscale filter... please wait.'
     }, pageAccessToken);
 
     try {
-      const resultUrl = `${api.hazey}/api/grey?image=${encodeURIComponent(imageUrl)}`;
+      const hazeyUrl = `${api.hazey}/api/grey?image=${encodeURIComponent(imageUrl)}`;
+      const res = await axios.get(hazeyUrl, { responseType: 'arraybuffer' });
+
+      const base64Image = Buffer.from(res.data, 'binary').toString('base64');
+      const imgurUploadUrl = `https://betadash-uploader.vercel.app/imgur`;
+
+      const uploadRes = await axios.post(imgurUploadUrl, { image: base64Image });
+      const hostedUrl = uploadRes?.data?.uploaded?.image;
+
+      if (!hostedUrl) throw new Error("Failed to rehost image");
 
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: resultUrl,
+            url: hostedUrl,
             is_reusable: true
           }
         }
       }, pageAccessToken);
     } catch (error) {
-      console.error('Greyscale command error:', error.message || error);
+      console.error('Grey command error:', error.message || error);
       await sendMessage(senderId, {
-        text: '⚠️ Failed to apply greyscale effect. Please try again later.'
+        text: '⚠️ Failed to apply greyscale or upload image. Try again later.'
       }, pageAccessToken);
     }
   }
