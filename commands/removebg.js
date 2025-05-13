@@ -1,4 +1,3 @@
-
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
@@ -30,7 +29,7 @@ module.exports = {
 
     if (!imageUrl) {
       return sendMessage(senderId, {
-        text: '⚠️ Please reply to an image you want to remove the background from.'
+        text: '⚠️ Please reply to an image you want to remove the background from.\n\n*Note: This command only works when replying to an image message.*\n*Make sure to use the Messenger app (not Facebook Lite) to enable reply detection.*'
       }, pageAccessToken);
     }
 
