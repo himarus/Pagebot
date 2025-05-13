@@ -39,7 +39,10 @@ module.exports = {
 
     try {
       const hazeyUrl = `${api.hazey}/api/grey?image=${encodeURIComponent(imageUrl)}`;
+      console.log('Hazey URL:', hazeyUrl);
+
       const res = await axios.get(hazeyUrl, { responseType: 'arraybuffer' });
+      if (!res.data) throw new Error('Empty image buffer from hazey');
 
       const base64Image = Buffer.from(res.data, 'binary').toString('base64');
       const imgurUploadUrl = `https://betadash-uploader.vercel.app/imgur`;
@@ -47,7 +50,9 @@ module.exports = {
       const uploadRes = await axios.post(imgurUploadUrl, { image: base64Image });
       const hostedUrl = uploadRes?.data?.uploaded?.image;
 
-      if (!hostedUrl) throw new Error("Failed to rehost image");
+      if (!hostedUrl || !/\.(jpg|jpeg|png|gif)$/i.test(hostedUrl)) {
+        throw new Error("Imgur upload returned an invalid image URL");
+      }
 
       await sendMessage(senderId, {
         attachment: {
@@ -59,7 +64,7 @@ module.exports = {
         }
       }, pageAccessToken);
     } catch (error) {
-      console.error('Grey command error:', error.message || error);
+      console.error('Grey command error:', error.response?.data || error.message || error);
       await sendMessage(senderId, {
         text: '⚠️ Failed to apply greyscale or upload image. Try again later.'
       }, pageAccessToken);
