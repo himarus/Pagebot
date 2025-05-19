@@ -30,7 +30,7 @@ module.exports = {
       return;
     }
 
-    const apiUrl = `${api.kaizen}/api/pinterest?search=${encodeURIComponent(searchTerm)}&limit=${numberOfImages}`;
+    const apiUrl = `${api.kaizen.base}/api/pinterest?search=${encodeURIComponent(searchTerm)}&limit=${numberOfImages}&apikey=${api.kaizen.key}`;
 
     try {
       await sendMessage(senderId, { text: `🔎 Searching Pinterest for "${searchTerm}"...` }, pageAccessToken);
