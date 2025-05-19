@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const api = require('./api'); // <- import api config
 
 const regEx_fb = /^(https?:\/\/)?(www\.)?(facebook\.com|fb\.watch|fb\.com)\/[^\s]+$/m;
 
@@ -13,7 +14,7 @@ async function handleFacebookVideo(event, pageAccessToken) {
     }, pageAccessToken);
 
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/fbdl?url=${encodeURIComponent(messageText)}`;
+      const apiUrl = `${api.kaizen.base}/api/fbdl?url=${encodeURIComponent(messageText)}&apikey=${api.kaizen.key}`;
       const response = await axios.get(apiUrl);
       const videoUrl = response.data.videoUrl;
 
