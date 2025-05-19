@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('./sendMessage');
+const api = require('./api'); // <- Import the API config
 
 const regEx_ig = /(?:https?:\/\/)?(?:www\.)?(instagram\.com)\/(reel|p|tv)\/[^\s?]+/m;
 
@@ -13,7 +14,7 @@ async function handleInstagramVideo(event, pageAccessToken) {
     }, pageAccessToken);
 
     try {
-      const apiUrl = `https://kaiz-apis.gleeze.com/api/insta-dl?url=${encodeURIComponent(messageText)}`;
+      const apiUrl = `${api.kaizen.base}/api/insta-dl?url=${encodeURIComponent(messageText)}&apikey=${api.kaizen.key}`;
       const response = await axios.get(apiUrl);
       const data = response.data.result;
 
