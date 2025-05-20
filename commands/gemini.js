@@ -22,11 +22,12 @@ module.exports = {
     }
 
     try {
-      const apiUrl = `${api.kaizen}/api/gemini-vision`;
+      const apiUrl = `${api.kaizen.base}/api/gemini-vision`;
       const query = {
         q: userPrompt || "Answer all questions that need to answer?",
         uid: senderId,
-        imageUrl: imageUrl || ""
+        imageUrl: imageUrl || "",
+        apikey: api.kaizen.key
       };
 
       const { data } = await axios.get(apiUrl, { params: query });
