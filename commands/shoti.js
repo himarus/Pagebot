@@ -8,34 +8,37 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     const directVideoUrl = `${api.haji.base}/api/shoti?stream=true&api_key=${api.haji.key}`;
+    let sentFollowUp = false;
 
     try {
       await sendMessage(senderId, {
         attachment: {
           type: "video",
-          payload: {
-            url: directVideoUrl
-          }
+          payload: { url: directVideoUrl }
         }
       }, pageAccessToken);
 
-      setTimeout(() => {
-        sendMessage(senderId, {
-          text: "Want to see more Shoti videos?",
-          quick_replies: [
-            {
-              content_type: "text",
-              title: "More Shoti",
-              payload: "MORE_SHOTI"
-            },
-            {
-              content_type: "text",
-              title: "No More Shoti",
-              payload: "NO_MORE_SHOTI"
-            }
-          ]
-        }, pageAccessToken);
-      }, 5000);
+      // Prevent multiple follow-ups
+      if (!sentFollowUp) {
+        sentFollowUp = true;
+        setTimeout(() => {
+          sendMessage(senderId, {
+            text: "Want to see more Shoti videos?",
+            quick_replies: [
+              {
+                content_type: "text",
+                title: "More Shoti",
+                payload: "MORE_SHOTI"
+              },
+              {
+                content_type: "text",
+                title: "No More Shoti",
+                payload: "NO_MORE_SHOTI"
+              }
+            ]
+          }, pageAccessToken);
+        }, 5000);
+      }
     } catch (error) {
       console.error("Failed to send the Shoti video:", error);
       await sendMessage(senderId, {
