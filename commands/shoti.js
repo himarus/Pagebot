@@ -1,5 +1,6 @@
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api');
 
 module.exports = {
   name: "shoti",
@@ -8,18 +9,20 @@ module.exports = {
 
   async execute(senderId, args, pageAccessToken) {
     try {
-      const response = await axios.get('https://rapido.zetsu.xyz/api/shoti');
-      const {
-        video_url: videoUrl,
-        username,
-        nickname,
-        duration_ms
-      } = response.data;
+      const response = await axios.get(`${api.haji.base}/api/shoti`, {
+        params: {
+          stream: true,
+          api_key: api.haji.key
+        }
+      });
 
-      const duration = (duration_ms / 1000).toFixed(1);
-      const delayMs = Math.min(duration_ms + 1000, 10000); // max wait = 10s
+      const videoUrl = response.data;
 
-      if (args.length > 0 && args[0] === 'more') {
+      if (!videoUrl || typeof videoUrl !== 'string') {
+        throw new Error("Invalid video URL received from API.");
+      }
+
+      if (args.length > 0 && args[0].toLowerCase() === 'more') {
         await sendMessage(senderId, {
           attachment: {
             type: "video",
@@ -30,10 +33,6 @@ module.exports = {
         }, pageAccessToken);
         return;
       }
-
-      await sendMessage(senderId, {
-        text: `Username: ${username}\nNickname: ${nickname}\nDuration: ${duration} seconds`
-      }, pageAccessToken);
 
       await sendMessage(senderId, {
         attachment: {
@@ -60,7 +59,7 @@ module.exports = {
             }
           ]
         }, pageAccessToken);
-      }, delayMs);
+      }, 5000);
     } catch (error) {
       console.error("Failed to fetch the Shoti video:", error);
       await sendMessage(senderId, {
