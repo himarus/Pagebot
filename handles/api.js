@@ -5,7 +5,10 @@ module.exports = {
     base: "https://api.zetsu.xyz",
     key: "6df340693fe9b121b213d637b9ce8e41"
   },
-  haji: "https://haji-mix.up.railway.app",
+  haji: {
+    base: "https://haji-mix.up.railway.app",
+    key: "c8f7fd6c2aace142b6a340ed2e2f0a00777079f2576798551234c4fa23fe2717"
+  },
   rapid: "https://rapido.zetsu.xyz",
   kaizen: {
     base: "https://kaiz-apis.gleeze.com",
