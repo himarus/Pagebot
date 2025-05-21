@@ -1,7 +1,10 @@
 module.exports = {
   hazey: "https://hazeyyyy-rest-apis.onrender.com",
   xnil: "https://xnilnew404.onrender.com",
-  josh: "https://api.zetsu.xyz",
+  josh: {
+    base: "https://api.zetsu.xyz",
+    key: "6df340693fe9b121b213d637b9ce8e41"
+  },
   haji: "https://haji-mix.up.railway.app",
   rapid: "https://rapido.zetsu.xyz",
   kaizen: {
