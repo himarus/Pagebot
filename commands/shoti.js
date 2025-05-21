@@ -6,7 +6,7 @@ module.exports = {
   description: "Sends a random Shoti video",
   author: "Chilli",
 
-  async execute(senderId, args, pageAccessToken, event) {
+  async execute(senderId, args, pageAccessToken, isQuickReply = false) {
     const directVideoUrl = `${api.haji.base}/api/shoti?stream=true&api_key=${api.haji.key}`;
 
     try {
@@ -17,8 +17,8 @@ module.exports = {
         }
       }, pageAccessToken);
 
-      // Only send follow-up quick replies if NOT a response to previous quick reply
-      if (!event?.message?.quick_reply) {
+      // Only send follow-up if NOT from quick reply
+      if (!isQuickReply) {
         setTimeout(() => {
           sendMessage(senderId, {
             text: "Want to see more Shoti videos?",
