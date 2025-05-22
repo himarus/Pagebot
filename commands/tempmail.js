@@ -1,5 +1,3 @@
-
-
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
@@ -11,9 +9,14 @@ module.exports = {
   author: 'churchill',
 
   async execute(senderId, args, pageAccessToken) {
+    const apikey = api.haji.key;
+    const baseUrl = api.haji.base;
+
     try {
       if (!args || args.length === 0) {
-        const res = await axios.get(`${api.haji}/api/tempgen`);
+        const res = await axios.get(`${baseUrl}/api/tempgen`, {
+          params: { apikey }
+        });
         const { email, token } = res.data;
 
         await sendMessage(senderId, {
@@ -22,7 +25,9 @@ module.exports = {
 
       } else {
         const token = args[0];
-        const inboxRes = await axios.get(`${api.haji}/api/tempinbox?token=${token}`);
+        const inboxRes = await axios.get(`${baseUrl}/api/tempinbox`, {
+          params: { token, apikey }
+        });
         const emails = inboxRes.data.emails;
 
         if (!emails || emails.length === 0) {
@@ -43,7 +48,7 @@ module.exports = {
 
     } catch (error) {
       await sendMessage(senderId, {
-        text: `⚠️ Error: ${error.response ? error.response.data : error.message || 'Unknown error.'}`
+        text: `⚠️ Error: ${error.response ? JSON.stringify(error.response.data) : error.message || 'Unknown error.'}`
       }, pageAccessToken);
     }
   }
