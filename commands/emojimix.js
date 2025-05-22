@@ -1,5 +1,6 @@
 const { sendMessage } = require('../handles/sendMessage');
 const api = require('../handles/api');
+const axios = require('axios');
 
 module.exports = {
   name: 'emojimix',
@@ -26,18 +27,30 @@ module.exports = {
     }
 
     const [emoji1, emoji2] = splitEmojis;
-    const imageUrl = `${api.kaizen}/api/emojimix?emoji1=${encodeURIComponent(emoji1)}&emoji2=${encodeURIComponent(emoji2)}`;
+    const baseUrl = api.kaizen.base;
+    const apikey = api.kaizen.key;
 
     try {
+      const res = await axios.get(`${baseUrl}/api/emojimix`, {
+        params: {
+          emoji1,
+          emoji2,
+          apikey
+        }
+      });
+
+      const { image } = res.data;
+
       await sendMessage(senderId, {
         attachment: {
           type: 'image',
           payload: {
-            url: imageUrl,
+            url: image,
             is_reusable: true
           }
         }
       }, pageAccessToken);
+
     } catch (error) {
       console.error('Error in emojimix command:', error.message || error);
       await sendMessage(senderId, {
