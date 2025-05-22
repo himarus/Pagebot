@@ -4,7 +4,7 @@ const api = require('../handles/api');
 
 module.exports = {
   name: 'ai',
-  description: 'Ask GPT-4o Pro anything, generate images, or recognize replied images.',
+  description: 'Ask GPT-4.1 anything, generate images, or recognize replied images.',
   usage: 'ai <prompt>',
   author: 'ownirsv2',
 
@@ -41,7 +41,7 @@ module.exports = {
     const imageUrl = await getRepliedImage(event, pageAccessToken);
 
     try {
-      const apiUrl = `${api.kaizen.base}/api/gpt-4o-pro?ask=${encodeURIComponent(ask)}&uid=${uid}&apikey=${api.kaizen.key}${imageUrl ? `&imageUrl=${encodeURIComponent(imageUrl)}` : ''}`;
+      const apiUrl = `${api.kaizen.base}/api/gpt-4.1?ask=${encodeURIComponent(ask)}&uid=${uid}&apikey=${api.kaizen.key}${imageUrl ? `&imageUrl=${encodeURIComponent(imageUrl)}` : ''}`;
       const res = await axios.get(apiUrl);
       let { response, images } = res.data;
 
