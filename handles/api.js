@@ -12,7 +12,7 @@ module.exports = {
   rapid: "https://rapido.zetsu.xyz",
   kaizen: {
     base: "https://kaiz-apis.gleeze.com",
-    key: "5ec89aab-a303-4d3f-8030-ba329a2ff201"
+    key: "57d6eb54-7bbe-45f1-9dd9-ec074ad5390c"
   },
   nethApi: "https://nethwieginedev.vercel.app",
   jonel: "https://jonell01-ccprojectsapihshs.hf.space",
