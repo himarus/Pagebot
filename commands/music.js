@@ -1,7 +1,7 @@
 const yts = require('yt-search');
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
-const api = require('../handles/api'); 
+const api = require('../handles/api');
 
 module.exports = {
   name: 'music',
@@ -30,10 +30,10 @@ module.exports = {
         return sendMessage(senderId, { text: 'No results found.' }, pageAccessToken);
       }
 
-      const kaizenApi = `${api.kaizen.base}/api/ytdown-mp3?url=${encodeURIComponent(video.url)}&apikey=82617be6-1675-499e-9402-e15953d636b2`;
-      const { data } = await axios.get(kaizenApi);
+      const apiUrl = `${api.kaizen.base}/api/ytdown-mp3?url=${encodeURIComponent(video.url)}&apikey=${api.kaizen.key}`;
+      const { data } = await axios.get(apiUrl);
 
-      const { title, author, download_url } = data;
+      const { title, download_url } = data;
 
       await sendMessage(senderId, {
         attachment: {
@@ -44,7 +44,7 @@ module.exports = {
               {
                 title: title || video.title,
                 image_url: video.thumbnail,
-                subtitle: `Artist: ${author}\nDuration: ${video.timestamp}`,
+                subtitle: `Artist: ${video.author.name}\nDuration: ${video.timestamp}`,
                 default_action: {
                   type: 'web_url',
                   url: video.url,
@@ -68,14 +68,32 @@ module.exports = {
         }
       }, pageAccessToken);
 
-      await sendMessage(senderId, {
-        attachment: {
-          type: 'audio',
-          payload: {
-            url: download_url
+      try {
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'audio',
+            payload: {
+              url: download_url
+            }
           }
-        }
-      }, pageAccessToken);
+        }, pageAccessToken);
+      } catch (err) {
+        // Fallback to video-style if audio upload fails
+        await sendMessage(senderId, {
+          attachment: {
+            type: 'template',
+            payload: {
+              template_type: 'media',
+              elements: [
+                {
+                  media_type: 'video',
+                  url: download_url
+                }
+              ]
+            }
+          }
+        }, pageAccessToken);
+      }
 
     } catch (err) {
       console.error('Error in music command:', err.message || err);
