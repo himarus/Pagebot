@@ -1,6 +1,7 @@
 const yts = require('yt-search');
 const axios = require('axios');
 const { sendMessage } = require('../handles/sendMessage');
+const api = require('../handles/api'); 
 
 module.exports = {
   name: 'music',
@@ -17,9 +18,8 @@ module.exports = {
       }, pageAccessToken);
     }
 
-    
     await sendMessage(senderId, {
-      text: `[⏳] Searching for "${query}"...\n\nThis may take about 1 minute and 30 seconds. Please wait.`
+      text: `[⏳] Searching for "${query}"...\n\nThis may take about 1 minute. Please wait.`
     }, pageAccessToken);
 
     try {
@@ -30,10 +30,10 @@ module.exports = {
         return sendMessage(senderId, { text: 'No results found.' }, pageAccessToken);
       }
 
-      const apiUrl = `https://nodejs-version-ytdlcc-production.up.railway.app/ytdl?url=${video.url}&type=mp3`;
-      const { data } = await axios.get(apiUrl);
+      const kaizenApi = `${api.kaizen.base}/api/ytdown-mp3?url=${encodeURIComponent(video.url)}&apikey=82617be6-1675-499e-9402-e15953d636b2`;
+      const { data } = await axios.get(kaizenApi);
 
-      const forceDownloadUrl = `${data.download}?dl=1`;
+      const { title, author, download_url } = data;
 
       await sendMessage(senderId, {
         attachment: {
@@ -42,9 +42,9 @@ module.exports = {
             template_type: 'generic',
             elements: [
               {
-                title: data.title || video.title,
+                title: title || video.title,
                 image_url: video.thumbnail,
-                subtitle: `Artist: ${video.author.name}\nDuration: ${video.timestamp}`,
+                subtitle: `Artist: ${author}\nDuration: ${video.timestamp}`,
                 default_action: {
                   type: 'web_url',
                   url: video.url,
@@ -58,7 +58,7 @@ module.exports = {
                   },
                   {
                     type: 'web_url',
-                    url: forceDownloadUrl,
+                    url: `${download_url}?dl=1`,
                     title: 'Download MP3'
                   }
                 ]
@@ -72,7 +72,7 @@ module.exports = {
         attachment: {
           type: 'audio',
           payload: {
-            url: data.download
+            url: download_url
           }
         }
       }, pageAccessToken);
