@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Churchill Abing - Tech enthusiast and web developer portfolio">
-    <title>Pagebot - chillimansi</title>
+    <meta name="description" content="ChilliBot System - Automated Facebook Page Bot Management">
+    <title>ChilliBot System</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,6 +16,8 @@
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="gradient-orb orb-3"></div>
+        <div class="gradient-orb orb-4"></div>
+        <div class="gradient-orb orb-5"></div>
     </div>
     
     <div id="particles-js"></div>
@@ -23,106 +25,205 @@
     <main class="container">
         <header class="header">
             <div class="header-content">
+                <div class="logo-container">
+                    <img src="images/1751028040096.jpg" alt="ChilliBot Logo" class="bot-logo">
+                    <div class="logo-glow"></div>
+                </div>
                 <h1 class="site-title">
-                    <i class="fas fa-code neon-icon"></i>
-                    Churchill Abing
+                    ChilliBot System
                 </h1>
-                <p id="datetime" class="datetime" aria-live="polite"></p>
+                <p class="site-subtitle">Facebook Page Bot Management</p>
+                <p id="datetime" class="datetime"></p>
             </div>
-            <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-                <i class="fas fa-moon"></i>
-                <i class="fas fa-sun"></i>
-            </button>
         </header>
 
         <div class="status-container">
-            <div class="status glass-card" role="status" aria-live="polite">
+            <div class="status glass-card">
                 <div class="status-indicator">
                     <span class="status-dot"></span>
                     <div class="status-pulse"></div>
                 </div>
-                <p class="status-text">System Status: <span class="highlight neon-text">Operational</span></p>
+                <p class="status-text">Bot Status: <span class="highlight neon-text">Running</span></p>
             </div>
         </div>
 
         <section class="content-grid">
-            <div class="catfact-container" aria-label="Random Cat Fact">
-                <div class="catfact-card glass-card">
-                    <div class="card-header">
-                        <i class="fas fa-cat catfact-icon neon-icon"></i>
-                        <h2>Random Cat Fact</h2>
-                        <button class="refresh-button" id="refreshCatFact" aria-label="Refresh cat fact">
-                            <i class="fas fa-sync-alt"></i>
+            <div class="system-info glass-card">
+                <div class="card-header">
+                    <div class="header-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                    </div>
+                    <h2>System Information</h2>
+                </div>
+                <div class="card-content">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Bot Version:</span>
+                            <span class="info-value">v3.2.1</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Uptime:</span>
+                            <span class="info-value" id="uptime">00:00:00</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Messages Processed:</span>
+                            <span class="info-value" id="messageCount">2,847</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Active Users:</span>
+                            <span class="info-value" id="activeUsers">156</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Response Rate:</span>
+                            <span class="info-value" id="responseRate">98.5%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Server Load:</span>
+                            <span class="info-value" id="serverLoad">23%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-activity glass-card">
+                <div class="card-header">
+                    <div class="header-icon">
+                        <div class="icon-wrapper pulse-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <h2>Live Activity Feed</h2>
+                    <button class="refresh-button" id="refreshActivity">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="card-content">
+                    <div class="activity-log" id="activityLog">
+                        <div class="activity-item">
+                            <span class="activity-time">Loading...</span>
+                            <span class="activity-text">Initializing activity feed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-controls glass-card">
+                <div class="card-header">
+                    <div class="header-icon">
+                        <div class="icon-wrapper control-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                    </div>
+                    <h2>Bot Controls</h2>
+                </div>
+                <div class="card-content">
+                    <div class="control-buttons">
+                        <button class="control-btn active" id="startBot">
+                            <i class="fas fa-play"></i>
+                            Start Bot
+                        </button>
+                        <button class="control-btn" id="stopBot">
+                            <i class="fas fa-stop"></i>
+                            Stop Bot
+                        </button>
+                        <button class="control-btn" id="restartBot">
+                            <i class="fas fa-redo"></i>
+                            Restart Bot
                         </button>
                     </div>
-                    <div class="card-content">
-                        <p class="catfact-text" id="catfactText">Loading cat fact...</p>
+                </div>
+            </div>
+
+            <div class="performance-metrics glass-card">
+                <div class="card-header">
+                    <div class="header-icon">
+                        <div class="icon-wrapper metrics-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                    </div>
+                    <h2>Performance Metrics</h2>
+                </div>
+                <div class="card-content">
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-circle" data-percentage="95">
+                                <div class="metric-inner">
+                                    <span class="metric-value">95%</span>
+                                    <span class="metric-label">Accuracy</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-circle" data-percentage="87">
+                                <div class="metric-inner">
+                                    <span class="metric-value">87%</span>
+                                    <span class="metric-label">Efficiency</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-circle" data-percentage="92">
+                                <div class="metric-inner">
+                                    <span class="metric-value">92%</span>
+                                    <span class="metric-label">Satisfaction</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="personal-info glass-card" aria-label="Personal information">
+            <div class="developer-info glass-card">
                 <div class="card-header">
-                    <i class="fas fa-user neon-icon"></i>
-                    <h2>About Me</h2>
-                </div>
-                <div class="card-content">
-                    <div class="profile-section">
-                        <div class="profile-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="profile-details">
-                            <h3 class="profile-name">Churchill Abing</h3>
-                            <p class="profile-title">Tech Enthusiast & Web Developer</p>
-                            <p class="profile-age">17 years old</p>
+                    <div class="header-icon">
+                        <div class="icon-wrapper dev-icon">
+                            <i class="fas fa-user-cog"></i>
                         </div>
                     </div>
-                    <p class="personal-description">
-                        Passionate about creating innovative websites and exploring the latest in web development. 
-                        When I'm not coding, you'll find me playing chess, watching anime, or diving into new technologies 
-                        that push the boundaries of what's possible on the web.
-                    </p>
-                    <div class="skills-tags">
-                        <span class="skill-tag">Web Development</span>
-                        <span class="skill-tag">Chess</span>
-                        <span class="skill-tag">Anime</span>
-                        <span class="skill-tag">Innovation</span>
+                    <h2>Developer</h2>
+                </div>
+                <div class="card-content">
+                    <div class="developer-profile">
+                        <div class="dev-avatar">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="dev-info">
+                            <h3>Churchill Abing</h3>
+                            <p class="dev-title">Bot Developer & System Administrator</p>
+                            <a href="https://www.facebook.com/Churchill.Dev4100" target="_blank" class="dev-link">
+                                <i class="fab fa-facebook"></i>
+                                Connect on Facebook
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="social-links glass-card" aria-label="Social media links">
+            <div class="system-logs glass-card">
                 <div class="card-header">
-                    <i class="fas fa-link neon-icon"></i>
-                    <h2>Connect</h2>
+                    <div class="header-icon">
+                        <div class="icon-wrapper logs-icon">
+                            <i class="fas fa-terminal"></i>
+                        </div>
+                    </div>
+                    <h2>System Logs</h2>
                 </div>
                 <div class="card-content">
-                    <div class="social-grid">
-                        <a href="https://www.facebook.com/profile.php?id=61567508575373" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="social-link facebook-link">
-                            <div class="social-icon">
-                                <i class="fab fa-facebook"></i>
-                            </div>
-                            <div class="social-info">
-                                <span class="social-title">PageBot</span>
-                                <span class="social-subtitle">Main Page</span>
-                            </div>
-                        </a>
-                        
-                        <a href="https://www.facebook.com/profile.php?id=61567508575373" 
-                           target="_blank" 
-                           rel="noopener noreferrer"
-                           class="social-link facebook-link">
-                            <div class="social-icon">
-                                <i class="fab fa-facebook"></i>
-                            </div>
-                            <div class="social-info">
-                                <span class="social-title">Developer</span>
-                                <span class="social-subtitle">Personal Profile</span>
-                            </div>
-                        </a>
+                    <div class="logs-container" id="systemLogs">
+                        <div class="log-entry success">
+                            <span class="log-time">2025-01-01 14:32:15</span>
+                            <span class="log-message">[INFO] Bot initialization completed successfully</span>
+                        </div>
+                        <div class="log-entry info">
+                            <span class="log-time">2025-01-01 14:32:16</span>
+                            <span class="log-message">[INFO] Connected to Facebook API</span>
+                        </div>
+                        <div class="log-entry success">
+                            <span class="log-time">2025-01-01 14:32:17</span>
+                            <span class="log-message">[INFO] Auto-reply system activated</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -130,10 +231,10 @@
     </main>
 
     <footer class="footer glass-card">
-        <p>&copy; 2025 Churchill Abing. Crafted with <i class="fas fa-heart neon-text"></i> and lots of coffee.</p>
+        <p>&copy; 2025 ChilliBot System. Developed by Churchill Abing.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="script.js" defer></script>
+    <script src="script.js"></script>
 </body>
 </html>
