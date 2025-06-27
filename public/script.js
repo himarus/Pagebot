@@ -1,36 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
     const datetimeElement = document.getElementById('datetime');
-    const themeToggle = document.getElementById('themeToggle');
-    const catfactText = document.getElementById('catfactText');
-    const refreshCatFact = document.getElementById('refreshCatFact');
+    const refreshActivity = document.getElementById('refreshActivity');
+    const startBot = document.getElementById('startBot');
+    const stopBot = document.getElementById('stopBot');
+    const restartBot = document.getElementById('restartBot');
+    const uptimeElement = document.getElementById('uptime');
+    const messageCountElement = document.getElementById('messageCount');
+    const activeUsersElement = document.getElementById('activeUsers');
+    const responseRateElement = document.getElementById('responseRate');
+    const serverLoadElement = document.getElementById('serverLoad');
+    const activityLog = document.getElementById('activityLog');
+    const systemLogs = document.getElementById('systemLogs');
 
-    // Initialize particles
+    let startTime = Date.now();
+    let messageCount = 2847;
+    let activeUsers = 156;
+    let responseRate = 98.5;
+    let serverLoad = 23;
+    let botRunning = true;
+
     initializeParticles();
-
-    // Initialize theme
-    initializeTheme();
-
-    // Start datetime updates
     updateDateTime();
     setInterval(updateDateTime, 1000);
+    setInterval(updateUptime, 1000);
+    setInterval(updateStats, 3000);
+    setInterval(updateActivityLog, 5000);
+    setInterval(addSystemLog, 8000);
 
-    // Load initial cat fact
-    fetchCatFact();
+    refreshActivity.addEventListener('click', refreshActivityLog);
+    startBot.addEventListener('click', () => toggleBot('start'));
+    stopBot.addEventListener('click', () => toggleBot('stop'));
+    restartBot.addEventListener('click', () => toggleBot('restart'));
 
-    // Event listeners
-    themeToggle.addEventListener('click', toggleTheme);
-    refreshCatFact.addEventListener('click', fetchCatFact);
-
-    // Add keyboard support for refresh button
-    refreshCatFact.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            fetchCatFact();
-        }
-    });
-
-    // Functions
     function updateDateTime() {
         const now = new Date();
         const options = {
@@ -47,122 +48,246 @@ document.addEventListener('DOMContentLoaded', () => {
         datetimeElement.textContent = now.toLocaleDateString('en-US', options);
     }
 
-    function initializeTheme() {
-        // Check for saved theme preference or default to dark mode
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    function updateUptime() {
+        const now = Date.now();
+        const uptime = now - startTime;
+        const hours = Math.floor(uptime / (1000 * 60 * 60));
+        const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
         
-        if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-            document.body.classList.add('light-mode');
+        uptimeElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateStats() {
+        if (botRunning) {
+            messageCount += Math.floor(Math.random() * 8) + 2;
+            activeUsers += Math.floor(Math.random() * 5) - 2;
+            activeUsers = Math.max(50, Math.min(300, activeUsers));
+            
+            responseRate += (Math.random() - 0.5) * 0.2;
+            responseRate = Math.max(95, Math.min(100, responseRate));
+            
+            serverLoad += (Math.random() - 0.5) * 5;
+            serverLoad = Math.max(15, Math.min(85, serverLoad));
+            
+            messageCountElement.textContent = messageCount.toLocaleString();
+            activeUsersElement.textContent = activeUsers.toString();
+            responseRateElement.textContent = responseRate.toFixed(1) + '%';
+            serverLoadElement.textContent = serverLoad.toFixed(0) + '%';
         }
     }
 
-    function toggleTheme() {
-        document.body.classList.toggle('light-mode');
+    function updateActivityLog() {
+        if (!botRunning) return;
         
-        // Save theme preference
-        const isLightMode = document.body.classList.contains('light-mode');
-        localStorage.setItem('theme', isLightMode ? 'light' : 'dark');
+        const activities = [
+            'Message auto-reply sent successfully',
+            'User query processed and resolved',
+            'Facebook API connection verified',
+            'New user interaction detected',
+            'Command executed successfully',
+            'Database query completed',
+            'User engagement tracked',
+            'Notification sent to admin',
+            'System health check passed',
+            'Cache updated successfully',
+            'User preferences saved',
+            'Analytics data collected',
+            'Security scan completed',
+            'Backup process initiated',
+            'Performance metrics updated'
+        ];
+
+        const now = new Date();
+        const timeString = now.toTimeString().slice(0, 8);
+        const activity = activities[Math.floor(Math.random() * activities.length)];
         
-        // Add a subtle animation to the toggle button
-        themeToggle.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-            themeToggle.style.transform = 'scale(1)';
-        }, 150);
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        activityItem.innerHTML = `
+            <span class="activity-time">${timeString}</span>
+            <span class="activity-text">${activity}</span>
+        `;
+        
+        activityLog.insertBefore(activityItem, activityLog.firstChild);
+        
+        if (activityLog.children.length > 8) {
+            activityLog.removeChild(activityLog.lastChild);
+        }
     }
 
-    async function fetchCatFact() {
-        // Add loading state
-        catfactText.classList.add('loading');
-        catfactText.textContent = 'Fetching a new cat fact...';
+    function addSystemLog() {
+        if (!botRunning) return;
         
-        // Disable refresh button during fetch
-        refreshCatFact.disabled = true;
+        const logTypes = ['info', 'success', 'warning'];
+        const logMessages = {
+            info: [
+                '[INFO] System monitoring active',
+                '[INFO] Database connection stable',
+                '[INFO] API rate limit: 85% remaining',
+                '[INFO] Memory usage: 45% of allocated',
+                '[INFO] Active connections: ' + Math.floor(Math.random() * 50 + 100)
+            ],
+            success: [
+                '[SUCCESS] Message delivery confirmed',
+                '[SUCCESS] User authentication completed',
+                '[SUCCESS] Data synchronization finished',
+                '[SUCCESS] Backup completed successfully',
+                '[SUCCESS] Security validation passed'
+            ],
+            warning: [
+                '[WARNING] High traffic detected',
+                '[WARNING] API response time increased',
+                '[WARNING] Memory usage above 70%',
+                '[WARNING] Rate limit approaching threshold'
+            ]
+        };
         
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-            
-            const response = await fetch('https://meowfacts.herokuapp.com/', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                },
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data && data.data && data.data[0]) {
-                catfactText.textContent = data.data[0];
-            } else {
-                throw new Error('Invalid response format');
-            }
-            
-        } catch (error) {
-            console.error('Error fetching cat fact:', error);
-            
-            // Fallback cat facts
-            const fallbackFacts = [
-                "Cats have been associated with humans for over 9,000 years.",
-                "A group of cats is called a 'clowder'.",
-                "Cats spend 70% of their lives sleeping.",
-                "A cat's purr vibrates at a frequency that promotes bone healing.",
-                "Cats have a third eyelid called a 'nictitating membrane'.",
-                "The oldest known pet cat existed 9,500 years ago.",
-                "Cats can't taste sweetness.",
-                "A cat's nose print is unique, just like a human's fingerprint."
-            ];
-            
-            const randomFact = fallbackFacts[Math.floor(Math.random() * fallbackFacts.length)];
-            catfactText.textContent = randomFact;
-            
-            // Show error message briefly
-            const originalText = catfactText.textContent;
-            catfactText.textContent = "Using backup cat fact due to connection issue...";
-            setTimeout(() => {
-                catfactText.textContent = originalText;
-            }, 2000);
-        } finally {
-            // Remove loading state and re-enable button
-            catfactText.classList.remove('loading');
-            refreshCatFact.disabled = false;
+        const logType = logTypes[Math.floor(Math.random() * logTypes.length)];
+        const messages = logMessages[logType];
+        const message = messages[Math.floor(Math.random() * messages.length)];
+        
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${logType}`;
+        logEntry.innerHTML = `
+            <span class="log-time">${timestamp}</span>
+            <span class="log-message">${message}</span>
+        `;
+        
+        systemLogs.insertBefore(logEntry, systemLogs.firstChild);
+        
+        if (systemLogs.children.length > 10) {
+            systemLogs.removeChild(systemLogs.lastChild);
+        }
+    }
+
+    function refreshActivityLog() {
+        activityLog.innerHTML = '';
+        
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => updateActivityLog(), i * 200);
+        }
+    }
+
+    function toggleBot(action) {
+        const statusText = document.querySelector('.status-text');
+        const statusDot = document.querySelector('.status-dot');
+        const statusPulse = document.querySelector('.status-pulse');
+        
+        startBot.classList.remove('active');
+        stopBot.classList.remove('active');
+        restartBot.classList.remove('active');
+        
+        switch(action) {
+            case 'start':
+                botRunning = true;
+                startBot.classList.add('active');
+                statusText.innerHTML = 'Bot Status: <span class="highlight neon-text">Running</span>';
+                statusDot.style.background = 'var(--neon-lime)';
+                statusDot.style.boxShadow = '0 0 15px var(--neon-lime)';
+                statusPulse.style.background = 'var(--neon-lime)';
+                addActivityLogEntry('ChilliBot started successfully');
+                addSystemLogEntry('success', '[SUCCESS] Bot initialization completed');
+                break;
+                
+            case 'stop':
+                botRunning = false;
+                stopBot.classList.add('active');
+                statusText.innerHTML = 'Bot Status: <span class="highlight" style="color: var(--neon-orange);">Stopped</span>';
+                statusDot.style.background = 'var(--neon-orange)';
+                statusDot.style.boxShadow = '0 0 15px var(--neon-orange)';
+                statusPulse.style.background = 'var(--neon-orange)';
+                addActivityLogEntry('ChilliBot stopped by administrator');
+                addSystemLogEntry('warning', '[WARNING] Bot service stopped');
+                break;
+                
+            case 'restart':
+                botRunning = false;
+                restartBot.classList.add('active');
+                statusText.innerHTML = 'Bot Status: <span class="highlight" style="color: var(--neon-purple);">Restarting</span>';
+                statusDot.style.background = 'var(--neon-purple)';
+                statusDot.style.boxShadow = '0 0 15px var(--neon-purple)';
+                statusPulse.style.background = 'var(--neon-purple)';
+                addActivityLogEntry('ChilliBot restart initiated');
+                addSystemLogEntry('info', '[INFO] Bot restart sequence started');
+                
+                setTimeout(() => {
+                    botRunning = true;
+                    startBot.classList.add('active');
+                    restartBot.classList.remove('active');
+                    statusText.innerHTML = 'Bot Status: <span class="highlight neon-text">Running</span>';
+                    statusDot.style.background = 'var(--neon-lime)';
+                    statusDot.style.boxShadow = '0 0 15px var(--neon-lime)';
+                    statusPulse.style.background = 'var(--neon-lime)';
+                    addActivityLogEntry('ChilliBot restarted successfully');
+                    addSystemLogEntry('success', '[SUCCESS] Bot restart completed');
+                    startTime = Date.now();
+                }, 3000);
+                break;
+        }
+    }
+
+    function addActivityLogEntry(message) {
+        const now = new Date();
+        const timeString = now.toTimeString().slice(0, 8);
+        
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        activityItem.innerHTML = `
+            <span class="activity-time">${timeString}</span>
+            <span class="activity-text">${message}</span>
+        `;
+        
+        activityLog.insertBefore(activityItem, activityLog.firstChild);
+        
+        if (activityLog.children.length > 8) {
+            activityLog.removeChild(activityLog.lastChild);
+        }
+    }
+
+    function addSystemLogEntry(type, message) {
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+        logEntry.innerHTML = `
+            <span class="log-time">${timestamp}</span>
+            <span class="log-message">${message}</span>
+        `;
+        
+        systemLogs.insertBefore(logEntry, systemLogs.firstChild);
+        
+        if (systemLogs.children.length > 10) {
+            systemLogs.removeChild(systemLogs.lastChild);
         }
     }
 
     function initializeParticles() {
         if (typeof particlesJS === 'undefined') {
-            console.warn('Particles.js not loaded');
             return;
         }
 
         particlesJS('particles-js', {
             particles: {
                 number: {
-                    value: 50,
+                    value: 80,
                     density: {
                         enable: true,
                         value_area: 800
                     }
                 },
                 color: {
-                    value: ['#00ffff', '#0080ff', '#ff0080', '#00ff80']
+                    value: ['#00ffff', '#0080ff', '#ff0080', '#00ff80', '#8000ff']
                 },
                 shape: {
-                    type: 'circle',
-                    stroke: {
-                        width: 0,
-                        color: '#000000'
-                    }
+                    type: 'circle'
                 },
                 opacity: {
-                    value: 0.3,
+                    value: 0.4,
                     random: true,
                     anim: {
                         enable: true,
@@ -172,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 },
                 size: {
-                    value: 3,
+                    value: 4,
                     random: true,
                     anim: {
                         enable: true,
@@ -185,22 +310,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     enable: true,
                     distance: 150,
                     color: '#00ffff',
-                    opacity: 0.2,
+                    opacity: 0.3,
                     width: 1
                 },
                 move: {
                     enable: true,
-                    speed: 1,
+                    speed: 1.5,
                     direction: 'none',
                     random: true,
                     straight: false,
                     out_mode: 'out',
-                    bounce: false,
-                    attract: {
-                        enable: false,
-                        rotateX: 600,
-                        rotateY: 1200
-                    }
+                    bounce: false
                 }
             },
             interactivity: {
@@ -220,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     grab: {
                         distance: 140,
                         line_linked: {
-                            opacity: 0.5
+                            opacity: 0.6
                         }
                     },
                     push: {
@@ -232,7 +352,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Performance optimization: Intersection Observer for animations
+    refreshActivityLog();
+    
+    setTimeout(() => {
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => addSystemLog(), i * 1000);
+        }
+    }, 2000);
+
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -247,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    // Observe all glass cards for scroll animations
     document.querySelectorAll('.glass-card').forEach(card => {
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
@@ -255,76 +381,37 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(card);
     });
 
-    // Add smooth scroll behavior for any internal links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-
-    // Handle offline/online states
     function updateConnectionStatus() {
         const isOnline = navigator.onLine;
         const statusText = document.querySelector('.status-text');
         const statusDot = document.querySelector('.status-dot');
         const statusPulse = document.querySelector('.status-pulse');
         
+        if (!botRunning) return;
+        
         if (isOnline) {
-            statusText.innerHTML = 'System Status: <span class="highlight neon-text">Operational</span>';
+            statusText.innerHTML = 'Bot Status: <span class="highlight neon-text">Running</span>';
             statusDot.style.background = 'var(--neon-lime)';
             statusDot.style.boxShadow = '0 0 15px var(--neon-lime)';
             statusPulse.style.background = 'var(--neon-lime)';
         } else {
-            statusText.innerHTML = 'System Status: <span class="highlight" style="color: var(--neon-orange);">Offline</span>';
+            statusText.innerHTML = 'Bot Status: <span class="highlight" style="color: var(--neon-orange);">Offline</span>';
             statusDot.style.background = 'var(--neon-orange)';
             statusDot.style.boxShadow = '0 0 15px var(--neon-orange)';
             statusPulse.style.background = 'var(--neon-orange)';
+            addActivityLogEntry('Connection lost - attempting reconnection');
         }
     }
 
-    // Listen for connection changes
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
+    window.addEventListener('online', () => {
+        updateConnectionStatus();
+        addActivityLogEntry('Internet connection restored');
+    });
     
-    // Initial connection status check
+    window.addEventListener('offline', () => {
+        updateConnectionStatus();
+        addActivityLogEntry('Internet connection lost');
+    });
+    
     updateConnectionStatus();
-
-    // Add subtle typing animation for the personal description
-    const description = document.querySelector('.personal-description');
-    const originalText = description.textContent;
-    
-    function typeWriter(element, text, speed = 50) {
-        element.textContent = '';
-        let i = 0;
-        
-        function type() {
-            if (i < text.length) {
-                element.textContent += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-            }
-        }
-        
-        // Start typing after a short delay
-        setTimeout(type, 1000);
-    }
-
-    // Observe the personal info section for the typing effect
-    const personalInfoObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !entry.target.dataset.typed) {
-                entry.target.dataset.typed = 'true';
-                typeWriter(description, originalText, 30);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    personalInfoObserver.observe(document.querySelector('.personal-info'));
 });
