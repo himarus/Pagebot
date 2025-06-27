@@ -3,83 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Pagebot - Your automated solution for web management">
-    <title>PageBot - chillimansi</title>
+    <meta name="description" content="Churchill Abing - Tech enthusiast and web developer portfolio">
+    <title>Pagebot - chillimansi</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+    <div class="animated-background">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    
     <div id="particles-js"></div>
+    
     <main class="container">
         <header class="header">
-            <p id="datetime" class="datetime" aria-live="polite"></p>
+            <div class="header-content">
+                <h1 class="site-title">
+                    <i class="fas fa-code neon-icon"></i>
+                    Churchill Abing
+                </h1>
+                <p id="datetime" class="datetime" aria-live="polite"></p>
+            </div>
             <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
                 <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
             </button>
         </header>
 
         <div class="status-container">
-            <div class="status" role="status" aria-live="polite">
-                <span class="status-dot"></span>
-                <p class="status-text">System Status: <span class="highlight">Operational</span></p>
+            <div class="status glass-card" role="status" aria-live="polite">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <div class="status-pulse"></div>
+                </div>
+                <p class="status-text">System Status: <span class="highlight neon-text">Operational</span></p>
             </div>
         </div>
 
-        
-        <section class="verse-container" aria-label="Daily Bible Verse">
-            <div class="verse-card">
-                <i class="fas fa-bible verse-icon"></i>
-                <p class="verse-text" id="verseText">Loading inspiration...</p>
-                <div class="verse-reference" id="verseReference"></div>
-                <button class="refresh-button" id="refreshVerse" aria-label="Refresh verse">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+        <section class="content-grid">
+            <div class="catfact-container" aria-label="Random Cat Fact">
+                <div class="catfact-card glass-card">
+                    <div class="card-header">
+                        <i class="fas fa-cat catfact-icon neon-icon"></i>
+                        <h2>Random Cat Fact</h2>
+                        <button class="refresh-button" id="refreshCatFact" aria-label="Refresh cat fact">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <p class="catfact-text" id="catfactText">Loading cat fact...</p>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        
-        <section class="catfact-container" aria-label="Random Cat Fact">
-            <div class="catfact-card">
-                <i class="fas fa-cat catfact-icon"></i>
-                <p class="catfact-text" id="catfactText">Loading cat fact...</p>
-                <button class="refresh-button" id="refreshCatFact" aria-label="Refresh cat fact">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
+            <div class="personal-info glass-card" aria-label="Personal information">
+                <div class="card-header">
+                    <i class="fas fa-user neon-icon"></i>
+                    <h2>About Me</h2>
+                </div>
+                <div class="card-content">
+                    <div class="profile-section">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-details">
+                            <h3 class="profile-name">Churchill Abing</h3>
+                            <p class="profile-title">Tech Enthusiast & Web Developer</p>
+                            <p class="profile-age">17 years old</p>
+                        </div>
+                    </div>
+                    <p class="personal-description">
+                        Passionate about creating innovative websites and exploring the latest in web development. 
+                        When I'm not coding, you'll find me playing chess, watching anime, or diving into new technologies 
+                        that push the boundaries of what's possible on the web.
+                    </p>
+                    <div class="skills-tags">
+                        <span class="skill-tag">Web Development</span>
+                        <span class="skill-tag">Chess</span>
+                        <span class="skill-tag">Anime</span>
+                        <span class="skill-tag">Innovation</span>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        
-        <section class="personal-info" aria-label="Personal information">
-            <p>About Me: 
-                <span class="personal-description">
-                    Hi, I'm Churchill Abing, a 17-year-old tech enthusiast. In my free time, I enjoy playing chess, watching anime, and exploring web development. I'm passionate about creating innovative websites and learning new skills.
-                </span>
-            </p>
-        </section>
-
-
-        <section class="social-link" aria-label="Facebook link">
-            <h3>Connect with us:</h3>
-            <p>
-                <a href="https://www.facebook.com/profile.php?id=61567508575373" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="facebook-link">
-                    <i class="fab fa-facebook-square"></i> PageBot
-                </a>
-            </p>
-            <p>
-                <a href="https://www.facebook.com/profile.php?id=61567508575373" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="facebook-link">
-                    <i class="fab fa-facebook-square"></i> Developer
-                </a>
-            </p>
+            <div class="social-links glass-card" aria-label="Social media links">
+                <div class="card-header">
+                    <i class="fas fa-link neon-icon"></i>
+                    <h2>Connect</h2>
+                </div>
+                <div class="card-content">
+                    <div class="social-grid">
+                        <a href="https://www.facebook.com/profile.php?id=61567508575373" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="social-link facebook-link">
+                            <div class="social-icon">
+                                <i class="fab fa-facebook"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-title">PageBot</span>
+                                <span class="social-subtitle">Main Page</span>
+                            </div>
+                        </a>
+                        
+                        <a href="https://www.facebook.com/profile.php?id=61567508575373" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="social-link facebook-link">
+                            <div class="social-icon">
+                                <i class="fab fa-facebook"></i>
+                            </div>
+                            <div class="social-info">
+                                <span class="social-title">Developer</span>
+                                <span class="social-subtitle">Personal Profile</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
         </section>
     </main>
+
+    <footer class="footer glass-card">
+        <p>&copy; 2025 Churchill Abing. Crafted with <i class="fas fa-heart neon-text"></i> and lots of coffee.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="script.js" defer></script>
